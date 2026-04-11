@@ -223,7 +223,7 @@ for i, d in enumerate(exoiris.data):
                             vmin=-5, vmax=5, cmap='PuOr_r')
     ax[1].set_xlabel('Time')
     ax[1].set_ylabel('Wavelength (micron)') 
-
+  
     fig.colorbar(im_f, ax=ax[0], label='Fluxes')
     fig.colorbar(im_z, ax=ax[1], label='Residuals (sigma)')
     fig.tight_layout()
