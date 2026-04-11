@@ -12,8 +12,7 @@ import argparse
 import h5py
 import json
 import numpy as np
-import matplotlib.pyplot as pl 
-import corner 
+import matplotlib.pyplot as pl  
 from astropy.io import fits
 from astropy.stats import sigma_clip
 from copy import deepcopy   
@@ -133,7 +132,7 @@ def init_p_atmosphere(self):
         GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-6, 2), (-np.inf, np.inf)),
         GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-6, 2), (-np.inf, np.inf)),
         GParameter('tp', 'temperature', 'K', UP(300, 3000), (0, np.inf)),
-        GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (np.inf, np.inf)),
+        GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-np.inf, np.inf)),
         GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, np.inf)),
         GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
         ]
@@ -282,6 +281,36 @@ def custom_fit_white(self, niter: int = 500) -> None:
     self.zero_epoch = self._wa.transit_center
     self.transit_duration = self._wa.transit_duration
     self.data.mask_transit(self.zero_epoch, self.period, self.transit_duration)
+
+def print_info(comm, string):
+    """
+    Print something when using mpiexec
+    """
+    if comm.Get_rank() == 0:
+        print(string, flush=True)
+    comm.Barrier()
+
+def print_elapsed_time(elapsed_time:float):   
+    """
+    Prints the elapsed time in a formatted string of hours, minutes, and seconds.
+
+    from time import time as current_time
+    time_start = current_time()
+    sleep(5)
+    time_end = current_time() 
+    elapsed_time = time_end - time_start
+
+    Args:
+        elapsed_time (float): The elapsed time in seconds.
+
+    Returns:
+        None
+    """
+    hours, rem = divmod(elapsed_time, 3600)
+    minutes, seconds = divmod(rem, 60)
+    output_str = f"{int(hours):02}:{int(minutes):02}:{seconds:05.2f}"
+    print("Time elapsed: "+output_str)
+    return output_str
 
 TSLPF.transit_model       = custom_transit_model
 TSLPF._init_parameters    = custom_init_parameters

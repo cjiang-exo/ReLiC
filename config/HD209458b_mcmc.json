@@ -5,7 +5,7 @@
             "../JWST_data/HD209458b/NIRCAM_F322W2.h5",
             "../JWST_data/HD209458b/NIRCAM_F444W.h5"
         ],
-        "output_dir": "../JWST_data/HD209458b/results-0411/"
+        "output_dir": "../JWST_data/HD209458b/results-0410/"
     },
 
     "STAR": {
@@ -71,10 +71,10 @@
     },
 
     "SAMPLER":{
-        "method": "multinest",
-        "nlivepoints":120,
-        "ns_tolerance": 0.5,
-        "ns_efficiency": 0.3,
-        "ns_resume": false
+        "method": "emcee",
+        "npools": 30,
+        "nwalkers": 60,
+        "niter_de": 500,
+        "niter_mcmc": 2000
     }
 }
