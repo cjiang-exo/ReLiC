@@ -4,8 +4,7 @@ import matplotlib.pyplot as pl
 import os
 from exoiris import TSData
 
-def plot_2dfluxes(exoiris_data: list[TSData],):
-    all_figures = []
+def plot_2dfluxes(exoiris_data: list[TSData], outputdir=""): 
     for i, d in enumerate(exoiris_data):
         fig, ax = pl.subplots(2,1, figsize=(7.2,7.2))
         _t = d.time
@@ -30,11 +29,13 @@ def plot_2dfluxes(exoiris_data: list[TSData],):
         [ax[0].axvline(tl, ls='--', color='w') for tl in transit_limits]
         [ax[1].axvline(tl, ls='--', color='w') for tl in transit_limits]
 
-        fig.tight_layout() 
-        all_figures.append(fig)
-    return all_figures
+        fig.tight_layout()  
 
-def plot_residuals(exoiris_data: list[TSData], fmod: list[np.ndarray], outputdir=None):
+        outname = os.path.join(outputdir, f'fluxes_d{i}.png')
+        fig.savefig(outname, dpi=100)
+        print(f"A preview of 2D fluxes is saved as {outname}.") 
+
+def plot_residuals(exoiris_data: list[TSData], fmod: list[np.ndarray], outputdir=""):
     for i, d in enumerate(exoiris_data):
         fres = d.fluxes - fmod[i][0]
         zres = fres/d.errors
@@ -51,13 +52,13 @@ def plot_residuals(exoiris_data: list[TSData], fmod: list[np.ndarray], outputdir
     
         fig.colorbar(im_f, ax=ax[0], label='Fluxes')
         fig.colorbar(im_z, ax=ax[1], label='Residuals (sigma)')
-        fig.tight_layout()
-        if outputdir is not None: 
-            outname = os.path.join(outputdir, f'residuals_d{i}.png')
-            fig.savefig(outname, dpi=100)
-            print(f"A preview of residuals is saved as {outname}.")
+        fig.tight_layout() 
 
-def plot_corners(samples, labels, outputname=None):
+        outname = os.path.join(outputdir, f'residuals_d{i}.png')
+        fig.savefig(outname, dpi=100)
+        print(f"A preview of residuals is saved as {outname}.")
+
+def plot_corners(samples, labels, outputdir=""):
     fig = corner.corner(
         samples, 
         labels=labels,   
@@ -66,7 +67,6 @@ def plot_corners(samples, labels, outputname=None):
         range=0.999*np.ones(samples.shape[1]),
         levels=[0.3935, 0.8647, 0.9889], 
         quantiles=[0.16, 0.5, 0.84])
-    if outputname is not None:
-        fig.savefig(outputname) 
-        print(f"A preview of posterior distributions is saved as {outputname}.")
-    return fig
+    outname = os.path.join(outputdir, f'corners.png')
+    fig.savefig(outname) 
+    print(f"A preview of posterior distributions is saved as {outname}.") 

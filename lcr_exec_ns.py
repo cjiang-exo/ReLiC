@@ -125,11 +125,7 @@ comm.Barrier()
 #%% Plot 2D fluxes #############################################################
 
 if comm.Get_rank() == 0: 
-    figures = plot_2dfluxes(exoiris.data)
-    for i, fig in enumerate(figures):
-        outname = os.path.join(cfg['PATH']['output_dir'], f'fluxes_d{i}.png')
-        fig.savefig(outname, dpi=100)
-        print(f"A preview of 2D fluxes is saved to {outname}.")
+    plot_2dfluxes(exoiris.data, outputdir=cfg['PATH']['output_dir']) 
 comm.Barrier()
 
 #%% fit white light curve for systematics correction ###########################
@@ -208,10 +204,10 @@ os.system('cp ' + py_args.config + ' ' + os.path.join(cfg['PATH']['output_dir'])
 os.system('rm ' + os.path.join(cfg['PATH']['output_dir'], 'IS.*'))
 
 #%% plot posterior distributions
-
-outname = os.path.join(cfg['PATH']['output_dir'], 'corners.pdf')
-fig = plot_corners(samples, labels=[p.name for p in exoiris.ps], outputname=outname) 
-
+ 
+plot_corners(samples, 
+             labels=[p.name for p in exoiris.ps], 
+             outputdir=cfg['PATH']['output_dir'])
 
 #%% plot best-fit residuals
  
