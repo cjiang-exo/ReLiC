@@ -1,13 +1,3 @@
-import os
-import numba
-os.environ["OMP_NUM_THREADS"] =        "1"
-os.environ["OPENBLAS_NUM_THREADS"] =   "1"
-os.environ["MKL_NUM_THREADS"] =        "1"
-os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
-os.environ["NUMEXPR_NUM_THREADS"] =    "1"
-os.environ["NUMBA_NUM_THREADS"] =      "1" 
-os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'  
-
 import argparse
 import h5py
 import json
@@ -21,7 +11,7 @@ from exoiris.wlpf import WhiteLPF
 from exoiris.ldtkld import LDTkLD
 from exoiris import ExoIris, TSData
 from multiprocessing import Pool 
-from numpy import atleast_2d, arctan2, dstack, sqrt, where, sqrt, isfinite, array,  log10, unique, average
+from numpy import atleast_2d, arctan2, dstack, sqrt, where, sqrt, isfinite, array,  log10, unique, average 
 from petitRADTRANS import physical_constants as nc  
 from petitRADTRANS.radtrans import Radtrans 
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
@@ -91,8 +81,10 @@ def custom_transit_model(self, pv, copy=True):
     p = pv[:, 1] 
     aor = as_from_rhop(pv[:, 0], p)
     inc = i_from_ba(pv[:, 2], aor)
-    ecc = pv[:, 3] ** 2 + pv[:, 4] ** 2
-    w = arctan2(pv[:, 4], pv[:, 3])
+    # ecc = pv[:, 3] ** 2 + pv[:, 4] ** 2
+    # w = arctan2(pv[:, 4], pv[:, 3])
+    ecc = 0 * p
+    w = 0 * p
     epids = self.data.epoch_groups
     fluxes = []
     if isinstance(self.ldmodel, LDTkLD):
@@ -126,7 +118,17 @@ def custom_init_parameters(self):
     self.generate_bandwidths() 
     return
 
-def init_p_atmosphere(self): 
+def custom_init_p_orbit(self): 
+    """ for circular orbits """
+    ps = self.ps
+    pp = [
+        GParameter('p', 'period', 'd', NP(1.0, 1e-5), (0, np.inf)),
+        GParameter('b', 'impact_parameter', 'R_s', UP(0.0, 1.0), (0, np.inf)), ]
+    ps.add_global_block('orbit', pp)
+    self._start_orbit = ps.blocks[-1].start
+    self._sl_orbit = ps.blocks[-1].slice
+
+def custom_init_p_atmosphere(self): 
     pp = [
         GParameter('mp', 'planet_mass', 'M_jup', NP(1.0, 1e-2), (0, np.inf)),
         GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-6, 2), (-np.inf, np.inf)),
@@ -314,9 +316,10 @@ def print_elapsed_time(elapsed_time:float):
 
 TSLPF.transit_model       = custom_transit_model
 TSLPF._init_parameters    = custom_init_parameters
+TSLPF._init_p_orbit       = custom_init_p_orbit
+TSLPF._init_p_atmosphere  = custom_init_p_atmosphere
 TSLPF.init_prt_model      = init_prt_model
 TSLPF.get_ts_model        = get_ts_model_patchycloud
-TSLPF._init_p_atmosphere  = init_p_atmosphere
 TSLPF.get_radius_ratios   = get_radius_ratios
 TSLPF.generate_bandwidths = generate_bandwidths
 

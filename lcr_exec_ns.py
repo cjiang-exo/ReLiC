@@ -1,12 +1,22 @@
 import pickle
-from lcr_core import *
-from lcr_ns import Priors, run_multinest
+import os
+import numba
+os.environ["OMP_NUM_THREADS"] =        "1"
+os.environ["OPENBLAS_NUM_THREADS"] =   "1"
+os.environ["MKL_NUM_THREADS"] =        "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] =    "1"
+os.environ["NUMBA_NUM_THREADS"] =      "1" 
+os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'  
+
+from lcr_core import * 
+from lcr_ns import run_multinest, Priors
 from lcr_plots import plot_2dfluxes, plot_corners, plot_residuals
 from time import time as current_time
 from pymultinest.analyse import Analyzer as Multinest_Analyzer
 from sys import exit as sys_exit
 from mpi4py import MPI 
-comm = MPI.COMM_WORLD
+comm = MPI.COMM_WORLD  
 
 DEFAULT_CFG = 'config/HD209458b.json'
 if 'get_ipython' in globals():
@@ -88,7 +98,7 @@ ldmodel = LDTkLD(data=tsdata,
 
 print_info(comm, "Initializing ExoIris model...")
 exoiris = ExoIris(cfg["PLANET"]["name"], ldmodel=ldmodel, data=tsdata, 
-                  noise_model='white_profiled', nthreads=1)
+                  noise_model='white_marginalized', nthreads=1)
 
 for k, v in cfg["PRIORS"].items():
     exoiris.set_prior(k, *v) 
@@ -103,46 +113,23 @@ exoiris._tsa.init_prt_model(atmosphere, chem,
 prior_list = list(cfg['PRIORS'].values())
 ps = Priors(prior_list)
 
-# test_cube = np.random.rand(len(prior_list))
-# test_params = ps.get_priors(test_cube)
-# print("Testing prior transformations with a random cube:")
-# for i, (p, val) in enumerate(zip(cfg['PRIORS'].keys(), test_params)):
-#     print(f"{p}: {val:.6g}")
-# raise SystemExit("Test complete. Exiting.")
-
-#%% Plot limb darkening profiles
-if comm.Get_rank() == 0:
-    _t = cfg['STAR']['teff'][0]
-    _g = cfg['STAR']['logg'][0]
-    _m = cfg['STAR']['metal'][0] 
-    fig = ldmodel.plot_profiles(teff=_t, logg=_g, metal=_m)
-    fig.axes[0].set_title(r'$T_{{\rm eff}}$={:.0f} K, $\log g$={:.2f}, [Fe/H]={:.2f}'.format(_t, _g, _m))
-    outname = os.path.join(cfg['PATH']['output_dir'], 'ldprofiles.png')
-    fig.savefig(outname, dpi=100)
-    print(f"A preview of LD profile is saved to {outname}.")
-comm.Barrier()
-
-#%% Plot 2D fluxes #############################################################
-
-if comm.Get_rank() == 0: 
-    plot_2dfluxes(exoiris.data, outputdir=cfg['PATH']['output_dir']) 
-comm.Barrier()
-
 #%% fit white light curve for systematics correction ###########################
 
-exoiris.fit_white()
-# update covariances with white systematics
-for i in range(len(exoiris.data)): 
-    sl = exoiris._wa.lcslices[i]
-    fm = exoiris._wa.flux_model(exoiris._wa._local_minimization.x)
-    white_systematics = exoiris._wa.ofluxa[sl] - fm[sl]
-    exoiris.data[i].covs[:, -1] = white_systematics
-    exoiris.data[i].covs[:, 1:] /= exoiris.data[i].covs[:, 1:].std(axis=0)
+# exoiris.fit_white()
+# # update covariances with white systematics
+# for i in range(len(exoiris.data)): 
+#     sl = exoiris._wa.lcslices[i]
+#     fm = exoiris._wa.flux_model(exoiris._wa._local_minimization.x)
+#     white_systematics = exoiris._wa.ofluxa[sl] - fm[sl]
+#     exoiris.data[i].covs[:, -1] = white_systematics
+#     exoiris.data[i].covs[:, 1:] /= exoiris.data[i].covs[:, 1:].std(axis=0)
 
 #%% test likelihood evaluation #################################################
 
 if comm.Get_rank() == 0: 
-    initial_population = exoiris.ps.sample_from_prior(3)
+    # initial_population = exoiris.ps.sample_from_prior(3)
+    testcube = np.random.rand(3, len(prior_list))
+    initial_population = np.array([ps.get_priors(cube) for cube in testcube])
     ll = exoiris._tsa.lnlikelihood(initial_population)
     pp = exoiris.lnposterior(initial_population)
     print("Evaluating test parameters:")
@@ -162,7 +149,7 @@ run_multinest(
     sampling_efficiency=cfg['SAMPLER']['ns_efficiency'],
     evidence_tolerance=cfg['SAMPLER']['ns_tolerance'],
     outputfiles_basename=cfg['PATH']['output_dir'],
-    importance_nested_sampling=True,
+    importance_nested_sampling=False,
     resume=cfg['SAMPLER']['ns_resume'],
     verbose = True,
 )
@@ -176,7 +163,7 @@ if comm.Get_rank() != 0:
 
 elapsed_time_str = print_elapsed_time(time_end - time_start)
 
-#%% Saving results =============================================================
+#%% Saving results #############################################################
 
 analyzer = Multinest_Analyzer(len(prior_list), 
                               outputfiles_basename = cfg['PATH']['output_dir'])
@@ -203,16 +190,32 @@ with open(outname, 'wb') as f:
 os.system('cp ' + py_args.config + ' ' + os.path.join(cfg['PATH']['output_dir']))
 os.system('rm ' + os.path.join(cfg['PATH']['output_dir'], 'IS.*'))
 
-#%% plot posterior distributions
+#%% Plot limb darkening profiles ###############################################
+
+_t = cfg['STAR']['teff'][0]
+_g = cfg['STAR']['logg'][0]
+_m = cfg['STAR']['metal'][0] 
+fig = ldmodel.plot_profiles(teff=_t, logg=_g, metal=_m)
+fig.axes[0].set_title(r'$T_{{\rm eff}}$={:.0f} K, $\log g$={:.2f}, [Fe/H]={:.2f}'.format(_t, _g, _m))
+outname = os.path.join(cfg['PATH']['output_dir'], 'ldprofiles.png')
+fig.savefig(outname, dpi=100)
+print(f"A preview of LD profile is saved to {outname}.")
+
+
+#%% Plot 2D fluxes #############################################################
+
+plot_2dfluxes(exoiris.data, outputdir=cfg['PATH']['output_dir'])  
+
+#%% plot posterior distributions ###############################################
  
 plot_corners(samples, 
              labels=[p.name for p in exoiris.ps], 
              outputdir=cfg['PATH']['output_dir'])
 
-#%% plot best-fit residuals
+#%% plot best-fit residuals ####################################################
  
 median_params = np.median(samples, axis=0)
-fmod = exoiris._tsa.flux_model(median_params, include_baseline=True)
+fmod = exoiris._tsa.flux_model(median_params, include_baseline=False)
 plot_residuals(exoiris.data, fmod, outputdir=cfg['PATH']['output_dir']) 
 
 print("Done!")

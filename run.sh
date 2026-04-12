@@ -5,4 +5,4 @@ set -e
 
 # python lcr_exec.py -c "config/HD209458b.json"
 
-mpiexec -n 30 python lcr_exec.py -c "config/HD209458b.json"
+mpiexec -n 30 python lcr_exec_ns.py -c "config/HD209458b.json"

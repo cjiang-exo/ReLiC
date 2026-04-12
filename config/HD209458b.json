@@ -40,7 +40,7 @@
     "EXOIRIS": {
         "WL_RANGE_MICRON": {
             "0": [2.5, 4.0],
-            "1": [4.0, 4.95]
+            "1": [4.0, 4.99]
         },
         "TIME_RANGE_BJD": {
             "0": null,
@@ -52,12 +52,10 @@
     "PRIORS": {
         "rho": ["NP", 1.04, 0.07], 
         "p": ["NP", 3.52474859, 0.00000038],
-        "b": ["NP", 0.5056, 0.0133],
-        "secw": ["NP", 0, 1e-6],
-        "sesw": ["NP", 0, 1e-6],
+        "b": ["NP", 0.5056, 0.0133], 
         "tc_00": ["UP", 2455216.385640, 2455216.425640],
         "teff": ["NP", 6091, 50],
-        "logg": ["NP", 4.45, 0.02],
+        "logg": ["NP", 4.45, 0.04],
         "metal": ["NP", 0.01, 0.05],
         "mp": ["NP", 0.73, 0.04],
         "ref_p": ["UP", -6, 2],
@@ -72,9 +70,9 @@
 
     "SAMPLER":{
         "method": "multinest",
-        "nlivepoints":120,
+        "nlivepoints":60,
         "ns_tolerance": 0.5,
-        "ns_efficiency": 0.3,
+        "ns_efficiency": 0.8,
         "ns_resume": false
     }
 }
