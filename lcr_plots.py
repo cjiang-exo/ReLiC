@@ -67,6 +67,6 @@ def plot_corners(samples, labels, outputdir=""):
         range=0.999*np.ones(samples.shape[1]),
         levels=[0.3935, 0.8647, 0.9889], 
         quantiles=[0.16, 0.5, 0.84])
-    outname = os.path.join(outputdir, f'corners.png')
+    outname = os.path.join(outputdir, f'corners.pdf')
     fig.savefig(outname) 
     print(f"A preview of posterior distributions is saved as {outname}.") 

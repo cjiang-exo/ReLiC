@@ -102,27 +102,31 @@ exoiris = ExoIris(cfg["PLANET"]["name"], ldmodel=ldmodel, data=tsdata,
 
 for k, v in cfg["PRIORS"].items():
     exoiris.set_prior(k, *v) 
-exoiris.print_parameters()
 exoiris._tsa.init_prt_model(atmosphere, chem, 
                             planet_radius=cfg["PLANET"]["radius_rjup"][0], 
                             star_radius=cfg["STAR"]["radius_rsun"][0]
                             )
+
+if comm.Get_rank() == 0:
+    exoiris.print_parameters()
+comm.Barrier()
 
 #%% Initialize prior functions for nested sampling
 
 prior_list = list(cfg['PRIORS'].values())
 ps = Priors(prior_list)
 
+
 #%% fit white light curve for systematics correction ###########################
 
-# exoiris.fit_white()
-# # update covariances with white systematics
-# for i in range(len(exoiris.data)): 
-#     sl = exoiris._wa.lcslices[i]
-#     fm = exoiris._wa.flux_model(exoiris._wa._local_minimization.x)
-#     white_systematics = exoiris._wa.ofluxa[sl] - fm[sl]
-#     exoiris.data[i].covs[:, -1] = white_systematics
-#     exoiris.data[i].covs[:, 1:] /= exoiris.data[i].covs[:, 1:].std(axis=0)
+exoiris.fit_white()
+# update covariances with white systematics
+for i in range(len(exoiris.data)): 
+    sl = exoiris._wa.lcslices[i]
+    fm = exoiris._wa.flux_model(exoiris._wa._local_minimization.x)
+    white_systematics = exoiris._wa.ofluxa[sl] - fm[sl]
+    exoiris.data[i].covs[:, -1] = white_systematics
+    exoiris.data[i].covs[:, 1:] /= exoiris.data[i].covs[:, 1:].std(axis=0)
 
 #%% test likelihood evaluation #################################################
 
@@ -197,6 +201,7 @@ _g = cfg['STAR']['logg'][0]
 _m = cfg['STAR']['metal'][0] 
 fig = ldmodel.plot_profiles(teff=_t, logg=_g, metal=_m)
 fig.axes[0].set_title(r'$T_{{\rm eff}}$={:.0f} K, $\log g$={:.2f}, [Fe/H]={:.2f}'.format(_t, _g, _m))
+fig.tight_layout()
 outname = os.path.join(cfg['PATH']['output_dir'], 'ldprofiles.png')
 fig.savefig(outname, dpi=100)
 print(f"A preview of LD profile is saved to {outname}.")

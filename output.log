@@ -244,3 +244,996 @@ Acceptance Rate:                        0.007881
 Replacements:                               2560
 Total Samples:                            324835
 Nested Sampling ln(Z):            3203455.560018
+Acceptance Rate:                        0.007315
+Replacements:                               2610
+Total Samples:                            356820
+Nested Sampling ln(Z):            3203456.290399
+
+ MultiNest Warning!
+ Parameter            5  of mode            1  is converging towards the edge of the prior.
+Acceptance Rate:                        0.006733
+Replacements:                               2660
+Total Samples:                            395090
+Nested Sampling ln(Z):            3203456.806847
+Acceptance Rate:                        0.006166
+Replacements:                               2710
+Total Samples:                            439537
+Nested Sampling ln(Z):            3203457.225252
+
+ MultiNest Warning!
+ Parameter            5  of mode            1  is converging towards the edge of the prior.
+Acceptance Rate:                        0.005853
+Replacements:                               2760
+Total Samples:                            471573
+Nested Sampling ln(Z):            3203457.527335
+Acceptance Rate:                        0.005293
+Replacements:                               2810
+Total Samples:                            530889
+Nested Sampling ln(Z):            3203457.788327
+
+ MultiNest Warning!
+ Parameter            5  of mode            1  is converging towards the edge of the prior.
+Acceptance Rate:                        0.004993
+Replacements:                               2860
+Total Samples:                            572748
+Nested Sampling ln(Z):            3203457.993127
+Acceptance Rate:                        0.004679
+Replacements:                               2910
+Total Samples:                            621891
+Nested Sampling ln(Z):            3203458.152073
+
+ MultiNest Warning!
+ Parameter            5  of mode            1  is converging towards the edge of the prior.
+Acceptance Rate:                        0.004360
+Replacements:                               2960
+Total Samples:                            678951
+Nested Sampling ln(Z):            3203458.274113
+Acceptance Rate:                        0.004143
+Replacements:                               3010
+Total Samples:                            726602
+Nested Sampling ln(Z):            3203458.371059
+
+ MultiNest Warning!
+ Parameter            5  of mode            1  is converging towards the edge of the prior.
+Acceptance Rate:                        0.003802
+Replacements:                               3060
+Total Samples:                            804890
+Nested Sampling ln(Z):            3203458.446646
+Acceptance Rate:                        0.003495
+Replacements:                               3092
+Total Samples:                            884775
+Nested Sampling ln(Z):            3203458.484306
+ ln(ev)=   3203458.5977993524      +/-  0.85558192313842962     
+ Total Likelihood Evaluations:       884775
+ Sampling finished. Exiting MultiNest
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2O/1H2-16O/1H2-16O__POKAZATEL.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO-NatAbund' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO/C-O-NatAbund/C-O-NatAbund__Chubb.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CO2/12C-16O2/12C-16O2__UCL-4000.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/CH4/12C-1H4/12C-1H4__YT34to10.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/NH3/14N-1H3/14N-1H3__CoYuTe.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/correlated_k/H2S/1H2-32S/1H2-32S__AYT2.R1000_0.3-50mu.ktable.petitRADTRANS.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2-H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2-He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+13 outliers detected.
+664 outliers detected.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455216.38564, b = 2455216.42564)  [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [    0.00 ..      inf]
+  5 |G| logg           N(μ = 4.45, σ = 0.04)                    [    0.00 ..      inf]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [    -inf ..      inf]
+  7 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.00 ..      inf]
+  8 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+ 10 |G| tp             U(a = 300, b = 3000)                     [    0.00 ..      inf]
+ 11 |G| m2h            U(a = -1, b = 3)                         [    -inf ..      inf]
+ 12 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.00 ..      inf]
+ 13 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 14 |G| sigma_m_00     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+ 15 |G| sigma_m_01     U(a = 0.5, b = 5)                        [    0.00 ..      inf]
+Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
+Evaluating test parameters:
+ll=2900966.49 		 pp=2900970.13
+ll=292768.23 		 pp=292774.05
+ll=1916217.09 		 pp=1916222.42
+Time elapsed: 09:13:07.22
+  analysing data from ../JWST_data/HD209458b/results-0411/.txt
+Number of posterior samples: 654
+Saving results to ../JWST_data/HD209458b/results-0411/ns_results.pkl.
+A preview of LD profile is saved to ../JWST_data/HD209458b/results-0411/ldprofiles.png.
+A preview of 2D fluxes is saved as ../JWST_data/HD209458b/results-0411/fluxes_d0.png.
+A preview of 2D fluxes is saved as ../JWST_data/HD209458b/results-0411/fluxes_d1.png.
+A preview of posterior distributions is saved as ../JWST_data/HD209458b/results-0411/corners.png.
+A preview of residuals is saved as ../JWST_data/HD209458b/results-0411/residuals_d0.png.
+A preview of residuals is saved as ../JWST_data/HD209458b/results-0411/residuals_d1.png.
+Done!
