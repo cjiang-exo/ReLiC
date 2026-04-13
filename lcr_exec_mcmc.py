@@ -1,7 +1,19 @@
+import os
+import numba
+os.environ["OMP_NUM_THREADS"] =        "1"
+os.environ["OPENBLAS_NUM_THREADS"] =   "1"
+os.environ["MKL_NUM_THREADS"] =        "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] =    "1"
+os.environ["NUMBA_NUM_THREADS"] =      "1" 
+os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'  
+
 from lcr_core import *
+from lcr_plots import plot_2dfluxes, plot_corners, plot_residuals
+
 import shutil
 
-DEFAULT_CFG = 'config/HD209458b.json'
+DEFAULT_CFG = 'config/HD209458b_mcmc.json'
 
 if 'get_ipython' in globals():
     class Args:
@@ -76,7 +88,7 @@ _gv, _ge = cfg['STAR']['logg']
 _mv, _me = cfg['STAR']['metal']
 ldmodel = LDTkLD(data=tsdata, 
                  teff=(_tv, max(_te, 50)), 
-                 logg=(_gv, max(_ge, 0.02)), 
+                 logg=(_gv, max(_ge, 0.05)), 
                  metal=(_mv, max(_me, 0.05)), 
                  dataset='visir')
 
@@ -86,48 +98,11 @@ exoiris = ExoIris(cfg["PLANET"]["name"], ldmodel=ldmodel, data=tsdata,
 
 for k, v in cfg["PRIORS"].items():
     exoiris.set_prior(k, *v) 
-exoiris.print_parameters()
 exoiris._tsa.init_prt_model(atmosphere, chem, 
                             planet_radius=cfg["PLANET"]["radius_rjup"][0], 
                             star_radius=cfg["STAR"]["radius_rsun"][0]
                             )
-
-_tgm = cfg['STAR']['teff'][0], cfg['STAR']['logg'][0], cfg['STAR']['metal'][0]
-fig = ldmodel.plot_profiles(teff=_tgm[0], logg=_tgm[1], metal=_tgm[2]) 
-fig.axes[0].set_title(r'$T_{{\rm eff}}$={:.0f} K, $\log g$={:.2f}, [Fe/H]={:.2f}'.format(*_tgm))
-outname = os.path.join(cfg['PATH']['output_dir'], 'LDProfiles.png') 
-fig.savefig(outname, dpi=100)
-print(f"A preview of LD profiles is saved to {outname}.")
-
-
-#%% Plot 2D fluxes #############################################################
-
-for i, d in enumerate(exoiris.data):
-    fig, ax = pl.subplots(2,1, figsize=(7.2,7.2))
-    _t = d.time
-    _w = d.wavelength
-    ax[0].imshow(d.fluxes, aspect='auto', origin='lower', 
-                extent=[_t.min(), _t.max(), _w.min(), _w.max()],
-                interpolation="none")
-    ax[0].set_title('Fluxes')
-    ax[0].set_xlabel('Time')
-    ax[0].set_ylabel('Wavelength (micron)')
-    fig.colorbar(ax[0].images[0], ax=ax[0])
-
-    ax[1].imshow(d.errors, aspect='auto', origin='lower', 
-                extent=[_t.min(), _t.max(), _w.min(), _w.max()],
-                interpolation="none")
-    ax[1].set_title('Errors')
-    ax[1].set_xlabel('Time')
-    ax[1].set_ylabel('Wavelength (micron)')
-    fig.colorbar(ax[1].images[0], ax=ax[1])
-
-    transit_limits = d.ephemeris.transit_limits(d.time.mean())
-    [ax[0].axvline(tl, ls='--', color='w') for tl in transit_limits]
-    [ax[1].axvline(tl, ls='--', color='w') for tl in transit_limits]
-
-    fig.tight_layout()
-    fig.savefig(cfg["PATH"]["output_dir"]+f'fluxes_d{i}.png', dpi=100)
+exoiris.print_parameters()
 
 #%% fit white light curve for systematics correction ###########################
 
@@ -167,12 +142,28 @@ with Pool(cfg["SAMPLER"]["npools"]) as pool:
 with Pool(cfg["SAMPLER"]["npools"]) as pool:
     exoiris.sample(niter=cfg["SAMPLER"]["niter_mcmc"], thin=1, 
                    pool=pool, lnpost=lnpostf)
+
+outname = os.path.join(cfg['PATH']['output_dir'], exoiris.name+'.fits')
 exoiris.save(overwrite=True)
-print(f"Results saved as {exoiris.name}.fits.")
+shutil.move(exoiris.name+'.fits', outname)
+print(f"Results saved as {outname}.")
 
-shutil.move(exoiris.name+'.fits', os.path.join(cfg['PATH']['output_dir'], exoiris.name+'.fits'))
 
-#%% Posterior probabilities ####################################################
+#%% Plot 2D fluxes #############################################################
+
+plot_2dfluxes(exoiris.data, outputdir=cfg['PATH']['output_dir'])  
+
+#%% Plot limb darkening profiles ###############################################
+
+_tgm = cfg['STAR']['teff'][0], cfg['STAR']['logg'][0], cfg['STAR']['metal'][0]
+_title = r'$T_{{\rm eff}}$={:.0f} K, $\log g$={:.2f}, [Fe/H]={:.2f}'.format(*_tgm)
+fig = ldmodel.plot_profiles(*_tgm) 
+fig.axes[0].set_title(_title)
+outname = os.path.join(cfg['PATH']['output_dir'], 'ldprofiles.png') 
+fig.savefig(outname, dpi=100)
+print(f"A preview of LD profiles is saved to {outname}.")
+
+#%% Plot posterior probabilities ####################################################
 
 lnp = exoiris.sampler.get_log_prob() 
 outputname = os.path.join(cfg['PATH']['output_dir'], 'lnprob.txt')
@@ -186,49 +177,22 @@ ax.set_ylabel('Posterior probability')
 fig.tight_layout()
 outname = os.path.join(cfg['PATH']['output_dir'], 'lnprob.png')
 fig.savefig(outname, dpi=100)
-print(f"Sampling evolution saved as {outname}.")
+print(f"A preview of sampling evolution saved as {outname}.")
 
 #%% plot posterior distributions
 
 postsamples = exoiris._tsa.sampler.flatchain 
 maxlike_params = postsamples[lnp.flatten().argmax()]
 
-fig = corner.corner(
-    postsamples, 
-    labels=[p.name for p in exoiris.ps],  
-    truths=maxlike_params,
-    show_titles=True, title_fmt='.4g',
-    plot_datapoints=False, plot_density=True,
-    range=0.999*np.ones(postsamples.shape[1]),
-    levels=[0.3935, 0.8647, 0.9889], 
-    quantiles=[0.16, 0.5, 0.84])
-outname = os.path.join(cfg['PATH']['output_dir'], 'corners.pdf')
-fig.savefig(outname) 
-print(f"Posterior distributions saved as {outname}")
+plot_corners(postsamples, 
+             labels=[p.name for p in exoiris.ps], 
+             truths=maxlike_params,
+             outputdir=cfg['PATH']['output_dir'])
 
 
 #%% plot best-fit residuals
  
 fmod = exoiris._tsa.flux_model(maxlike_params, include_baseline=True)
-for i, d in enumerate(exoiris.data):
-    fres = d.fluxes - fmod[i][0]
-    zres = fres/d.errors
-
-    fig, ax = pl.subplots(2,1, figsize=(6, 6))
-    im_f = ax[0].pcolormesh(d.time, d.wavelength, d.fluxes, shading='auto')
-    ax[0].set_xlabel('Time')
-    ax[0].set_ylabel('Wavelength (micron)') 
-
-    im_z = ax[1].pcolormesh(d.time, d.wavelength, zres, shading='auto', 
-                            vmin=-5, vmax=5, cmap='PuOr_r')
-    ax[1].set_xlabel('Time')
-    ax[1].set_ylabel('Wavelength (micron)') 
-  
-    fig.colorbar(im_f, ax=ax[0], label='Fluxes')
-    fig.colorbar(im_z, ax=ax[1], label='Residuals (sigma)')
-    fig.tight_layout()
-    outname = os.path.join(cfg['PATH']['output_dir'], f'residuals_d{i}.png')
-    fig.savefig(outname, dpi=100)
-    print(f"Residuals plot saved as {outname}")
+plot_residuals(exoiris.data, fmod, outputdir=cfg['PATH']['output_dir']) 
 
 print("Done!")

@@ -58,10 +58,11 @@ def plot_residuals(exoiris_data: list[TSData], fmod: list[np.ndarray], outputdir
         fig.savefig(outname, dpi=100)
         print(f"A preview of residuals is saved as {outname}.")
 
-def plot_corners(samples, labels, outputdir=""):
+def plot_corners(samples, labels, truths=None, outputdir=""):
     fig = corner.corner(
         samples, 
         labels=labels,   
+        truths=truths,
         show_titles=True, title_fmt='.4g',
         plot_datapoints=False, plot_density=True,
         range=0.999*np.ones(samples.shape[1]),

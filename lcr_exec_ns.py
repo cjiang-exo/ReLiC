@@ -18,7 +18,7 @@ from sys import exit as sys_exit
 from mpi4py import MPI 
 comm = MPI.COMM_WORLD  
 
-DEFAULT_CFG = 'config/HD209458b.json'
+DEFAULT_CFG = 'config/HD209458b_ns.json'
 if 'get_ipython' in globals():
     class Args:
         config = DEFAULT_CFG
