@@ -53,7 +53,7 @@ class CustomWhiteLPF(WhiteLPF):
         self.set_prior('p', tsa.ps[tsa.ps.find_pid('p')].prior)
         self.set_prior('rho', tsa.ps[tsa.ps.find_pid('rho')].prior)
         self.set_prior('b', tsa.ps[tsa.ps.find_pid('b')].prior) 
-        self.set_prior('k2', 'UP', 0.01**2, 0.2**2) 
+        self.set_prior('k2', 'UP', 0.01**2, 0.3**2) 
         ngids = tsa.data.noise_groups[self.lcids]
         for i in range(tsa.data.n_noise_groups):
             self.set_prior(f'wn_loge_{i}', 'NP', log10(np.diff(self.ofluxa[ngids==i]).std() / sqrt(2)), 0.1)
@@ -171,8 +171,8 @@ def get_ts_model(self, atm_params):
     temperatures = np.full_like(self.prt_pbar, atm_params[3]) 
     
     # calculate chemical abundances
-    co_ratios = np.full_like(self.prt_pbar, atm_params[4])
-    metallicities = np.full_like(self.prt_pbar, atm_params[5])
+    metallicities = np.full_like(self.prt_pbar, atm_params[4])
+    co_ratios = np.full_like(self.prt_pbar, atm_params[5])
     mass_fractions, mmw, nabla_ad = self.prt_chem.interpolate_mass_fractions(
     co_ratios           = co_ratios,
     log10_metallicities = metallicities,
