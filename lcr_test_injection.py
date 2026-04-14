@@ -63,7 +63,7 @@ for i, rd in enumerate(raw_data):
     _ferr = rd['flux_err'][:].T 
     _flux, _ferr = replace_outliers(_time, _flux, _ferr, sigma=8)
     _name = cfg['PLANET']['name'] + f"_d{i}"
-    tsdata_list.append(TSData(time=_time, wavelength=_wave, fluxes=_flux, errors=_ferr, name=_name, noise_group=i, n_baseline=2))
+    tsdata_list.append(TSData(time=_time, wavelength=_wave, fluxes=_flux, errors=_ferr, name=_name, noise_group=i, n_baseline=1))
 
     _wlrange = cfg["EXOIRIS"]["WL_RANGE_MICRON"][str(i)]
     _trange  = cfg["EXOIRIS"]["TIME_RANGE_BJD"][str(i)]
@@ -107,24 +107,27 @@ exoiris.print_parameters()
 #%% Generate an injection spectrum #############################################
 
 test_params = array([
-    1.04, 3.52474859, 0.5056, 2455216.385640, 6091, 4.35, 0.01, 
-    0.73, -1, -1, 1500, 0.5, 0.5, 0.5, 1.2, 1.2
+    1.04, 3.52474859, 0.5056, 2459890.20, 6090, 4.45, 0.0, 
+    0.73, -1, -1, 1500, 0.5, 0.5, 1.5, 1.5
 ])
-fmod = exoiris._tsa.flux_model(test_params, include_baseline=True)
-exoiris.data[0].fluxes = fmod[0][0] + np.random.normal(np.zeros_like(exoiris.data[0].errors), 1.2 * exoiris.data[0].errors)
-exoiris.data[1].fluxes = fmod[1][0] + np.random.normal(np.zeros_like(exoiris.data[1].errors), 1.2 * exoiris.data[1].errors)
-
+fmod = exoiris._tsa.flux_model(test_params, include_baseline=False)
+exoiris.data[0].fluxes = fmod[0][0] + np.random.normal(np.zeros_like(exoiris.data[0].errors), 1.5*exoiris.data[0].errors)
+exoiris.data[1].fluxes = fmod[1][0] + np.random.normal(np.zeros_like(exoiris.data[1].errors), 1.5*exoiris.data[1].errors)
 
 #%% fit white light curve for systematics correction ###########################
 
 exoiris.fit_white()
-# update covariances with white systematics
-for i in range(len(exoiris.data)): 
-    sl = exoiris._wa.lcslices[i]
-    fm = exoiris._wa.flux_model(exoiris._wa._local_minimization.x)
-    white_systematics = exoiris._wa.ofluxa[sl] - fm[sl]
-    exoiris.data[i].covs[:, -1] = white_systematics
-    exoiris.data[i].covs[:, 1:] /= exoiris.data[i].covs[:, 1:].std(axis=0)
+fig = exoiris.plot_white()
+outname = os.path.join(cfg['PATH']['output_dir'], 'white_fit.png')
+fig.savefig(outname, dpi=100)
+print(f"A preview of white light curve fit saved as {outname}.")
+# # update covariances with white systematics
+# for i in range(len(exoiris.data)): 
+#     sl = exoiris._wa.lcslices[i]
+#     fm = exoiris._wa.flux_model(exoiris._wa._local_minimization.x)
+#     white_systematics = exoiris._wa.ofluxa[sl] - fm[sl]
+#     exoiris.data[i].covs[:, -1] = white_systematics
+#     exoiris.data[i].covs[:, 1:] /= exoiris.data[i].covs[:, 1:].std(axis=0)
 
 #%% test likelihood evaluation #################################################
 
@@ -197,7 +200,7 @@ maxlike_params = postsamples[lnp.flatten().argmax()]
 
 plot_corners(postsamples, 
              labels=[p.name for p in exoiris.ps], 
-             truths=maxlike_params,
+             truths=test_params,
              outputdir=cfg['PATH']['output_dir'])
 
 
@@ -206,4 +209,6 @@ plot_corners(postsamples,
 fmod = exoiris._tsa.flux_model(maxlike_params, include_baseline=True)
 plot_residuals(exoiris.data, fmod, outputdir=cfg['PATH']['output_dir']) 
 
+outname = os.path.join(cfg['PATH']['output_dir'], 'output.log') 
+shutil.copy('output.log', outname)
 print("Done!")

@@ -107,6 +107,10 @@ exoiris.print_parameters()
 #%% fit white light curve for systematics correction ###########################
 
 exoiris.fit_white()
+fig = exoiris.plot_white()
+outname = os.path.join(cfg['PATH']['output_dir'], 'white_fit.png')
+fig.savefig(outname, dpi=100)
+print(f"A preview of white light curve fit saved as {outname}.")
 # update covariances with white systematics
 for i in range(len(exoiris.data)): 
     sl = exoiris._wa.lcslices[i]
@@ -195,4 +199,6 @@ plot_corners(postsamples,
 fmod = exoiris._tsa.flux_model(maxlike_params, include_baseline=True)
 plot_residuals(exoiris.data, fmod, outputdir=cfg['PATH']['output_dir']) 
 
+outname = os.path.join(cfg['PATH']['output_dir'], 'output.log') 
+shutil.copy('output.log', outname)
 print("Done!")

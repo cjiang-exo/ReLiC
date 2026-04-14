@@ -10,6 +10,7 @@ from exoiris.tslpf import TSLPF
 from exoiris.wlpf import WhiteLPF
 from exoiris.ldtkld import LDTkLD
 from exoiris import ExoIris, TSData
+from matplotlib.figure import Figure
 from multiprocessing import Pool 
 from numpy import atleast_2d, arctan2, dstack, sqrt, where, sqrt, isfinite, array,  log10, unique, average 
 from petitRADTRANS import physical_constants as nc  
@@ -17,7 +18,7 @@ from petitRADTRANS.radtrans import Radtrans
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
 from petitRADTRANS.physics import temperature_profile_function_guillot_global as get_tprofile
 from petitRADTRANS.physics import rebin_spectrum_bin
-from pytransit.orbits import as_from_rhop, i_from_ba
+from pytransit.orbits import as_from_rhop, i_from_ba, epoch
 from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter
 from pytransit import BaseLPF
 
@@ -57,6 +58,32 @@ class CustomWhiteLPF(WhiteLPF):
         ngids = tsa.data.noise_groups[self.lcids]
         for i in range(tsa.data.n_noise_groups):
             self.set_prior(f'wn_loge_{i}', 'NP', log10(np.diff(self.ofluxa[ngids==i]).std() / sqrt(2)), 0.1)
+
+    def plot(self, axs=None, figsize=None, ncols=2) -> Figure:
+        if axs is None:
+            nrows = int(np.ceil(self.nlc / ncols))
+            fig, axs = pl.subplots(nrows, ncols, figsize=figsize, sharey='all', squeeze=False, constrained_layout=True)
+        else:
+            fig = axs[0].get_figure()
+
+        
+        fm = self.flux_model(self._local_minimization.x)
+        t14 = self.transit_duration
+        pv = self._local_minimization.x
+
+        for i, sl in enumerate(self.lcslices):
+            ax = axs.flat[i]
+            tref = np.floor(self.timea[sl].min())
+            # tc = pv[0] + pv[1]*epoch(self.times[i].mean(), pv[0], pv[1])
+            tc = pv[3] + pv[0]*epoch(self.times[i].mean(), pv[3], pv[0])
+            ax.plot(self.timea[sl] - tref, self.ofluxa[sl], '.k', alpha=0.25)
+            ax.plot(self.timea[sl] - tref, fm[sl], 'r', zorder=9)
+            ax.axvline(tc - tref, ls='--', c='0.5')
+            ax.axvline(tc - tref - 0.5*t14, ls='--', c='0.5')
+            ax.axvline(tc - tref + 0.5*t14, ls='--', c='0.5')
+            pl.setp(ax, xlabel=f'Time - {tref:.0f} [BJD]', xlim=(self.times[i].min()-tref, self.times[i].max()-tref))
+        pl.setp(axs[:,0], ylabel='Normalized flux')
+        return fig
 
 def custom_transit_model(self, pv, copy=True):
     """Evaluates the transit model for parameter vector pv.
@@ -136,7 +163,7 @@ def custom_init_p_atmosphere(self):
         GParameter('tp', 'temperature', 'K', UP(300, 3000), (0, np.inf)),
         GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-np.inf, np.inf)),
         GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, np.inf)),
-        GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
+        # GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
         ]
     self.ps.add_global_block('atmosphere', pp)
     self._start_atm = self.ps.blocks[-1].start
@@ -319,7 +346,7 @@ TSLPF._init_parameters    = custom_init_parameters
 TSLPF._init_p_orbit       = custom_init_p_orbit
 TSLPF._init_p_atmosphere  = custom_init_p_atmosphere
 TSLPF.init_prt_model      = init_prt_model
-TSLPF.get_ts_model        = get_ts_model_patchycloud
+TSLPF.get_ts_model        = get_ts_model
 TSLPF.get_radius_ratios   = get_radius_ratios
 TSLPF.generate_bandwidths = generate_bandwidths
 
