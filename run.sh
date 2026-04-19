@@ -3,7 +3,7 @@
 
 set -e
 
-python lcr_exec_mcmc.py -c "config/HD209458b_mcmc.json"
+python lcr_exec_mcmc.py -c "config/HD209458b_pix.json"
 
 # mpiexec -n 30 python lcr_exec_ns.py -c "config/HD209458b_ns.json"
 

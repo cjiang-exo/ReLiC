@@ -12,7 +12,7 @@ from exoiris.ldtkld import LDTkLD
 from exoiris import ExoIris, TSData
 from matplotlib.figure import Figure
 from multiprocessing import Pool 
-from numpy import atleast_2d, arctan2, dstack, sqrt, where, sqrt, isfinite, array,  log10, unique, average 
+from numpy import atleast_2d, arctan2, dstack, inf, sqrt, where, sqrt, isfinite, array,  log10, unique, average 
 from petitRADTRANS import physical_constants as nc  
 from petitRADTRANS.radtrans import Radtrans 
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
@@ -20,7 +20,8 @@ from petitRADTRANS.physics import temperature_profile_function_guillot_global as
 from petitRADTRANS.physics import rebin_spectrum_bin
 from pytransit.orbits import as_from_rhop, i_from_ba, epoch
 from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter
-from pytransit import BaseLPF
+# from pytransit import BaseLPF
+# from pytransit import LogPosteriorFunction
 
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -207,7 +208,7 @@ def get_ts_model(self, atm_params):
     pressures           = self.prt_pbar,
     full                = True
     )
-    mass_fractions['CO-NatAbund'] = mass_fractions.pop('CO')
+    # mass_fractions['CO-NatAbund'] = mass_fractions.pop('CO')
 
     # calculate the transmission spectrum, with clouds
     _, tr_c, _ = self.prt_atmosphere.calculate_transit_radii(
@@ -242,7 +243,7 @@ def get_ts_model_patchycloud(self, atm_params):
     pressures           = self.prt_pbar,
     full                = True
     )
-    mass_fractions['CO-NatAbund'] = mass_fractions.pop('CO')
+    # mass_fractions['CO-NatAbund'] = mass_fractions.pop('CO')
 
     # calculate the transmission spectrum, with clouds
     _, tr_c, _ = self.prt_atmosphere.calculate_transit_radii(
@@ -341,6 +342,12 @@ def print_elapsed_time(elapsed_time:float):
     print("Time elapsed: "+output_str)
     return output_str
 
+def lnposterior(self, pv):
+    prior = self.lnprior(pv)
+    if not np.isfinite(prior):
+        return -inf 
+    return prior + self.lnlikelihood(pv) 
+    
 TSLPF.transit_model       = custom_transit_model
 TSLPF._init_parameters    = custom_init_parameters
 TSLPF._init_p_orbit       = custom_init_p_orbit
@@ -349,5 +356,7 @@ TSLPF.init_prt_model      = init_prt_model
 TSLPF.get_ts_model        = get_ts_model
 TSLPF.get_radius_ratios   = get_radius_ratios
 TSLPF.generate_bandwidths = generate_bandwidths
+TSLPF.lnposterior         = lnposterior
 
 ExoIris.fit_white         = custom_fit_white
+

@@ -13,7 +13,7 @@ from lcr_plots import plot_2dfluxes, plot_corners, plot_residuals
 
 import shutil
 
-DEFAULT_CFG = 'config/HD209458b_mcmc.json'
+DEFAULT_CFG = 'config/HD209458b_pix.json'
 
 if 'get_ipython' in globals():
     class Args:
@@ -32,11 +32,12 @@ print(f"Configuration file loaded: {py_args.config}")
 
 #%% initialize pRT and chemical model
 
-pressures_bar       = np.logspace(*cfg["ATMOSPHERE"]["pressure_bounds_log10bar"], 101)
+pressures_bar       = np.logspace(*cfg["ATMOSPHERE"]["pressure_bounds_log10bar"], 100)
 wavelength_bounds   = cfg["ATMOSPHERE"]["wavelength_bounds_micron"]
 species_names       = cfg["ATMOSPHERE"]["chemical_species"] 
 rayleigh_species    = cfg["ATMOSPHERE"]["rayleigh_species"]
 continuum_species   = cfg["ATMOSPHERE"]["continuum_species"]
+mode                = cfg["ATMOSPHERE"]["opacity_mode"]
 
 atmosphere = Radtrans(
             pressures = pressures_bar,
@@ -44,7 +45,7 @@ atmosphere = Radtrans(
             line_species = species_names, 
             rayleigh_species = rayleigh_species,
             gas_continuum_contributors = continuum_species,
-            line_opacity_mode = 'c-k', )
+            line_opacity_mode = mode, )
 wavelengths = 1e4 * atmosphere.get_wavelengths() # from cm to micron 
 
 chem = PreCalculatedEquilibriumChemistryTable() 
@@ -79,7 +80,10 @@ for i, rd in enumerate(raw_data):
                                  t14 = cfg["PLANET"]["transit_duration_d"][0]) 
     tsdata_list[-1].normalize_to_poly()
     r = cfg["EXOIRIS"]["bin_resolution"]
-    tsdata_list[-1] = tsdata_list[-1].bin_wavelength(r=r, estimate_errors=False)
+    if r is not None and r > 0:
+        tsdata_list[-1] = tsdata_list[-1].bin_wavelength(r=r, estimate_errors=False)
+    else:
+        print("No wavelength binning applied. Running retrievals on native resolution.")
 tsdata = tsdata_list[0] + tsdata_list[1]
  
 print('Initializing LDTk model... It takes several minutes. Be patient!')
