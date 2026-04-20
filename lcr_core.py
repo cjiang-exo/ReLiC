@@ -190,8 +190,7 @@ def init_prt_model(self, prt_atmosphere: Radtrans, prt_chem: PreCalculatedEquili
     return
 
 def get_ts_model(self, atm_params):
-    planet_mass = atm_params[0] * m_jup # g
-    planet_mass = max(SMALL_MASS, planet_mass)
+    planet_mass = max(atm_params[0]*m_jup, SMALL_MASS)  # g
     ref_pressure = 10**atm_params[1] # bar
     cloudtop_pbar = 10**atm_params[2] # bar
     

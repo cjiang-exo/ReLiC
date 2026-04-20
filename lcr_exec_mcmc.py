@@ -37,7 +37,7 @@ print(f"Configuration file loaded: {py_args.config}")
 #%% initialize pRT and chemical model
 
 atmosphere = Radtrans(
-    pressures = np.logspace(*cfg["ATMOSPHERE"]["pressure_bounds_log10bar"], 101),
+    pressures = np.logspace(*cfg["ATMOSPHERE"]["pressure_bounds_log10bar"], 121),
     wavelength_boundaries       = cfg["ATMOSPHERE"]["wavelength_bounds_micron"],
     line_species                = cfg["ATMOSPHERE"]["chemical_species"], 
     rayleigh_species            = cfg["ATMOSPHERE"]["rayleigh_species"],
@@ -75,7 +75,9 @@ for i, rd in enumerate(raw_data):
     if _trange is not None:
         tsdata_list[-1].crop_time(*_trange)
  
-    print("Loaded dataset #{0:d} with nwl={1:d}, nt={2:d}.".format(i, *tsdata_list[i].fluxes.shape))
+    print("Loaded dataset #{0:d} with nwl={1:d}, nt={2:d}.".format(
+        i, *tsdata_list[i].fluxes.shape
+    ))
 
     tsdata_list[-1].mask_transit(
         t0  = cfg["PLANET"]["orb_t0_bjd"][0], 
@@ -92,6 +94,7 @@ for i, rd in enumerate(raw_data):
 tsdata = tsdata_list[0] + tsdata_list[1]
  
 print('Initializing LDTk model... It takes several minutes. Be patient!')
+
 _tv, _te = cfg['STAR']['teff']
 _gv, _ge = cfg['STAR']['logg']
 _mv, _me = cfg['STAR']['metal']
@@ -154,8 +157,13 @@ def lnpostf(pv):
 
 init_population = exoiris.ps.sample_from_prior(cfg["SAMPLER"]["nwalkers"]) 
 with Pool(cfg["SAMPLER"]["npools"]) as pool: 
-    exoiris.fit(niter=cfg["SAMPLER"]["niter_de"], population=init_population, 
-        pool=pool, lnpost=lnpostf, plot_convergence=False)   
+    exoiris.fit(
+        population       = init_population, 
+        lnpost           = lnpostf, 
+        niter            = cfg["SAMPLER"]["niter_de"], 
+        pool             = pool, 
+        plot_convergence = False
+    )   
 
 #%% run MCMC sampling ##########################################################
 
@@ -177,9 +185,11 @@ plot_2dfluxes(exoiris.data, outputdir=cfg['PATH']['output_dir'])
 
 _tgm = cfg['STAR']['teff'][0], cfg['STAR']['logg'][0], cfg['STAR']['metal'][0]
 _title = r'$T_{{\rm eff}}$={:.0f} K, $\log g$={:.2f}, [Fe/H]={:.2f}'.format(*_tgm)
+outname = os.path.join(cfg['PATH']['output_dir'], 'ldprofiles.png') 
+
 fig = ldmodel.plot_profiles(*_tgm) 
 fig.axes[0].set_title(_title)
-outname = os.path.join(cfg['PATH']['output_dir'], 'ldprofiles.png') 
+fig.tight_layout()
 fig.savefig(outname, dpi=100)
 print(f"A preview of LD profiles is saved to {outname}.")
 
@@ -204,11 +214,8 @@ print(f"A preview of sampling evolution saved as {outname}.")
 postsamples = exoiris._tsa.sampler.flatchain 
 maxlike_params = postsamples[lnp.flatten().argmax()]
 
-plot_corners(postsamples, 
-             labels=[p.name for p in exoiris.ps], 
-             truths=maxlike_params,
-             outputdir=cfg['PATH']['output_dir'])
-
+plot_corners(postsamples, labels=[p.name for p in exoiris.ps],
+    truths=maxlike_params, outputdir=cfg['PATH']['output_dir'])
 
 #%% plot best-fit residuals
  

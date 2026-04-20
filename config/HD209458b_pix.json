@@ -5,7 +5,7 @@
             "../JWST_data/HD209458b/NIRCAM_F322W2.h5",
             "../JWST_data/HD209458b/NIRCAM_F444W.h5"
         ],
-        "output_dir": "../JWST_data/HD209458b/results-260419-pix/"
+        "output_dir": "../JWST_data/HD209458b/results-260420-pix/"
     },
 
     "STAR": {
