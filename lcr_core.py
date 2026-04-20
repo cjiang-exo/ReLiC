@@ -1,21 +1,16 @@
-import argparse
-import h5py
-import json
 import numpy as np
-import matplotlib.pyplot as pl  
-from astropy.io import fits
-from astropy.stats import sigma_clip
-from copy import deepcopy   
+import matplotlib.pyplot as pl   
+from astropy.stats import sigma_clip 
 from exoiris.tslpf import TSLPF
 from exoiris.wlpf import WhiteLPF
 from exoiris.ldtkld import LDTkLD
 from exoiris import ExoIris, TSData
 from matplotlib.figure import Figure
-from multiprocessing import Pool 
-from numpy import atleast_2d, arctan2, dstack, inf, sqrt, where, sqrt, isfinite, array,  log10, unique, average 
-from petitRADTRANS import physical_constants as nc  
+from numpy import array, average, atleast_2d, arctan2, diff, dstack, inf, isfinite, interp, log10, sqrt, where, unique, full_like, zeros_like
+from petitRADTRANS.physical_constants import m_jup, m_sun, r_jup_mean, r_sun, G as grav_const
 from petitRADTRANS.radtrans import Radtrans 
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
+from petitRADTRANS.chemistry.utils import compute_mean_molar_masses
 from petitRADTRANS.physics import temperature_profile_function_guillot_global as get_tprofile
 from petitRADTRANS.physics import rebin_spectrum_bin
 from pytransit.orbits import as_from_rhop, i_from_ba, epoch
@@ -27,6 +22,7 @@ NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
 NM_GP_FREE = 2
 NM_WHITE_PROFILED = 3
+SMALL_MASS = 1e-6 * m_jup
 
 class CustomWhiteLPF(WhiteLPF):
     def __init__(self, tsa: TSLPF):
@@ -58,7 +54,7 @@ class CustomWhiteLPF(WhiteLPF):
         self.set_prior('k2', 'UP', 0.01**2, 0.3**2) 
         ngids = tsa.data.noise_groups[self.lcids]
         for i in range(tsa.data.n_noise_groups):
-            self.set_prior(f'wn_loge_{i}', 'NP', log10(np.diff(self.ofluxa[ngids==i]).std() / sqrt(2)), 0.1)
+            self.set_prior(f'wn_loge_{i}', 'NP', log10(diff(self.ofluxa[ngids==i]).std() / sqrt(2)), 0.1)
 
     def plot(self, axs=None, figsize=None, ncols=2) -> Figure:
         if axs is None:
@@ -150,20 +146,23 @@ def custom_init_p_orbit(self):
     """ for circular orbits """
     ps = self.ps
     pp = [
-        GParameter('p', 'period', 'd', NP(1.0, 1e-5), (0, np.inf)),
-        GParameter('b', 'impact_parameter', 'R_s', UP(0.0, 1.0), (0, np.inf)), ]
+        GParameter('p', 'period', 'd', NP(1.0, 1e-5), (0, inf)),
+        GParameter('b', 'impact_parameter', 'R_s', UP(0.0, 1.0), (0, inf)), ]
     ps.add_global_block('orbit', pp)
     self._start_orbit = ps.blocks[-1].start
     self._sl_orbit = ps.blocks[-1].slice
 
 def custom_init_p_atmosphere(self): 
     pp = [
-        GParameter('mp', 'planet_mass', 'M_jup', NP(1.0, 1e-2), (0, np.inf)),
-        GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-6, 2), (-np.inf, np.inf)),
-        GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-6, 2), (-np.inf, np.inf)),
-        GParameter('tp', 'temperature', 'K', UP(300, 3000), (0, np.inf)),
-        GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-np.inf, np.inf)),
-        GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, np.inf)),
+        GParameter('mp', 'planet_mass', 'M_jup', NP(1.0, 1e-2), (0, inf)),
+        GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-8, 2), (-inf, inf)),
+        GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-8, 2), (-inf, inf)),
+        # GParameter('tp', 'temperature', 'K', UP(300, 3000), (0, inf)),
+        GParameter('kir', 'infrared opacity', 'log10 cm^2/g', UP(-5, 2), (-inf, inf)),
+        GParameter('gamma', 'kv/kir', 'log10', UP(-3, 3), (-inf, inf)),
+        GParameter('tint', 'intrinsic temperature', 'K', UP(10, 500), (0, inf)),
+        GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-inf, inf)),
+        GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, inf)),
         # GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
         ]
     self.ps.add_global_block('atmosphere', pp)
@@ -174,41 +173,52 @@ def custom_init_p_atmosphere(self):
 def get_radius_ratios(self, pv):
     radius_ratios = []
     pv_atm = pv[:, self._sl_atm]  
-    ts_model  = np.array([self.get_ts_model(atm_params) for atm_params in pv_atm])  
+    ts_model  = array([self.get_ts_model(atm_params) for atm_params in pv_atm])  
     for i, _d in enumerate(self.data):
         ts_rebinned = array([rebin_spectrum_bin(self.prt_wl, _ts, self.wavelengths[i], bin_widths=self.bandwidths[i]) for _ts in ts_model])
         radius_ratios.append(ts_rebinned**0.5)
     return radius_ratios
 
-def init_prt_model(self, prt_atmosphere: Radtrans, prt_chem: PreCalculatedEquilibriumChemistryTable, planet_radius=1.0, star_radius=1.0):
+def init_prt_model(self, prt_atmosphere: Radtrans, prt_chem: PreCalculatedEquilibriumChemistryTable, planet_radius=1.0, star_radius=1.0, equilibrium_temperature=1000):
     self.prt_atmosphere = prt_atmosphere
     self.prt_wl = 1e4 * prt_atmosphere.get_wavelengths() # A to micron
     self.prt_pbar = prt_atmosphere.pressures*1e-6 # cgs to bar
     self.prt_chem = prt_chem
-    self.planet_radius = planet_radius * nc.r_jup_mean # cm 
-    self.star_radius = star_radius * nc.r_sun # cm
+    self.planet_radius = planet_radius * r_jup_mean # cm 
+    self.star_radius = star_radius * r_sun # cm
+    self.teq = equilibrium_temperature # K
     return
 
 def get_ts_model(self, atm_params):
-    planet_mass = atm_params[0] * nc.m_jup # g
+    planet_mass = atm_params[0] * m_jup # g
+    planet_mass = max(SMALL_MASS, planet_mass)
     ref_pressure = 10**atm_params[1] # bar
     cloudtop_pbar = 10**atm_params[2] # bar
     
     # calculate the temperature profile
-    ref_gravity = nc.G * planet_mass / self.planet_radius**2
-    temperatures = np.full_like(self.prt_pbar, atm_params[3]) 
+    ref_gravity = grav_const * planet_mass / self.planet_radius**2
+    # temperatures = full_like(self.prt_pbar, atm_params[3]) 
+    temperatures = get_tprofile(
+        pressures               = self.prt_pbar, 
+        infrared_mean_opacity   = 10**atm_params[3],
+        gamma                   = 10**atm_params[4], 
+        gravities               = ref_gravity,
+        intrinsic_temperature   = atm_params[5],
+        equilibrium_temperature = self.teq,
+    )
     
     # calculate chemical abundances
-    metallicities = np.full_like(self.prt_pbar, atm_params[4])
-    co_ratios = np.full_like(self.prt_pbar, atm_params[5])
-    mass_fractions, mmw, nabla_ad = self.prt_chem.interpolate_mass_fractions(
-    co_ratios           = co_ratios,
-    log10_metallicities = metallicities,
-    temperatures        = temperatures,
-    pressures           = self.prt_pbar,
-    full                = True
-    )
-    # mass_fractions['CO-NatAbund'] = mass_fractions.pop('CO')
+    metallicities = full_like(self.prt_pbar, atm_params[6])
+    co_ratios = full_like(self.prt_pbar, atm_params[7])
+    mass_fractions = self.prt_chem.interpolate_mass_fractions(
+        co_ratios               = co_ratios,
+        log10_metallicities     = metallicities,
+        temperatures            = temperatures,
+        pressures               = self.prt_pbar, 
+        full                    = False,
+    ) 
+
+    mmw = compute_mean_molar_masses(mass_fractions)
 
     # calculate the transmission spectrum, with clouds
     _, tr_c, _ = self.prt_atmosphere.calculate_transit_radii(
@@ -224,61 +234,11 @@ def get_ts_model(self, atm_params):
     transit_depths = (tr_c / self.star_radius)**2
     return transit_depths
 
-def get_ts_model_patchycloud(self, atm_params):
-    planet_mass = atm_params[0] * nc.m_jup # g
-    ref_pressure = 10**atm_params[1] # bar
-    cloudtop_pbar = 10**atm_params[2] # bar
-    
-    # calculate the temperature profile
-    ref_gravity = nc.G * planet_mass / self.planet_radius**2
-    temperatures = np.full_like(self.prt_pbar, atm_params[3]) 
-    
-    # calculate chemical abundances
-    metallicities = np.full_like(self.prt_pbar, atm_params[4])
-    co_ratios = np.full_like(self.prt_pbar, atm_params[5])
-    mass_fractions, mmw, nabla_ad = self.prt_chem.interpolate_mass_fractions(
-    log10_metallicities = metallicities,
-    co_ratios           = co_ratios,
-    temperatures        = temperatures,
-    pressures           = self.prt_pbar,
-    full                = True
-    )
-    # mass_fractions['CO-NatAbund'] = mass_fractions.pop('CO')
-
-    # calculate the transmission spectrum, with clouds
-    _, tr_c, _ = self.prt_atmosphere.calculate_transit_radii(
-        temperatures                = temperatures,
-        mass_fractions              = mass_fractions,
-        mean_molar_masses           = mmw,
-        reference_gravity           = ref_gravity,
-        planet_radius               = self.planet_radius,
-        reference_pressure          = ref_pressure,
-        opaque_cloud_top_pressure   = cloudtop_pbar,
-    ) 
-
-    # calculate the transmission spectrum, without clouds
-    _, tr_nc, _ = self.prt_atmosphere.calculate_transit_radii(
-        temperatures                = temperatures,
-        mass_fractions              = mass_fractions,
-        mean_molar_masses           = mmw,
-        reference_gravity           = ref_gravity,
-        planet_radius               = self.planet_radius,
-        reference_pressure          = ref_pressure,
-        opaque_cloud_top_pressure   = None,
-    ) 
-
-    # average the patchy cloud model
-    cloud_frac = atm_params[6] 
-    td_c = (tr_c / self.star_radius)**2
-    td_nc = (tr_nc / self.star_radius)**2
-    transit_depth = cloud_frac * td_c + (1 - cloud_frac) * td_nc
-    return transit_depth
-
 def generate_bandwidths(self):
     self.bandwidths = []
     for wl in self.wavelengths: 
-        dwl         = np.zeros_like(wl)
-        dwl[:-1]    = np.diff(wl)
+        dwl         = zeros_like(wl)
+        dwl[:-1]    = diff(wl)
         dwl[-1]     = dwl[-2] 
         self.bandwidths.append(dwl)
     return self.bandwidths
@@ -291,8 +251,8 @@ def replace_outliers(time, flux, ferr, sigma=8):
             x = time[~maskrow]
             y = flux[i, ~maskrow]
             ye = ferr[i, ~maskrow]
-            flux[i] = np.interp(time, x, y)
-            ferr[i] = np.interp(time, x, ye) 
+            flux[i] = interp(time, x, y)
+            ferr[i] = interp(time, x, ye) 
     return flux, ferr
 
 def custom_fit_white(self, niter: int = 500) -> None: 
@@ -342,11 +302,11 @@ def print_elapsed_time(elapsed_time:float):
     print("Time elapsed: "+output_str)
     return output_str
 
-def lnposterior(self, pv):
-    prior = self.lnprior(pv)
-    if not np.isfinite(prior):
-        return -inf 
-    return prior + self.lnlikelihood(pv) 
+# def lnposterior(self, pv):
+#     prior = self.lnprior(pv)
+#     if not np.isfinite(prior):
+#         return -inf 
+#     return prior + self.lnlikelihood(pv) 
     
 TSLPF.transit_model       = custom_transit_model
 TSLPF._init_parameters    = custom_init_parameters
@@ -356,7 +316,9 @@ TSLPF.init_prt_model      = init_prt_model
 TSLPF.get_ts_model        = get_ts_model
 TSLPF.get_radius_ratios   = get_radius_ratios
 TSLPF.generate_bandwidths = generate_bandwidths
-TSLPF.lnposterior         = lnposterior
+# TSLPF.lnposterior         = lnposterior
 
 ExoIris.fit_white         = custom_fit_white
 
+if __name__ == "__main__":
+    print("Testing ...")
