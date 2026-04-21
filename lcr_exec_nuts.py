@@ -12,8 +12,12 @@ import argparse
 import json
 import h5py
 import shutil
+import pymc as pm
+import arviz as az
+import math as m
 from lcr_core import *
 from lcr_plots import plot_2dfluxes, plot_corners, plot_residuals
+
 from multiprocessing import Pool 
 
 
@@ -140,14 +144,61 @@ for i in range(len(exoiris.data)):
 
 #%% test likelihood evaluation #################################################
 
-initial_population = exoiris.ps.sample_from_prior(3)
-ll = exoiris._tsa.lnlikelihood(initial_population)
-pp = exoiris.lnposterior(initial_population)
+class MyPriors(ParameterSet):
+    def 
+    def get_logprior(self, pv):
+        lower_ok = pt.all(pv > self.bounds[:, 0])
+        upper_ok = pt.all(pv < self.bounds[:, 1])
+        inbounds = pt.and_(lower_ok, upper_ok)
+        lnp = sum([p.lnprior(pv[i]) for i, p in enumerate(self)])
+        return pt.switch(inbounds, lnp, -np.inf)
+
+
+def get_loglike(pv): 
+    return exoiris._tsa.lnlikelihood(pv)
+
+def get_logprior(pv):   
+    lower_ok = pt.all(pv > exoiris.ps.bounds[:, 0])
+    upper_ok = pt.all(pv < exoiris.ps.bounds[:, 1])
+    inbounds = pt.and_(lower_ok, upper_ok)
+    lnp = sum([p.lnprior(pv[i]) for i, p in enumerate(exoiris.ps)])
+    return pt.switch(inbounds, lnp, -np.inf)
+
+def get_logprior_nptest(pv):  
+    pv = squeeze(pv)
+    lower_ok = all(pv > exoiris.ps.bounds[:, 0])
+    upper_ok = all(pv < exoiris.ps.bounds[:, 1])
+    inbounds = lower_ok & upper_ok
+    lnp = sum([p.lnprior(pv[i]) for i, p in enumerate(exoiris.ps)])
+    return lnp if inbounds else -np.inf
+
+initial_population = exoiris.ps.sample_from_prior(1)
+pp = get_logprior_nptest(initial_population)
+ll = get_loglike(initial_population)
 print("Evaluating test parameters:")
-for val in zip(ll, pp):
-    print("ll={:.2f} \t\t pp={:.2f}".format(*val))
+# for val in zip(pp, ll):
+print("pp={:.2f} \t\t ll={:.2f}".format(pp, ll))
 # raise SystemExit("Test complete. Exiting.")
 
+#%% Run NUTS ###################################################################
+
+with pm.Model() as model: 
+
+    v = pm.Flat('v', shape=len(exoiris.ps))
+
+    pm.Potential('prior', get_logprior(v))
+     
+    pm.Potential('likelihood', get_loglike(v))
+     
+    trace = pm.sample(draws=2000, tune=1000, chains=30, cores=30, )
+
+az.plot_trace(trace)
+pl.show()
+
+az.plot_posterior(trace, hdi_prob=0.94)
+pl.show()
+
+raise SystemExit("Test complete. Exiting.")
 #%% run DE evaluation ##########################################################
 
 def lnpostf(pv):
@@ -164,7 +215,6 @@ with Pool(cfg["SAMPLER"]["npools"]) as pool:
         pool             = pool, 
         plot_convergence = False
     )   
-
 
 #%% run MCMC sampling ##########################################################
 

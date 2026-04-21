@@ -5,7 +5,7 @@
             "../JWST_data/HD209458b/NIRCAM_F322W2.h5",
             "../JWST_data/HD209458b/NIRCAM_F444W.h5"
         ],
-        "output_dir": "../JWST_data/HD209458b/results-260414/"
+        "output_dir": "../JWST_data/HD209458b/results-260421/"
     },
 
     "STAR": {
@@ -26,27 +26,29 @@
         "orb_t0_bjd": [2455216.405640, 0.000094],
         "orb_p_d": [3.52474859, 0.00000038],
         "transit_duration_d": [0.127, 0.0],
-        "impact_parameter": [0.5056, 0.0133]
+        "impact_parameter": [0.5056, 0.0133],
+        "equilibrium_temperature": [1459, 12]
     },
 
     "ATMOSPHERE": {
-        "pressure_bounds_log10bar": [-6, 2],
+        "opacity_mode": "lbl",
+        "pressure_bounds_log10bar": [-10, 2],
         "wavelength_bounds_micron": [2.4, 5.1],
-        "chemical_species": ["H2O", "CO-NatAbund", "CO2", "CH4", "NH3", "H2S"],
+        "chemical_species": ["H2O", "CO", "CO2", "CH4", "NH3", "SiO", "C2H2", "HCN"],
         "rayleigh_species": ["H2", "He"],
-        "continuum_species": ["H2-H2", "H2-He"]
+        "continuum_species": ["H2--H2", "H2--He"]
     },
 
     "EXOIRIS": {
         "WL_RANGE_MICRON": {
             "0": [2.5, 4.0],
-            "1": [4.0, 4.99]
+            "1": [4.0, 5.0]
         },
         "TIME_RANGE_BJD": {
             "0": null,
             "1": [2459890.03, 2459890.3]
         },
-        "bin_resolution": 100
+        "bin_resolution": 50
     },
 
     "PRIORS": {
@@ -58,9 +60,11 @@
         "logg": ["NP", 4.45, 0.02],
         "metal": ["NP", 0.01, 0.05],
         "mp": ["NP", 0.73, 0.04],
-        "ref_p": ["UP", -5.9, 1.9],
-        "cloud_p": ["UP", -6, 2],
-        "tp": ["UP", 300, 3000],
+        "ref_p": ["UP", -10, 2],
+        "cloud_p": ["UP", -10, 2],
+        "kir": ["UP", -5, 2],
+        "gamma": ["UP", -3, 3],
+        "tint": ["UP", 10, 500], 
         "m2h": ["UP", -1, 3],
         "c2o": ["UP", 0.1, 1.6], 
         "sigma_m_00": ["UP", 0.5, 5],
@@ -71,7 +75,7 @@
         "method": "emcee",
         "npools": 30,
         "nwalkers": 60,
-        "niter_de": 500,
+        "niter_de": 1000,
         "niter_mcmc": 2000
     }
 }

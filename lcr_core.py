@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as pl   
+# import pytensor.tensor as pt
 from astropy.stats import sigma_clip 
 from exoiris.tslpf import TSLPF
 from exoiris.wlpf import WhiteLPF
 from exoiris.ldtkld import LDTkLD
 from exoiris import ExoIris, TSData
 from matplotlib.figure import Figure
-from numpy import array, average, atleast_2d, arctan2, diff, dstack, inf, isfinite, interp, log10, sqrt, where, unique, full_like, zeros_like
+from numpy import array, average, atleast_2d, arctan2, diff, dstack, inf, isfinite, interp, log10, sqrt, where, unique, full_like, zeros_like, zeros, squeeze
 from petitRADTRANS.physical_constants import m_jup, m_sun, r_jup_mean, r_sun, G as grav_const
 from petitRADTRANS.radtrans import Radtrans 
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
@@ -300,12 +301,15 @@ def print_elapsed_time(elapsed_time:float):
     output_str = f"{int(hours):02}:{int(minutes):02}:{seconds:05.2f}"
     print("Time elapsed: "+output_str)
     return output_str
+ 
 
-# def lnposterior(self, pv):
-#     prior = self.lnprior(pv)
-#     if not np.isfinite(prior):
-#         return -inf 
-#     return prior + self.lnlikelihood(pv) 
+# def custom_logpdf(self, v):
+#     # lower_ok = pt.all(v > self.a)
+#     # upper_ok = pt.all(v < self.b)
+#     inbounds = pt.and_(v > self.a, v < self.b) 
+#     return pt.switch(inbounds, self.lnc, -inf)
+
+# UP.logpdf = custom_logpdf
     
 TSLPF.transit_model       = custom_transit_model
 TSLPF._init_parameters    = custom_init_parameters
@@ -314,8 +318,7 @@ TSLPF._init_p_atmosphere  = custom_init_p_atmosphere
 TSLPF.init_prt_model      = init_prt_model
 TSLPF.get_ts_model        = get_ts_model
 TSLPF.get_radius_ratios   = get_radius_ratios
-TSLPF.generate_bandwidths = generate_bandwidths
-# TSLPF.lnposterior         = lnposterior
+TSLPF.generate_bandwidths = generate_bandwidths 
 
 ExoIris.fit_white         = custom_fit_white
 
