@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as pl   
-# import pytensor.tensor as pt
+import pytensor.tensor as pt
 from astropy.stats import sigma_clip 
 from exoiris.tslpf import TSLPF
 from exoiris.wlpf import WhiteLPF
 from exoiris.ldtkld import LDTkLD
 from exoiris import ExoIris, TSData
 from matplotlib.figure import Figure
-from numpy import array, average, atleast_2d, arctan2, diff, dstack, inf, isfinite, interp, log10, sqrt, where, unique, full_like, zeros_like, zeros, squeeze
+from numpy import array, average, atleast_2d, arctan2, diff, dstack, inf, isfinite, interp, log10, sqrt, where, unique, zeros_like, zeros, squeeze, ones_like
 from petitRADTRANS.physical_constants import m_jup, m_sun, r_jup_mean, r_sun, G as grav_const
 from petitRADTRANS.radtrans import Radtrans 
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
@@ -16,6 +16,7 @@ from petitRADTRANS.physics import temperature_profile_function_guillot_global as
 from petitRADTRANS.physics import rebin_spectrum_bin
 from pytransit.orbits import as_from_rhop, i_from_ba, epoch
 from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter
+from petitRADTRANS.fortran_chemistry import fortran_chemistry as fchem
 # from pytransit import BaseLPF
 # from pytransit import LogPosteriorFunction
 
@@ -208,8 +209,9 @@ def get_ts_model(self, atm_params):
     )
     
     # calculate chemical abundances
-    metallicities = full_like(self.prt_pbar, atm_params[6])
-    co_ratios = full_like(self.prt_pbar, atm_params[7])
+    metallicities = atm_params[6] * ones_like(self.prt_pbar)
+    co_ratios = atm_params[7] * ones_like(self.prt_pbar)
+
     mass_fractions = self.prt_chem.interpolate_mass_fractions(
         co_ratios               = co_ratios,
         log10_metallicities     = metallicities,
@@ -302,15 +304,7 @@ def print_elapsed_time(elapsed_time:float):
     print("Time elapsed: "+output_str)
     return output_str
  
-
-# def custom_logpdf(self, v):
-#     # lower_ok = pt.all(v > self.a)
-#     # upper_ok = pt.all(v < self.b)
-#     inbounds = pt.and_(v > self.a, v < self.b) 
-#     return pt.switch(inbounds, self.lnc, -inf)
-
-# UP.logpdf = custom_logpdf
-    
+ 
 TSLPF.transit_model       = custom_transit_model
 TSLPF._init_parameters    = custom_init_parameters
 TSLPF._init_p_orbit       = custom_init_p_orbit

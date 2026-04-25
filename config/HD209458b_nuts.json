@@ -5,7 +5,7 @@
             "../JWST_data/HD209458b/NIRCAM_F322W2.h5",
             "../JWST_data/HD209458b/NIRCAM_F444W.h5"
         ],
-        "output_dir": "../JWST_data/HD209458b/results-260421-pix/"
+        "output_dir": "../JWST_data/HD209458b/results-260422-nuts/"
     },
 
     "STAR": {
@@ -48,7 +48,7 @@
             "0": null,
             "1": [2459890.03, 2459890.3]
         },
-        "bin_resolution": null
+        "bin_resolution": 50
     },
 
     "PRIORS": {
@@ -72,10 +72,10 @@
     },
 
     "SAMPLER":{
-        "method": "emcee",
-        "npools": 30,
-        "nwalkers": 60,
-        "niter_de": 1000,
-        "niter_mcmc": 2000
+        "method": "nuts", 
+        "ncores": 30,     
+        "nwalkers": 60,    
+        "niter_tune": 1000,
+        "niter_sample": 2000
     }
 }

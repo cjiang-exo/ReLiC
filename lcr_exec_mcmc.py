@@ -15,9 +15,9 @@ import shutil
 from lcr_core import *
 from lcr_plots import plot_2dfluxes, plot_corners, plot_residuals
 from multiprocessing import Pool 
+from functools import reduce
 
-
-DEFAULT_CFG = 'config/HD209458b_pix.json'
+DEFAULT_CFG = 'config/WASP107b_mcmc.json'
 
 if 'get_ipython' in globals():
     class Args:
@@ -49,7 +49,7 @@ atmosphere = Radtrans(
 
 chem = PreCalculatedEquilibriumChemistryTable() 
 
-#%% initialize exoiris #########################################################
+#%% initialize TSData #########################################################
 
 print("Loading data: ")
 [print(f"  {f}") for f in cfg["PATH"]["input_file"]]
@@ -61,8 +61,8 @@ for i, rd in enumerate(raw_data):
     tsdata_list.append(TSData(
         time=rd['time'][:] + 2400000.5, 
         wavelength=rd['wavelength'][:], 
-        fluxes=rd['flux'][:].T, 
-        errors=rd['flux_err'][:].T, 
+        fluxes=rd['data'][:], # rd['flux'][:].T, 
+        errors=rd['err'][:], # rd['flux_err'][:].T, 
         name=cfg['PLANET']['name'] + f"_d{i}", 
         noise_group=i, 
         n_baseline=2
@@ -91,8 +91,11 @@ for i, rd in enumerate(raw_data):
     else:
         print("No wavelength binning applied. Running retrievals on native resolution.")
 
-tsdata = tsdata_list[0] + tsdata_list[1]
- 
+# tsdata = tsdata_list[0]
+# tsdata = tsdata_list[0] + tsdata_list[1]
+tsdata = reduce(lambda x,y: x+y, tsdata_list)
+
+#%% initialize LDTk model
 print('Initializing LDTk model... It takes several minutes. Be patient!')
 
 _tv, _te = cfg['STAR']['teff']
@@ -106,6 +109,7 @@ ldmodel = LDTkLD(
     dataset='visir'
 )
 
+#%% initialize ExoIris model
 print("Initializing ExoIris model...")
 
 exoiris = ExoIris(cfg["PLANET"]["name"], ldmodel=ldmodel, data=tsdata, 

@@ -1,4 +1,5 @@
 import os
+import pickle
 import numba
 os.environ["OMP_NUM_THREADS"] =        "1"
 os.environ["OPENBLAS_NUM_THREADS"] =   "1"
@@ -13,15 +14,14 @@ import json
 import h5py
 import shutil
 import pymc as pm
-import arviz as az
-import math as m
+import arviz as az 
 from lcr_core import *
 from lcr_plots import plot_2dfluxes, plot_corners, plot_residuals
 
 from multiprocessing import Pool 
 
 
-DEFAULT_CFG = 'config/HD209458b_pix.json'
+DEFAULT_CFG = 'config/HD209458b_nuts.json'
 
 if 'get_ipython' in globals():
     class Args:
@@ -144,37 +144,9 @@ for i in range(len(exoiris.data)):
 
 #%% test likelihood evaluation #################################################
 
-class MyPriors(ParameterSet):
-    def 
-    def get_logprior(self, pv):
-        lower_ok = pt.all(pv > self.bounds[:, 0])
-        upper_ok = pt.all(pv < self.bounds[:, 1])
-        inbounds = pt.and_(lower_ok, upper_ok)
-        lnp = sum([p.lnprior(pv[i]) for i, p in enumerate(self)])
-        return pt.switch(inbounds, lnp, -np.inf)
-
-
-def get_loglike(pv): 
-    return exoiris._tsa.lnlikelihood(pv)
-
-def get_logprior(pv):   
-    lower_ok = pt.all(pv > exoiris.ps.bounds[:, 0])
-    upper_ok = pt.all(pv < exoiris.ps.bounds[:, 1])
-    inbounds = pt.and_(lower_ok, upper_ok)
-    lnp = sum([p.lnprior(pv[i]) for i, p in enumerate(exoiris.ps)])
-    return pt.switch(inbounds, lnp, -np.inf)
-
-def get_logprior_nptest(pv):  
-    pv = squeeze(pv)
-    lower_ok = all(pv > exoiris.ps.bounds[:, 0])
-    upper_ok = all(pv < exoiris.ps.bounds[:, 1])
-    inbounds = lower_ok & upper_ok
-    lnp = sum([p.lnprior(pv[i]) for i, p in enumerate(exoiris.ps)])
-    return lnp if inbounds else -np.inf
-
 initial_population = exoiris.ps.sample_from_prior(1)
-pp = get_logprior_nptest(initial_population)
-ll = get_loglike(initial_population)
+pp = exoiris._tsa.lnprior(initial_population)
+ll = exoiris._tsa.lnlikelihood(initial_population)
 print("Evaluating test parameters:")
 # for val in zip(pp, ll):
 print("pp={:.2f} \t\t ll={:.2f}".format(pp, ll))
@@ -184,18 +156,34 @@ print("pp={:.2f} \t\t ll={:.2f}".format(pp, ll))
 
 with pm.Model() as model: 
 
-    v = pm.Flat('v', shape=len(exoiris.ps))
+    priorlist = []
+    for pname, p in cfg["PRIORS"].items():
+        if p[0] == 'UP':
+            _p = pm.Uniform(pname, lower=p[1], upper=p[2], initval=0.5*(p[1]+p[2]))
+        elif p[0] == 'NP':
+            if pname == 'rho':
+                _p = pm.TruncatedNormal(pname, mu=p[1], sigma=p[2], lower=0.1, upper=10, initval=p[1])
+            elif pname == 'mp':
+                _p = pm.TruncatedNormal(pname, mu=p[1], sigma=p[2], lower=0.1, upper=10, initval=p[1])    
+            else:
+                _p = pm.Normal(pname, mu=p[1], sigma=p[2], initval=p[1])  
+        else:
+            raise ValueError(f"Unsupported prior type: {p[0]}")
+        priorlist.append(_p)
 
-    pm.Potential('prior', get_logprior(v))
-     
-    pm.Potential('likelihood', get_loglike(v))
-     
-    trace = pm.sample(draws=2000, tune=1000, chains=30, cores=30, )
+    loglike = pm.Deterministic("loglike", exoiris._tsa.lnlikelihood(priorlist))
+    pm.Potential('likelihood', loglike)
+
+    print("Sampling...")
+    trace = pm.sample(draws=10, tune=10, chains=4, cores=4, progressbar=False)
+
+with open('trace.pkl', 'wb') as f:
+    pickle.dump(trace, f)
 
 az.plot_trace(trace)
 pl.show()
 
-az.plot_posterior(trace, hdi_prob=0.94)
+az.plot_posterior(trace, hdi_prob=0.68)
 pl.show()
 
 raise SystemExit("Test complete. Exiting.")
