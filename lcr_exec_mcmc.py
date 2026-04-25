@@ -83,8 +83,9 @@ for i, rd in enumerate(raw_data):
         t0  = cfg["PLANET"]["orb_t0_bjd"][0], 
         p   = cfg["PLANET"]["orb_p_d"][0], 
         t14 = cfg["PLANET"]["transit_duration_d"][0]
-    )
+    ) 
     tsdata_list[-1].normalize_to_poly()
+    tsdata_list[-1].mask_outliers(sigma=5.0)
     r = cfg["EXOIRIS"]["bin_resolution"]
     if r is not None and r > 0:
         tsdata_list[-1] = tsdata_list[-1].bin_wavelength(r=r, estimate_errors=False)
