@@ -181,6 +181,10 @@ exoiris.save(overwrite=True)
 shutil.move(exoiris.name+'.fits', outname)
 print(f"Results saved as {outname}.")
 
+outname = os.path.join(cfg['PATH']['output_dir'], os.path.basename(py_args.config))
+shutil.copy(py_args.config, outname)
+print(f"Configuration file saved as {outname}.")
+
 
 #%% Plot 2D fluxes #############################################################
 
