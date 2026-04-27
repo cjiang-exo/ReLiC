@@ -165,7 +165,7 @@ def custom_init_p_atmosphere(self):
         GParameter('tint', 'intrinsic temperature', 'K', UP(10, 500), (0, inf)),
         GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-inf, inf)),
         GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, inf)),
-        # GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
+        GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
         ]
     self.ps.add_global_block('atmosphere', pp)
     self._start_atm = self.ps.blocks[-1].start
@@ -195,7 +195,8 @@ def get_ts_model(self, atm_params):
     planet_mass = max(atm_params[0]*m_jup, SMALL_MASS)  # g
     ref_pressure = 10**atm_params[1] # bar
     cloudtop_pbar = 10**atm_params[2] # bar
-    
+    cloud_fraction = min(max(atm_params[-1], 0), 1.0)
+
     # calculate the temperature profile
     ref_gravity = grav_const * planet_mass / self.planet_radius**2
     # temperatures = full_like(self.prt_pbar, atm_params[3]) 
@@ -231,6 +232,7 @@ def get_ts_model(self, atm_params):
         planet_radius               = self.planet_radius,
         reference_pressure          = ref_pressure,
         opaque_cloud_top_pressure   = cloudtop_pbar,
+        cloud_fraction              = cloud_fraction,
     ) 
 
     transit_depths = (tr_c / self.star_radius)**2
