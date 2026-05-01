@@ -159,7 +159,7 @@ pp = exoiris.lnposterior(initial_population)
 print("Evaluating test parameters:")
 for val in zip(ll, pp):
     print("ll={:.2f} \t\t pp={:.2f}".format(*val))
-# raise SystemExit("Test complete. Exiting.")
+raise SystemExit("Test complete. Exiting.")
 
 #%% run DE evaluation ##########################################################
 

@@ -72,8 +72,7 @@ class CustomWhiteLPF(WhiteLPF):
 
         for i, sl in enumerate(self.lcslices):
             ax = axs.flat[i]
-            tref = np.floor(self.timea[sl].min())
-            # tc = pv[0] + pv[1]*epoch(self.times[i].mean(), pv[0], pv[1])
+            tref = np.floor(self.timea[sl].min()) 
             tc = pv[3] + pv[0]*epoch(self.times[i].mean(), pv[3], pv[0])
             ax.plot(self.timea[sl] - tref, self.ofluxa[sl], '.k', alpha=0.25)
             ax.plot(self.timea[sl] - tref, fm[sl], 'r', zorder=9)
@@ -84,6 +83,22 @@ class CustomWhiteLPF(WhiteLPF):
         pl.setp(axs[:,0], ylabel='Normalized flux')
         return fig
 
+def custom_flux_model(self, pv, include_baseline: bool = True):
+    pv_atm = pv[:, self._sl_atm]   
+    self._transmission_spectra = array([
+        self.get_ts_model(atm_params) for atm_params in pv_atm
+    ]) 
+    transit_models = self.transit_model(pv)
+    if self.spot_model is not None:
+        self.spot_model.apply_spots(pv, transit_models)
+        if self.spot_model.include_tlse:
+            self.spot_model.apply_tlse(pv, transit_models)
+    if include_baseline:
+        baseline_models = self.baseline_model(transit_models)
+        for i in range(self.data.size):
+            transit_models[i][:, :, :] *= baseline_models[i][:, :, :]
+    return transit_models
+    
 def custom_transit_model(self, pv, copy=True):
     """Evaluates the transit model for parameter vector pv.
 
@@ -174,10 +189,10 @@ def custom_init_p_atmosphere(self):
 
 def get_radius_ratios(self, pv):
     radius_ratios = []
-    pv_atm = pv[:, self._sl_atm]  
-    ts_model  = array([self.get_ts_model(atm_params) for atm_params in pv_atm])  
+    # pv_atm = pv[:, self._sl_atm]  
+    # ts_model  = array([self.get_ts_model(atm_params) for atm_params in pv_atm])  
     for i, _d in enumerate(self.data):
-        ts_rebinned = array([rebin_spectrum_bin(self.prt_wl, _ts, self.wavelengths[i], bin_widths=self.bandwidths[i]) for _ts in ts_model])
+        ts_rebinned = array([rebin_spectrum_bin(self.prt_wl, _ts, self.wavelengths[i], bin_widths=self.bandwidths[i]) for _ts in self._transmission_spectra])
         radius_ratios.append(ts_rebinned**0.5)
     return radius_ratios
 
@@ -306,7 +321,7 @@ def print_elapsed_time(elapsed_time:float):
     print("Time elapsed: "+output_str)
     return output_str
  
- 
+TSLPF.flux_model          = custom_flux_model
 TSLPF.transit_model       = custom_transit_model
 TSLPF._init_parameters    = custom_init_parameters
 TSLPF._init_p_orbit       = custom_init_p_orbit
