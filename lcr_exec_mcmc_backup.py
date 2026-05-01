@@ -1,4 +1,3 @@
-#%% 
 import os
 import numba
 os.environ["OMP_NUM_THREADS"] =        "1"
@@ -10,7 +9,7 @@ os.environ["NUMBA_NUM_THREADS"] =      "1"
 os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'  
 
 import argparse
-import tomllib
+import json
 import h5py
 import shutil
 from lcr_core import *
@@ -18,7 +17,7 @@ from lcr_plots import plot_2dfluxes, plot_corners, plot_residuals
 from multiprocessing import Pool 
 from functools import reduce
 
-DEFAULT_CFG = 'config/HD209458b_joint.toml'
+DEFAULT_CFG = 'config/WASP107b_mcmc.json'
 
 if 'get_ipython' in globals():
     class Args:
@@ -30,39 +29,50 @@ else:
                         default=DEFAULT_CFG,
                         help="the input configuration file")
     py_args = parser.parse_args()
-
-cfg = tomllib.load(open(py_args.config, 'rb'))
+ 
+cfg = json.load(open(py_args.config, 'r'))  
 os.makedirs(cfg["PATH"]["output_dir"], exist_ok=True)
 print(f"Configuration file loaded: {py_args.config}")
 
-#%% load data from input files
+#%% initialize pRT and chemical model
+
+atmosphere = Radtrans(
+    pressures = np.logspace(*cfg["ATMOSPHERE"]["pressure_bounds_log10bar"], 121),
+    wavelength_boundaries       = cfg["ATMOSPHERE"]["wavelength_bounds_micron"],
+    line_species                = cfg["ATMOSPHERE"]["chemical_species"], 
+    rayleigh_species            = cfg["ATMOSPHERE"]["rayleigh_species"],
+    gas_continuum_contributors  = cfg["ATMOSPHERE"]["continuum_species"],
+    line_opacity_mode           = cfg["ATMOSPHERE"]["opacity_mode"], 
+)
+
+# wavelengths = 1e4 * atmosphere.get_wavelengths() # from cm to micron 
+
+chem = PreCalculatedEquilibriumChemistryTable() 
+
+#%% initialize TSData #########################################################
 
 print("Loading data: ")
 [print(f"  {f}") for f in cfg["PATH"]["input_file"]]
 
 raw_data  = [h5py.File(f, 'r') for f in cfg["PATH"]["input_file"]]
 
-# raise SystemExit("Configuration loaded. Exiting for testing purposes.")
-
-#%% initialize TSData #########################################################
-
 tsdata_list = []
 for i, rd in enumerate(raw_data): 
     tsdata_list.append(TSData(
-        time        = rd['bjd_tdb'][:], 
-        wavelength  = rd['wavelength'][:], 
-        fluxes      = rd['flux'][:], 
-        errors      = rd['flux_err'][:], 
-        name        = cfg['PLANET']['name'] + f"_d{i}", 
-        noise_group = i, 
-        n_baseline  = 2
+        time=rd['time'][:] + 2400000.5, 
+        wavelength=rd['wavelength'][:], 
+        fluxes=rd['data'][:], # rd['flux'][:].T, 
+        errors=rd['err'][:], # rd['flux_err'][:].T, 
+        name=cfg['PLANET']['name'] + f"_d{i}", 
+        noise_group=i, 
+        n_baseline=2
     ))
 
     _wlrange = cfg["EXOIRIS"]["WL_RANGE_MICRON"][str(i)]
     _trange  = cfg["EXOIRIS"]["TIME_RANGE_BJD"][str(i)]
-    if _wlrange != []:
+    if _wlrange is not None:
         tsdata_list[-1].crop_wavelength(*_wlrange)
-    if _trange != []:
+    if _trange is not None:
         tsdata_list[-1].crop_time(*_trange)
  
     print("Loaded dataset #{0:d} with nwl={1:d}, nt={2:d}.".format(
@@ -77,30 +87,14 @@ for i, rd in enumerate(raw_data):
     tsdata_list[-1].normalize_to_poly()
     tsdata_list[-1].mask_outliers(sigma=5.0)
     r = cfg["EXOIRIS"]["bin_resolution"]
-    if ("JWST" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]) & (r > 0):
-        tsdata_list[-1] = tsdata_list[-1].bin_wavelength(
-            r=r, estimate_errors=False
-        )
-        print(f"Wavelength binning applied with resolution R={r}. New nwl={tsdata_list[-1].fluxes.shape[0]}.")
+    if r is not None and r > 0:
+        tsdata_list[-1] = tsdata_list[-1].bin_wavelength(r=r, estimate_errors=False)
     else:
         print("No wavelength binning applied. Running retrievals on native resolution.")
 
+# tsdata = tsdata_list[0]
+# tsdata = tsdata_list[0] + tsdata_list[1]
 tsdata = reduce(lambda x,y: x+y, tsdata_list)
-del tsdata_list, raw_data
-
-#%% initialize pRT and chemical model
-print("Initializing atmospheric model...")
-
-atmosphere = Radtrans(
-    pressures = np.logspace(*cfg["ATMOSPHERE"]["pressure_bounds_log10bar"], 121),
-    wavelength_boundaries       = cfg["ATMOSPHERE"]["wavelength_bounds_micron"],
-    line_species                = cfg["ATMOSPHERE"]["chemical_species"], 
-    rayleigh_species            = cfg["ATMOSPHERE"]["rayleigh_species"],
-    gas_continuum_contributors  = cfg["ATMOSPHERE"]["continuum_species"],
-    line_opacity_mode           = cfg["ATMOSPHERE"]["opacity_mode"], 
-)
-
-chem = PreCalculatedEquilibriumChemistryTable() 
 
 #%% initialize LDTk model
 print('Initializing LDTk model... It takes several minutes. Be patient!')
@@ -137,10 +131,8 @@ exoiris.print_parameters()
 #%% fit white light curve for systematics correction ###########################
 
 exoiris.fit_white()
-_ncol = exoiris.data.size
-fig = exoiris.plot_white(figsize=(3*_ncol, 4), ncols=_ncol)
+fig = exoiris.plot_white()
 outname = os.path.join(cfg['PATH']['output_dir'], 'white_fit.png')
-fig.tight_layout()
 fig.savefig(outname, dpi=100)
 print(f"A preview of white light curve fit saved as {outname}.")
 # update covariances with white systematics
