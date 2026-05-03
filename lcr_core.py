@@ -84,7 +84,7 @@ class CustomWhiteLPF(WhiteLPF):
         return fig
 
 def custom_flux_model(self, pv, include_baseline: bool = True):
-    pv_atm = pv[:, self._sl_atm]   
+    pv_atm = atleast_2d(pv)[:, self._sl_atm]   
     self._transmission_spectra = array([
         self.get_ts_model(atm_params) for atm_params in pv_atm
     ]) 
@@ -155,8 +155,7 @@ def custom_init_parameters(self):
     if self._nm == NM_GP_FREE:
         self._init_p_gp()
     self._init_p_bias()
-    self.ps.freeze()
-    self.generate_bandwidths() 
+    self.ps.freeze() 
     return
 
 def custom_init_p_orbit(self): 
@@ -192,7 +191,7 @@ def get_radius_ratios(self, pv):
     # pv_atm = pv[:, self._sl_atm]  
     # ts_model  = array([self.get_ts_model(atm_params) for atm_params in pv_atm])  
     for i, _d in enumerate(self.data):
-        ts_rebinned = array([rebin_spectrum_bin(self.prt_wl, _ts, self.wavelengths[i], bin_widths=self.bandwidths[i]) for _ts in self._transmission_spectra])
+        ts_rebinned = array([rebin_spectrum_bin(self.prt_wl, _ts, self.wavelengths[i], bin_widths=self.bin_widths[i]) for _ts in self._transmission_spectra])
         radius_ratios.append(ts_rebinned**0.5)
     return radius_ratios
 
@@ -204,6 +203,7 @@ def init_prt_model(self, prt_atmosphere: Radtrans, prt_chem: PreCalculatedEquili
     self.planet_radius = planet_radius * r_jup_mean # cm 
     self.star_radius = star_radius * r_sun # cm
     self.teq = equilibrium_temperature # K
+    self.generate_binwidths()
     return
 
 def get_ts_model(self, atm_params):
@@ -253,14 +253,20 @@ def get_ts_model(self, atm_params):
     transit_depths = (tr_c / self.star_radius)**2
     return transit_depths
 
-def generate_bandwidths(self):
-    self.bandwidths = []
-    for wl in self.wavelengths: 
-        dwl         = zeros_like(wl)
-        dwl[:-1]    = diff(wl)
-        dwl[-1]     = dwl[-2] 
-        self.bandwidths.append(dwl)
-    return self.bandwidths
+# def generate_bandwidths(self):
+#     self.bin_widths = []
+#     for wl in self.wavelengths: 
+#         dwl         = zeros_like(wl)
+#         dwl[:-1]    = diff(wl)
+#         dwl[-1]     = dwl[-2] 
+#         self.bin_widths.append(dwl)
+#     return self.bin_widths
+
+def generate_binwidths(self):
+    self.bin_widths = []
+    for d in self.data:
+        self.bin_widths.append(d._wl_r_edges - d._wl_l_edges)
+
 
 def replace_outliers(time, flux, ferr, sigma=8):
     mask = sigma_clip(flux, sigma=sigma, axis=1, masked=True, copy=False).mask
@@ -329,7 +335,7 @@ TSLPF._init_p_atmosphere  = custom_init_p_atmosphere
 TSLPF.init_prt_model      = init_prt_model
 TSLPF.get_ts_model        = get_ts_model
 TSLPF.get_radius_ratios   = get_radius_ratios
-TSLPF.generate_bandwidths = generate_bandwidths 
+TSLPF.generate_binwidths  = generate_binwidths 
 
 ExoIris.fit_white         = custom_fit_white
 

@@ -9,17 +9,13 @@ def plot_2dfluxes(exoiris_data: list[TSData], outputdir=""):
         fig, ax = pl.subplots(2,1, figsize=(7.2,7.2))
         _t = d.time
         _w = d.wavelength
-        ax[0].imshow(d.fluxes, aspect='auto', origin='lower', 
-                    extent=[_t.min(), _t.max(), _w.min(), _w.max()],
-                    interpolation="none")
+        ax[0].pcolormesh(_t, _w, d.fluxes, aspect='auto')
         ax[0].set_title('Fluxes')
         ax[0].set_xlabel('Time')
         ax[0].set_ylabel('Wavelength (micron)')
         fig.colorbar(ax[0].images[0], ax=ax[0])
 
-        ax[1].imshow(d.errors, aspect='auto', origin='lower', 
-                    extent=[_t.min(), _t.max(), _w.min(), _w.max()],
-                    interpolation="none")
+        ax[1].pcolormesh(_t, _w, d.errors, aspect='auto')
         ax[1].set_title('Errors')
         ax[1].set_xlabel('Time')
         ax[1].set_ylabel('Wavelength (micron)')

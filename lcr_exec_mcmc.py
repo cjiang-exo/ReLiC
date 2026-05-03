@@ -48,11 +48,16 @@ raw_data  = [h5py.File(f, 'r') for f in cfg["PATH"]["input_file"]]
 
 tsdata_list = []
 for i, rd in enumerate(raw_data): 
+    try:
+        wl_edges = rd['wavelength_bins'][:].T 
+    except KeyError:
+        wl_edges = None
     tsdata_list.append(TSData(
         time        = rd['bjd_tdb'][:], 
         wavelength  = rd['wavelength'][:], 
         fluxes      = rd['flux'][:], 
         errors      = rd['flux_err'][:], 
+        wl_edges    = wl_edges, # specify edges for STIS and WFC3
         name        = cfg['PLANET']['name'] + f"_d{i}", 
         noise_group = i, 
         n_baseline  = 2
@@ -75,7 +80,7 @@ for i, rd in enumerate(raw_data):
         t14 = cfg["PLANET"]["transit_duration_d"][0]
     ) 
     tsdata_list[-1].normalize_to_poly()
-    tsdata_list[-1].mask_outliers(sigma=5.0)
+    tsdata_list[-1].mask_outliers(sigma=8.0)
     r = cfg["EXOIRIS"]["bin_resolution"]
     if ("JWST" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]) & (r > 0):
         tsdata_list[-1] = tsdata_list[-1].bin_wavelength(
@@ -86,7 +91,7 @@ for i, rd in enumerate(raw_data):
         print("No wavelength binning applied. Running retrievals on native resolution.")
 
 tsdata = reduce(lambda x,y: x+y, tsdata_list)
-del tsdata_list, raw_data
+del tsdata_list
 
 #%% initialize pRT and chemical model
 print("Initializing atmospheric model...")
@@ -143,12 +148,19 @@ outname = os.path.join(cfg['PATH']['output_dir'], 'white_fit.png')
 fig.tight_layout()
 fig.savefig(outname, dpi=100)
 print(f"A preview of white light curve fit saved as {outname}.")
+
 # update covariances with white systematics
 for i in range(len(exoiris.data)): 
-    sl = exoiris._wa.lcslices[i]
-    fm = exoiris._wa.flux_model(exoiris._wa._local_minimization.x)
-    white_systematics = exoiris._wa.ofluxa[sl] - fm[sl]
-    exoiris.data[i].covs[:, -1] = white_systematics
+    if "STIS" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]:
+        _systematics = raw_data[i]["detrend_vectors"][:, 0]
+    elif "WFC3" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]:
+        _systematics = raw_data[i]["sky_background_level_array"][:]**-1
+    elif "JWST" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]:
+        sl = exoiris._wa.lcslices[i]
+        fm = exoiris._wa.flux_model(exoiris._wa._local_minimization.x)
+        _systematics = exoiris._wa.ofluxa[sl] - fm[sl]
+    exoiris.data[i].covs[:, -1] = _systematics
+    exoiris.data[i].covs[:, 1:] -= exoiris.data[i].covs[:, 1:].mean(axis=0)
     exoiris.data[i].covs[:, 1:] /= exoiris.data[i].covs[:, 1:].std(axis=0)
 
 #%% test likelihood evaluation #################################################
@@ -243,3 +255,4 @@ plot_residuals(exoiris.data, fmod, outputdir=cfg['PATH']['output_dir'])
 outname = os.path.join(cfg['PATH']['output_dir'], 'output.log') 
 shutil.copy('output.log', outname)
 print("Done!")
+# %%

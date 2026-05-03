@@ -8,7 +8,7 @@ input_file = [
   "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
   "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260430-joint/"
+output_dir = "../results/HD209458b/results-260503-joint/"
 
 [STAR]
 reference = "2017AJ....153..136S"
@@ -33,13 +33,13 @@ equilibrium_temperature = [1459, 12]
 [ATMOSPHERE]
 opacity_mode = "lbl"
 pressure_bounds_log10bar = [-10, 2]
-wavelength_bounds_micron = [0.3, 5.1]
+wavelength_bounds_micron = [0.298, 5.05]
 chemical_species = ["H2O", "CO", "CO2", "CH4", "NH3", "SiO", "C2H2", "HCN", "Na", "K"]
 rayleigh_species = ["H2", "He"]
 continuum_species = ["H2--H2", "H2--He"]
 
 [EXOIRIS]
-bin_resolution = 50 # set to 0 for native resolution. Only used for JWST data.
+bin_resolution = 100 # set to 0 for native resolution. Only used for JWST data.
 
 [EXOIRIS.INSTRUMENT]
 "0" = "HST/STIS G430L"
