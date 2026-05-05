@@ -17,6 +17,7 @@ from petitRADTRANS.physics import rebin_spectrum_bin
 from pytransit.orbits import as_from_rhop, i_from_ba, epoch
 from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter
 from petitRADTRANS.fortran_chemistry import fortran_chemistry as fchem
+from lcr_fitwhite import NewWhiteLPF
 # from pytransit import BaseLPF
 # from pytransit import LogPosteriorFunction
 
@@ -26,62 +27,62 @@ NM_GP_FREE = 2
 NM_WHITE_PROFILED = 3
 SMALL_MASS = 1e-6 * m_jup
 
-class CustomWhiteLPF(WhiteLPF):
-    def __init__(self, tsa: TSLPF):
-        self.tsa = tsa
-        fluxes, times, errors = [], [], []
-        for t, f, e in zip(tsa.data.times, tsa.data.fluxes, tsa.data.errors):
-            weights = where(isfinite(f) & isfinite(e), 1/e**2, 0.0)
-            mf = average(where(isfinite(f), f, 0), axis=0, weights=weights)
-            me = sqrt(1 / weights.sum(0))
-            m = isfinite(mf)
-            times.append(t[m])
-            fluxes.append(mf[m])
-            errors.append(me[m])
-        covs = [(t-t.mean())[:, np.newaxis] for t in times]
-        self.std_errors = errors
-        self.neps = max(self.tsa.data.epoch_groups) + 1
+# class CustomWhiteLPF(WhiteLPF):
+#     def __init__(self, tsa: TSLPF):
+#         self.tsa = tsa
+#         fluxes, times, errors = [], [], []
+#         for t, f, e in zip(tsa.data.times, tsa.data.fluxes, tsa.data.errors):
+#             weights = where(isfinite(f) & isfinite(e), 1/e**2, 0.0)
+#             mf = average(where(isfinite(f), f, 0), axis=0, weights=weights)
+#             me = sqrt(1 / weights.sum(0))
+#             m = isfinite(mf)
+#             times.append(t[m])
+#             fluxes.append(mf[m])
+#             errors.append(me[m])
+#         covs = [(t-t.mean())[:, np.newaxis] for t in times]
+#         self.std_errors = errors
+#         self.neps = max(self.tsa.data.epoch_groups) + 1
 
-        pbs = unique(tsa.data.noise_groups).astype('<U21')
-        super(WhiteLPF, self).__init__('white', pbs, times, fluxes,
-                        covariates=covs, wnids=tsa.data.noise_groups, pbids=tsa.data.noise_groups)
+#         pbs = unique(tsa.data.noise_groups).astype('<U21')
+#         super(WhiteLPF, self).__init__('white', pbs, times, fluxes,
+#                         covariates=covs, wnids=tsa.data.noise_groups, pbids=tsa.data.noise_groups)
 
-        self.tm.epids = array(self.tsa.data.epoch_groups)
+#         self.tm.epids = array(self.tsa.data.epoch_groups)
 
-        for i in range(self.neps):
-            self.set_prior(f'tc_{i:02d}', tsa.ps[tsa.ps.find_pid(f'tc_{i:02d}')].prior)
-        self.set_prior('p', tsa.ps[tsa.ps.find_pid('p')].prior)
-        self.set_prior('rho', tsa.ps[tsa.ps.find_pid('rho')].prior)
-        self.set_prior('b', tsa.ps[tsa.ps.find_pid('b')].prior) 
-        self.set_prior('k2', 'UP', 0.01**2, 0.3**2) 
-        ngids = tsa.data.noise_groups[self.lcids]
-        for i in range(tsa.data.n_noise_groups):
-            self.set_prior(f'wn_loge_{i}', 'NP', log10(diff(self.ofluxa[ngids==i]).std() / sqrt(2)), 0.1)
+#         for i in range(self.neps):
+#             self.set_prior(f'tc_{i:02d}', tsa.ps[tsa.ps.find_pid(f'tc_{i:02d}')].prior)
+#         self.set_prior('p', tsa.ps[tsa.ps.find_pid('p')].prior)
+#         self.set_prior('rho', tsa.ps[tsa.ps.find_pid('rho')].prior)
+#         self.set_prior('b', tsa.ps[tsa.ps.find_pid('b')].prior) 
+#         self.set_prior('k2', 'UP', 0.01**2, 0.3**2) 
+#         ngids = tsa.data.noise_groups[self.lcids]
+#         for i in range(tsa.data.n_noise_groups):
+#             self.set_prior(f'wn_loge_{i}', 'NP', log10(diff(self.ofluxa[ngids==i]).std() / sqrt(2)), 0.1)
 
-    def plot(self, axs=None, figsize=None, ncols=2) -> Figure:
-        if axs is None:
-            nrows = int(np.ceil(self.nlc / ncols))
-            fig, axs = pl.subplots(nrows, ncols, figsize=figsize, sharey='all', squeeze=False, constrained_layout=True)
-        else:
-            fig = axs[0].get_figure()
+#     def plot(self, axs=None, figsize=None, ncols=2) -> Figure:
+#         if axs is None:
+#             nrows = int(np.ceil(self.nlc / ncols))
+#             fig, axs = pl.subplots(nrows, ncols, figsize=figsize, sharey='all', squeeze=False, constrained_layout=True)
+#         else:
+#             fig = axs[0].get_figure()
 
         
-        fm = self.flux_model(self._local_minimization.x)
-        t14 = self.transit_duration
-        pv = self._local_minimization.x
+#         fm = self.flux_model(self._local_minimization.x)
+#         t14 = self.transit_duration
+#         pv = self._local_minimization.x
 
-        for i, sl in enumerate(self.lcslices):
-            ax = axs.flat[i]
-            tref = np.floor(self.timea[sl].min()) 
-            tc = pv[3] + pv[0]*epoch(self.times[i].mean(), pv[3], pv[0])
-            ax.plot(self.timea[sl] - tref, self.ofluxa[sl], '.k', alpha=0.25)
-            ax.plot(self.timea[sl] - tref, fm[sl], 'r', zorder=9)
-            ax.axvline(tc - tref, ls='--', c='0.5')
-            ax.axvline(tc - tref - 0.5*t14, ls='--', c='0.5')
-            ax.axvline(tc - tref + 0.5*t14, ls='--', c='0.5')
-            pl.setp(ax, xlabel=f'Time - {tref:.0f} [BJD]', xlim=(self.times[i].min()-tref, self.times[i].max()-tref))
-        pl.setp(axs[:,0], ylabel='Normalized flux')
-        return fig
+#         for i, sl in enumerate(self.lcslices):
+#             ax = axs.flat[i]
+#             tref = np.floor(self.timea[sl].min()) 
+#             tc = pv[3] + pv[0]*epoch(self.times[i].mean(), pv[3], pv[0])
+#             ax.plot(self.timea[sl] - tref, self.ofluxa[sl], '.k', alpha=0.25)
+#             ax.plot(self.timea[sl] - tref, fm[sl], 'r', zorder=9)
+#             ax.axvline(tc - tref, ls='--', c='0.5')
+#             ax.axvline(tc - tref - 0.5*t14, ls='--', c='0.5')
+#             ax.axvline(tc - tref + 0.5*t14, ls='--', c='0.5')
+#             pl.setp(ax, xlabel=f'Time - {tref:.0f} [BJD]', xlim=(self.times[i].min()-tref, self.times[i].max()-tref))
+#         pl.setp(axs[:,0], ylabel='Normalized flux')
+#         return fig
 
 def custom_flux_model(self, pv, include_baseline: bool = True):
     pv_atm = atleast_2d(pv)[:, self._sl_atm]   
@@ -280,15 +281,20 @@ def replace_outliers(time, flux, ferr, sigma=8):
             ferr[i] = interp(time, x, ye) 
     return flux, ferr
 
-def custom_fit_white(self, niter: int = 500) -> None: 
+
+def analyze_white_lightcurve(exoiris:ExoIris, niter: int = 500, jitters:list[np.ndarray]=[None, ...]) -> None:
+    exoiris._wa = NewWhiteLPF(exoiris._tsa, jitters=jitters)
+    return exoiris
+
+def custom_fit_white(self, niter: int = 500, jitters:list[np.ndarray]=[None, ...]) -> None: 
     """Fit a white light curve model and sets the out-of-transit mask.
 
     Parameters
     ----------
     niter : int, optional
         The number of iterations for the global optimization algorithm (default is 500).
-    """
-    self._wa = CustomWhiteLPF(self._tsa)
+    """ 
+    self._wa = NewWhiteLPF(self._tsa, jitters=jitters)
     self._wa.optimize_global(niter, plot_convergence=False, use_tqdm=False)
     self._wa.optimize()
     pv = self._wa._local_minimization.x
@@ -336,8 +342,8 @@ TSLPF.init_prt_model      = init_prt_model
 TSLPF.get_ts_model        = get_ts_model
 TSLPF.get_radius_ratios   = get_radius_ratios
 TSLPF.generate_binwidths  = generate_binwidths 
-
-ExoIris.fit_white         = custom_fit_white
+ 
+# ExoIris.custom_fit_white  = custom_fit_white
 
 if __name__ == "__main__":
     print("Testing ...")

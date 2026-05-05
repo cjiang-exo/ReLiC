@@ -17,6 +17,8 @@ from lcr_core import *
 from lcr_plots import plot_2dfluxes, plot_corners, plot_residuals
 from multiprocessing import Pool 
 from functools import reduce
+from numpy.polynomial import Chebyshev
+from numpy.linalg import lstsq
 
 DEFAULT_CFG = 'config/HD209458b_joint.toml'
 
@@ -58,9 +60,9 @@ for i, rd in enumerate(raw_data):
         fluxes      = rd['flux'][:], 
         errors      = rd['flux_err'][:], 
         wl_edges    = wl_edges, # specify edges for STIS and WFC3
-        name        = cfg['PLANET']['name'] + f"_d{i}", 
-        noise_group = i, 
-        n_baseline  = 2
+        name        = cfg['EXOIRIS']['INSTRUMENT'][str(i)] + f"_d{i}", 
+        noise_group = cfg["EXOIRIS"]["NOISE_GROUP"][str(i)], 
+        n_baseline  = cfg['EXOIRIS']['N_BASELINE'][str(i)],
     ))
 
     _wlrange = cfg["EXOIRIS"]["WL_RANGE_MICRON"][str(i)]
@@ -139,9 +141,123 @@ exoiris._tsa.init_prt_model(
 
 exoiris.print_parameters()
 
+#%% Update covariates for baseline detrending
+
+# period_hst = 95.42 / 1440.0 # [days]
+# x = lambda phi: 2 * (phi - phi.min()) / (phi.max() - phi.min()) - 1
+
+
+
+# for i, d in enumerate(exoiris.data): 
+#     if "STIS" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]:
+#         t = d.time
+#         f = d.fluxes[0]
+#         fe = d.errors[0]
+#         _mask = d.transit_mask & isfinite(f) & isfinite(fe)
+#         _covs = raw_data[i]["detrend_vectors"][:, 0]
+#     elif "WFC3" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]:
+#         _covs = raw_data[i]["sky_background_level_array"][:]**-1
+#     else:
+#         continue # keep default for JWST
+#     exoiris.data[i].covs[:, -1] = _covs
+#     exoiris.data[i].covs[:, 1:] -= exoiris.data[i].covs[:, 1:].mean(axis=0)
+#     exoiris.data[i].covs[:, 1:] /= exoiris.data[i].covs[:, 1:].std(axis=0)
+
+#%% STIS
+
+# period_hst = 95.42/1440.0 # [days]
+# x = lambda phi: 2 * (phi - phi.min()) / (phi.max() - phi.min()) - 1
+
+# t = exoiris.data[2].time
+# f = exoiris.data[2].fluxes[8]
+# fe = exoiris.data[2].errors[8]
+# _mask = exoiris.data[2].transit_mask & isfinite(f) & isfinite(fe)
+
+# phases = (t - t[0]) % period_hst # folded phases  
+# phases[phases > 0.7*period_hst] -= period_hst
+# tsub = (t - t.mean()) / t.std() 
+
+# covariates = array([Chebyshev.basis(i)(x(phases)) for i in range(5)]).T
+# covariates = np.hstack((covariates, raw_data[2]['detrend_vectors'][:])) 
+# covariates = covariates[_mask]
+
+# x_sim = x(phases)[_mask]
+# y_sim = f[_mask]
+# ye_sim = fe[_mask]
+ 
+# coeffs = lstsq(covariates, y_sim)[0]
+# y_fit = (covariates @ coeffs).T
+
+# reduced_chisq = sum(((y_sim - y_fit) / ye_sim)**2) / (len(y_sim) - covariates.shape[1])
+# print(f"LSQ fit reduced chi-squared: {reduced_chisq:.2f}")
+
+# pl.errorbar(phases[_mask], y_sim, yerr=ye_sim, fmt='.k')
+# pl.plot(phases[_mask], y_fit, '.r')
+# pl.show()
+
+
+# #%% WFC3 
+
+# t = exoiris.data[4].time
+# f = exoiris.data[4].fluxes[9]
+# fe = exoiris.data[4].errors[9]
+# _mask = exoiris.data[4].transit_mask
+
+# phases = (t - t[0]) % period_hst # folded phases  
+# phases[phases > 0.7*period_hst] -= period_hst
+# tsub = (t - t.mean()) / t.std() 
+
+# covariates = array([Chebyshev.basis(i)(x(phases)) for i in range(5)])   
+# covariates = covariates[:, _mask].T
+
+# x_sim = x(phases)[_mask]
+# y_sim = f[_mask]
+# ye_sim = fe[_mask]
+ 
+# coeffs = lstsq(covariates, y_sim)[0]
+# y_fit = (covariates @ coeffs).T
+
+# reduced_chisq = sum(((y_sim - y_fit) / ye_sim)**2) / (len(y_sim) - covariates.shape[1])
+# print(f"LSQ fit reduced chi-squared: {reduced_chisq:.2f}")
+
+# pl.errorbar(phases[_mask], y_sim, yerr=ye_sim, fmt='.k')
+# pl.plot(phases[_mask], y_fit, '.r')
+# pl.show()
+
+# raise SystemExit("Configuration loaded. Exiting for testing purposes.")
+
 #%% fit white light curve for systematics correction ###########################
 
-exoiris.fit_white()
+jitters = []
+for i, rd in enumerate(raw_data):
+    if "STIS" in exoiris.data[i].name: # use the first two PCs
+        jitters.append(rd["detrend_vectors"][:, :2]) 
+    else:
+        jitters.append(None) 
+
+analyze_white_lightcurve(exoiris, jitters=jitters)
+
+# exoiris.custom_fit_white(jitters=jitters)
+
+
+#%%
+
+initial_population = exoiris._wa.ps.sample_from_prior(3)
+fmodel = exoiris._wa.flux_model(initial_population) 
+
+fig, ax = pl.subplots(1, len(exoiris.data), figsize=(3*len(exoiris.data), 4), sharey=True)
+for i, sl in enumerate(exoiris._wa.lcslices):
+    ax[i].errorbar(exoiris._wa.times[i], exoiris._wa.fluxes[i], 
+        yerr=exoiris._wa.errors[i], fmt='.k')
+    ax[i].plot(exoiris._wa.times[i], fmodel[0, sl], '.r')
+    ax[i].set_title(cfg["EXOIRIS"]["INSTRUMENT"][str(i)]) 
+    ax[i].set_xlabel('Time')
+
+ax[0].set_ylabel('Normalized flux')
+fig.tight_layout()
+raise SystemExit("Configuration loaded. Exiting for testing purposes.")
+
+#%%
 _ncol = exoiris.data.size
 fig = exoiris.plot_white(figsize=(3*_ncol, 4), ncols=_ncol)
 outname = os.path.join(cfg['PATH']['output_dir'], 'white_fit.png')
@@ -206,6 +322,21 @@ outname = os.path.join(cfg['PATH']['output_dir'], os.path.basename(py_args.confi
 shutil.copy(py_args.config, outname)
 print(f"Configuration file saved as {outname}.")
 
+#%% Plot posterior probabilities ####################################################
+
+lnp = exoiris.sampler.get_log_prob() 
+outputname = os.path.join(cfg['PATH']['output_dir'], 'lnprob.txt')
+np.savetxt(outputname, lnp)
+print(f"Sampling evolution saved as {outputname}.")
+
+fig, ax = pl.subplots(1,1,figsize=(6,4))
+ax.plot(lnp, c='k', lw=0.5, alpha=0.5) 
+ax.set_xlabel(f'Iterations ({cfg["SAMPLER"]["nwalkers"]} walkers)')
+ax.set_ylabel('Posterior probability')
+fig.tight_layout()
+outname = os.path.join(cfg['PATH']['output_dir'], 'lnprob.png')
+fig.savefig(outname, dpi=100)
+print(f"A preview of sampling evolution saved as {outname}.")
 
 #%% Plot 2D fluxes #############################################################
 
@@ -223,21 +354,6 @@ fig.tight_layout()
 fig.savefig(outname, dpi=100)
 print(f"A preview of LD profiles is saved to {outname}.")
 
-#%% Plot posterior probabilities ####################################################
-
-lnp = exoiris.sampler.get_log_prob() 
-outputname = os.path.join(cfg['PATH']['output_dir'], 'lnprob.txt')
-np.savetxt(outputname, lnp)
-print(f"Sampling evolution saved as {outputname}.")
-
-fig, ax = pl.subplots(1,1,figsize=(6,4))
-ax.plot(lnp, c='k', lw=0.5, alpha=0.5) 
-ax.set_xlabel(f'Iterations ({cfg["SAMPLER"]["nwalkers"]} walkers)')
-ax.set_ylabel('Posterior probability')
-fig.tight_layout()
-outname = os.path.join(cfg['PATH']['output_dir'], 'lnprob.png')
-fig.savefig(outname, dpi=100)
-print(f"A preview of sampling evolution saved as {outname}.")
 
 #%% plot posterior distributions
 

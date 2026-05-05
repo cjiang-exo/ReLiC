@@ -9,17 +9,17 @@ def plot_2dfluxes(exoiris_data: list[TSData], outputdir=""):
         fig, ax = pl.subplots(2,1, figsize=(7.2,7.2))
         _t = d.time
         _w = d.wavelength
-        ax[0].pcolormesh(_t, _w, d.fluxes, aspect='auto')
+        _im = ax[0].pcolormesh(_t, _w, d.fluxes, shading='auto')
         ax[0].set_title('Fluxes')
         ax[0].set_xlabel('Time')
         ax[0].set_ylabel('Wavelength (micron)')
-        fig.colorbar(ax[0].images[0], ax=ax[0])
+        fig.colorbar(_im, ax=ax[0])
 
-        ax[1].pcolormesh(_t, _w, d.errors, aspect='auto')
+        _im = ax[1].pcolormesh(_t, _w, d.errors, shading='auto')
         ax[1].set_title('Errors')
         ax[1].set_xlabel('Time')
         ax[1].set_ylabel('Wavelength (micron)')
-        fig.colorbar(ax[1].images[0], ax=ax[1])
+        fig.colorbar(_im, ax=ax[1])
 
         transit_limits = d.ephemeris.transit_limits(d.time.mean())
         [ax[0].axvline(tl, ls='--', color='w') for tl in transit_limits]

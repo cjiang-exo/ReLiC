@@ -39,34 +39,52 @@ rayleigh_species = ["H2", "He"]
 continuum_species = ["H2--H2", "H2--He"]
 
 [EXOIRIS]
-bin_resolution = 100 # set to 0 for native resolution. Only used for JWST data.
+bin_resolution = 20 # set to 0 for native resolution. Only used for JWST data.
 
-[EXOIRIS.INSTRUMENT]
-"0" = "HST/STIS G430L"
-"1" = "HST/STIS G430L"
-"2" = "HST/STIS G750L"
-"3" = "HST/STIS G750L"
-"4" = "HST/WFC3 G141"
-"5" = "JWST/NIRCam F322W2"
-"6" = "JWST/NIRCam F444W"
+[EXOIRIS.INSTRUMENT] # NO SPACE
+0 = "HST/STIS_G430L"
+1 = "HST/STIS_G430L"
+2 = "HST/STIS_G750L"
+3 = "HST/STIS_G750L"
+4 = "HST/WFC3_G141"
+5 = "JWST/NIRCam_F322W2"
+6 = "JWST/NIRCam_F444W"
+
+[EXOIRIS.NOISE_GROUP]
+0 = 0
+1 = 0
+2 = 1
+3 = 1
+4 = 2
+5 = 3
+6 = 4
+
+[EXOIRIS.N_BASELINE]
+0 = 6 # fourth order of orbital phases, second order of PC jitters 
+1 = 6 # fourth order of orbital phases, second order of PC jitters
+2 = 6 # fourth order of orbital phases, second order of PC jitters
+3 = 6 # fourth order of orbital phases, second order of PC jitters
+4 = 4 # fourth order of orbital phases
+5 = 1 # first order of time
+6 = 1 # first order of time
 
 [EXOIRIS.WL_RANGE_MICRON]
-"0" = []
-"1" = []
-"2" = []
-"3" = []
-"4" = []
-"5" = [2.5, 4.0]
-"6" = [4.0, 5.0]
+0 = []
+1 = []
+2 = []
+3 = []
+4 = []
+5 = [2.5, 4.0]
+6 = [4.0, 5.0]
 
 [EXOIRIS.TIME_RANGE_BJD]
-"0" = []
-"1" = []
-"2" = []
-"3" = []
-"4" = []
-"5" = []
-"6" = [2459890.03, 2459890.3]
+0 = []
+1 = []
+2 = []
+3 = []
+4 = []
+5 = []
+6 = [2459890.03, 2459890.3]
 
 [PRIORS]
 rho = ["NP", 1.04, 0.07]
@@ -85,13 +103,11 @@ tint = ["UP", 10, 500]
 m2h = ["UP", -1, 3]
 c2o = ["UP", 0.1, 1.6]
 cloud_f = ["UP", 0.0, 1.0]
-sigma_m_00 = ["UP", 0.5, 5]
-sigma_m_01 = ["UP", 0.5, 5]
-sigma_m_02 = ["UP", 0.5, 5]
-sigma_m_03 = ["UP", 0.5, 5]
-sigma_m_04 = ["UP", 0.5, 5]
-sigma_m_05 = ["UP", 0.5, 5]
-sigma_m_06 = ["UP", 0.5, 5]
+sigma_m_00 = ["UP", 0.2, 5]
+sigma_m_01 = ["UP", 0.2, 5]
+sigma_m_02 = ["UP", 0.2, 5]
+sigma_m_03 = ["UP", 0.2, 5]
+sigma_m_04 = ["UP", 0.2, 5] 
 
 [SAMPLER]
 method = "emcee"
