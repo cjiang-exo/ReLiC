@@ -6,28 +6,17 @@ from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquili
 from petitRADTRANS.chemistry.utils import compute_mean_molar_masses
 from petitRADTRANS.physics import temperature_profile_function_guillot_global as get_tprofile
 
-SMALL_MASS = 1e-6 * m_jup
-
-# def init_prt_model(prt_atmosphere: Radtrans, prt_chem: PreCalculatedEquilibriumChemistryTable, planet_radius=1.0, star_radius=1.0, equilibrium_temperature=1000):
-#     self.prt_atmosphere = prt_atmosphere
-#     self.prt_wl = 1e4 * prt_atmosphere.get_wavelengths() # A to micron
-#     self.prt_pbar = prt_atmosphere.pressures*1e-6 # cgs to bar
-#     self.prt_chem = prt_chem
-#     self.planet_radius = planet_radius * r_jup_mean # cm 
-#     self.star_radius = star_radius * r_sun # cm
-#     self.teq = equilibrium_temperature # K
-#     self.generate_binwidths()
-#     return
+# SMALL_MASS = 1e-6 * m_jup
 
 def calc_ts_prt(atm_params, atmosphere: Radtrans, 
     chem: PreCalculatedEquilibriumChemistryTable, 
     planet_radius_cm: float, star_radius_cm: float,
     equilibrium_temperature: float, ):
 
-    planet_mass     = max(atm_params[0]*m_jup, SMALL_MASS)  # g
+    planet_mass     = atm_params[0]*m_jup # g
     ref_pressure    = 10**atm_params[1] # bar
     cloudtop_pbar   = 10**atm_params[2] # bar
-    cloud_fraction  = min(max(atm_params[-1], 0), 1.0)
+    cloud_fraction  = atm_params[-1]
     pres_bar        = atmosphere.pressures*1e-6 # cgs to bar
 
     # Assume Guillot's T-P model

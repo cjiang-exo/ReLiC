@@ -110,12 +110,12 @@ def custom_init_p_orbit(self):
 
 def custom_init_p_atmosphere(self): 
     pp = [
-        GParameter('mp', 'planet_mass', 'M_jup', NP(1.0, 1e-2), (0, inf)),
-        GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-8, 2), (-inf, inf)),
-        GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-8, 2), (-inf, inf)), 
+        GParameter('mp', 'planet_mass', 'M_jup', NP(1.0, 1e-2), (1e-4, inf)),
+        GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-10, 2), (-inf, inf)),
+        GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-10, 2), (-inf, inf)), 
         GParameter('kir', 'infrared opacity', 'log10 cm^2/g', UP(-5, 2), (-inf, inf)),
         GParameter('gamma', 'kv/kir', 'log10', UP(-3, 3), (-inf, inf)),
-        GParameter('tint', 'intrinsic temperature', 'K', UP(10, 500), (0, inf)),
+        GParameter('tint', 'intrinsic temperature', 'K', UP(10, 500), (1, inf)),
         GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-inf, inf)),
         GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, inf)),
         GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
@@ -131,6 +131,12 @@ def get_radius_ratios(self, pv):
         ts_rebinned = array([rebin_spectrum_bin(self.prt_wl, _ts, self.wavelengths[i], bin_widths=self.bin_widths[i]) for _ts in self._transmission_spectra])
         radius_ratios.append(ts_rebinned**0.5)
     return radius_ratios
+
+def custom_lnposterior(self, pv):
+    lnp = self.lnprior(pv)
+    _mask = isfinite(lnp)
+    lnp[_mask] += self.lnlikelihood(pv[_mask])
+    return where(isfinite(lnp), lnp, -inf)
 
 def replace_outliers(time, flux, ferr, sigma=8):
     mask = sigma_clip(flux, sigma=sigma, axis=1, masked=True, copy=False).mask
@@ -186,6 +192,7 @@ TSLPF._init_parameters    = custom_init_parameters
 TSLPF._init_p_orbit       = custom_init_p_orbit
 TSLPF._init_p_atmosphere  = custom_init_p_atmosphere
 TSLPF.get_radius_ratios   = get_radius_ratios 
+TSLPF.lnposterior         = custom_lnposterior
 TSLPF.calculate_transmission_spectrum  = calculate_transmission_spectrum 
 
 if __name__ == "__main__":

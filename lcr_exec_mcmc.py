@@ -111,6 +111,7 @@ ldmodel = LDTkLD(
     dataset='visir'
 )
 
+
 #%% initialize ExoIris model ###################################################
 
 print("Initializing ExoIris model...")
@@ -118,8 +119,14 @@ print("Initializing ExoIris model...")
 exoiris = ExoIris(cfg["PLANET"]["name"], ldmodel=ldmodel, data=tsdata, 
     noise_model='white_profiled', nthreads=1)
 
-for k, v in cfg["PRIORS"].items(): # update priors
+for i, (k, v) in enumerate(cfg["PRIORS"].items()): # update priors
     exoiris.set_prior(k, *v) 
+
+exoiris.ps[exoiris.ps.names.index("teff")].bounds  = ldmodel.sc.client.teffl
+exoiris.ps[exoiris.ps.names.index("logg")].bounds  = ldmodel.sc.client.loggl 
+exoiris.ps[exoiris.ps.names.index("metal")].bounds = ldmodel.sc.client.zl
+
+# raise SystemExit("Test complete. Exiting.")
 
 #%% initialize TS model ########################################################
 
@@ -151,8 +158,9 @@ exoiris._tsa.calculate_transmission_spectrum = calculate_transmission_spectrum
 generate_binwidths(exoiris._tsa)
 
 exoiris.print_parameters()
+print("Initialization complete.")
 
-#%% fit white light curves for benchmark test ##################################
+#%% fit white light curves to validate the covariates ##########################
 
 jitters = []
 for i, rd in enumerate(raw_data):
@@ -170,7 +178,7 @@ fig.tight_layout()
 fig.savefig(outname, dpi=100)
 print(f"A preview of white light curve fit saved as {outname}.")
 
-#%% update covariances with white systematics ##################################
+#%% update covariances for spectral light curves ###############################
 
 for i, (_t, _cov) in enumerate(zip(exoiris._wa.times, exoiris._wa.covariates)):
     newt = exoiris.data[i].time
@@ -180,16 +188,19 @@ for i, (_t, _cov) in enumerate(zip(exoiris._wa.times, exoiris._wa.covariates)):
 
 #%% test likelihood evaluation #################################################
 
-initial_population = exoiris.ps.sample_from_prior(3)
-ll = exoiris._tsa.lnlikelihood(initial_population)
-pp = exoiris.lnposterior(initial_population)
-print("Evaluating test parameters:")
-for val in zip(ll, pp):
-    print("ll={:.2f} \t\t pp={:.2f}".format(*val))
+print("Running a quick test of posterior evaluation...")
+
+initial_population = exoiris.ps.sample_from_prior(3) 
+pp = exoiris.lnposterior(initial_population) 
+[print(f"pp = {_v:.6e}") for _v in pp]
+
+print("Test complete.")
 
 # raise SystemExit("Test complete. Exiting.")
 
-#%% run DE evaluation ##########################################################
+#%% run DE optimization ##########################################################
+
+print("Running Differential Evolution Optimization...")
 
 def lnpostf(pv):
     ''' DON'T USE LAMBDA FUNCTION FOR THIS, 
@@ -199,8 +210,8 @@ def lnpostf(pv):
 init_population = exoiris.ps.sample_from_prior(cfg["SAMPLER"]["nwalkers"]) 
 with Pool(cfg["SAMPLER"]["npools"]) as pool: 
     exoiris.fit(
-        population       = init_population, 
         lnpost           = lnpostf, 
+        population       = init_population,  
         niter            = cfg["SAMPLER"]["niter_de"], 
         pool             = pool, 
         plot_convergence = False
@@ -209,12 +220,18 @@ with Pool(cfg["SAMPLER"]["npools"]) as pool:
 
 #%% run MCMC sampling ##########################################################
 
+print("Running MCMC sampling...")
+
 with Pool(cfg["SAMPLER"]["npools"]) as pool:
-    exoiris.sample(niter=cfg["SAMPLER"]["niter_mcmc"], 
-        thin=1, pool=pool, lnpost=lnpostf)
+    exoiris.sample(
+        lnpost  = lnpostf,
+        niter   = cfg["SAMPLER"]["niter_mcmc"], 
+        thin    = 1, 
+        pool    = pool, 
+    )
+exoiris.save(overwrite=True)
 
 outname = os.path.join(cfg['PATH']['output_dir'], exoiris.name+'.fits')
-exoiris.save(overwrite=True)
 shutil.move(exoiris.name+'.fits', outname)
 print(f"Results saved as {outname}.")
 
