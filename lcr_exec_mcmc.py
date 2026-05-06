@@ -14,11 +14,14 @@ import tomllib
 import h5py
 import shutil
 from lcr_core import *
+from lcr_atm import *
+from lcr_white import analyze_white_lightcurve
 from lcr_plots import plot_2dfluxes, plot_corners, plot_residuals
+from exoiris import ExoIris, TSData
+from petitRADTRANS.radtrans import Radtrans 
+from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
 from multiprocessing import Pool 
-from functools import reduce
-from numpy.polynomial import Chebyshev
-from numpy.linalg import lstsq
+from functools import reduce 
 
 DEFAULT_CFG = 'config/HD209458b_joint.toml'
 
@@ -44,13 +47,12 @@ print("Loading data: ")
 
 raw_data  = [h5py.File(f, 'r') for f in cfg["PATH"]["input_file"]]
 
-# raise SystemExit("Configuration loaded. Exiting for testing purposes.")
 
 #%% initialize TSData #########################################################
 
 tsdata_list = []
 for i, rd in enumerate(raw_data): 
-    try:
+    try: # specify edges for STIS and WFC3
         wl_edges = rd['wavelength_bins'][:].T 
     except KeyError:
         wl_edges = None
@@ -59,7 +61,7 @@ for i, rd in enumerate(raw_data):
         wavelength  = rd['wavelength'][:], 
         fluxes      = rd['flux'][:], 
         errors      = rd['flux_err'][:], 
-        wl_edges    = wl_edges, # specify edges for STIS and WFC3
+        wl_edges    = wl_edges, 
         name        = cfg['EXOIRIS']['INSTRUMENT'][str(i)] + f"_d{i}", 
         noise_group = cfg["EXOIRIS"]["NOISE_GROUP"][str(i)], 
         n_baseline  = cfg['EXOIRIS']['N_BASELINE'][str(i)],
@@ -95,21 +97,7 @@ for i, rd in enumerate(raw_data):
 tsdata = reduce(lambda x,y: x+y, tsdata_list)
 del tsdata_list
 
-#%% initialize pRT and chemical model
-print("Initializing atmospheric model...")
-
-atmosphere = Radtrans(
-    pressures = np.logspace(*cfg["ATMOSPHERE"]["pressure_bounds_log10bar"], 121),
-    wavelength_boundaries       = cfg["ATMOSPHERE"]["wavelength_bounds_micron"],
-    line_species                = cfg["ATMOSPHERE"]["chemical_species"], 
-    rayleigh_species            = cfg["ATMOSPHERE"]["rayleigh_species"],
-    gas_continuum_contributors  = cfg["ATMOSPHERE"]["continuum_species"],
-    line_opacity_mode           = cfg["ATMOSPHERE"]["opacity_mode"], 
-)
-
-chem = PreCalculatedEquilibriumChemistryTable() 
-
-#%% initialize LDTk model
+#%% initialize LDTk model ######################################################
 print('Initializing LDTk model... It takes several minutes. Be patient!')
 
 _tv, _te = cfg['STAR']['teff']
@@ -123,110 +111,48 @@ ldmodel = LDTkLD(
     dataset='visir'
 )
 
-#%% initialize ExoIris model
+#%% initialize ExoIris model ###################################################
+
 print("Initializing ExoIris model...")
 
 exoiris = ExoIris(cfg["PLANET"]["name"], ldmodel=ldmodel, data=tsdata, 
     noise_model='white_profiled', nthreads=1)
 
-for k, v in cfg["PRIORS"].items():
+for k, v in cfg["PRIORS"].items(): # update priors
     exoiris.set_prior(k, *v) 
 
-exoiris._tsa.init_prt_model(
-    atmosphere, chem, 
-    planet_radius=cfg["PLANET"]["radius_rjup"][0], 
-    star_radius=cfg["STAR"]["radius_rsun"][0],
-    equilibrium_temperature=cfg["PLANET"]["equilibrium_temperature"][0]
+#%% initialize TS model ########################################################
+
+print("Initializing atmospheric model...")
+
+atmosphere = Radtrans(
+    pressures = np.logspace(*cfg["ATMOSPHERE"]["pressure_bounds_log10bar"], 121),
+    wavelength_boundaries       = cfg["ATMOSPHERE"]["wavelength_bounds_micron"],
+    line_species                = cfg["ATMOSPHERE"]["chemical_species"], 
+    rayleigh_species            = cfg["ATMOSPHERE"]["rayleigh_species"],
+    gas_continuum_contributors  = cfg["ATMOSPHERE"]["continuum_species"],
+    line_opacity_mode           = cfg["ATMOSPHERE"]["opacity_mode"], 
 )
+
+chem = PreCalculatedEquilibriumChemistryTable() 
+
+def calculate_transmission_spectrum(atm_params: np.ndarray):
+    return calc_ts_prt(
+        atm_params=atm_params, 
+        atmosphere=atmosphere,
+        chem=chem,
+        planet_radius_cm=cfg["PLANET"]["radius_rjup"][0] * r_jup_mean,
+        star_radius_cm=cfg["STAR"]["radius_rsun"][0] * r_sun,
+        equilibrium_temperature=cfg["PLANET"]["equilibrium_temperature"][0]
+    )
+
+exoiris._tsa.prt_wl = atmosphere.get_wavelengths() * 1e4 # A --> micron
+exoiris._tsa.calculate_transmission_spectrum = calculate_transmission_spectrum
+generate_binwidths(exoiris._tsa)
 
 exoiris.print_parameters()
 
-#%% Update covariates for baseline detrending
-
-# period_hst = 95.42 / 1440.0 # [days]
-# x = lambda phi: 2 * (phi - phi.min()) / (phi.max() - phi.min()) - 1
-
-
-
-# for i, d in enumerate(exoiris.data): 
-#     if "STIS" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]:
-#         t = d.time
-#         f = d.fluxes[0]
-#         fe = d.errors[0]
-#         _mask = d.transit_mask & isfinite(f) & isfinite(fe)
-#         _covs = raw_data[i]["detrend_vectors"][:, 0]
-#     elif "WFC3" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]:
-#         _covs = raw_data[i]["sky_background_level_array"][:]**-1
-#     else:
-#         continue # keep default for JWST
-#     exoiris.data[i].covs[:, -1] = _covs
-#     exoiris.data[i].covs[:, 1:] -= exoiris.data[i].covs[:, 1:].mean(axis=0)
-#     exoiris.data[i].covs[:, 1:] /= exoiris.data[i].covs[:, 1:].std(axis=0)
-
-#%% STIS
-
-# period_hst = 95.42/1440.0 # [days]
-# x = lambda phi: 2 * (phi - phi.min()) / (phi.max() - phi.min()) - 1
-
-# t = exoiris.data[2].time
-# f = exoiris.data[2].fluxes[8]
-# fe = exoiris.data[2].errors[8]
-# _mask = exoiris.data[2].transit_mask & isfinite(f) & isfinite(fe)
-
-# phases = (t - t[0]) % period_hst # folded phases  
-# phases[phases > 0.7*period_hst] -= period_hst
-# tsub = (t - t.mean()) / t.std() 
-
-# covariates = array([Chebyshev.basis(i)(x(phases)) for i in range(5)]).T
-# covariates = np.hstack((covariates, raw_data[2]['detrend_vectors'][:])) 
-# covariates = covariates[_mask]
-
-# x_sim = x(phases)[_mask]
-# y_sim = f[_mask]
-# ye_sim = fe[_mask]
- 
-# coeffs = lstsq(covariates, y_sim)[0]
-# y_fit = (covariates @ coeffs).T
-
-# reduced_chisq = sum(((y_sim - y_fit) / ye_sim)**2) / (len(y_sim) - covariates.shape[1])
-# print(f"LSQ fit reduced chi-squared: {reduced_chisq:.2f}")
-
-# pl.errorbar(phases[_mask], y_sim, yerr=ye_sim, fmt='.k')
-# pl.plot(phases[_mask], y_fit, '.r')
-# pl.show()
-
-
-# #%% WFC3 
-
-# t = exoiris.data[4].time
-# f = exoiris.data[4].fluxes[9]
-# fe = exoiris.data[4].errors[9]
-# _mask = exoiris.data[4].transit_mask
-
-# phases = (t - t[0]) % period_hst # folded phases  
-# phases[phases > 0.7*period_hst] -= period_hst
-# tsub = (t - t.mean()) / t.std() 
-
-# covariates = array([Chebyshev.basis(i)(x(phases)) for i in range(5)])   
-# covariates = covariates[:, _mask].T
-
-# x_sim = x(phases)[_mask]
-# y_sim = f[_mask]
-# ye_sim = fe[_mask]
- 
-# coeffs = lstsq(covariates, y_sim)[0]
-# y_fit = (covariates @ coeffs).T
-
-# reduced_chisq = sum(((y_sim - y_fit) / ye_sim)**2) / (len(y_sim) - covariates.shape[1])
-# print(f"LSQ fit reduced chi-squared: {reduced_chisq:.2f}")
-
-# pl.errorbar(phases[_mask], y_sim, yerr=ye_sim, fmt='.k')
-# pl.plot(phases[_mask], y_fit, '.r')
-# pl.show()
-
-# raise SystemExit("Configuration loaded. Exiting for testing purposes.")
-
-#%% fit white light curve for systematics correction ###########################
+#%% fit white light curves for benchmark test ##################################
 
 jitters = []
 for i, rd in enumerate(raw_data):
@@ -235,49 +161,22 @@ for i, rd in enumerate(raw_data):
     else:
         jitters.append(None) 
 
-analyze_white_lightcurve(exoiris, jitters=jitters)
-
-# exoiris.custom_fit_white(jitters=jitters)
-
-
-#%%
-
-initial_population = exoiris._wa.ps.sample_from_prior(3)
-fmodel = exoiris._wa.flux_model(initial_population) 
-
-fig, ax = pl.subplots(1, len(exoiris.data), figsize=(3*len(exoiris.data), 4), sharey=True)
-for i, sl in enumerate(exoiris._wa.lcslices):
-    ax[i].errorbar(exoiris._wa.times[i], exoiris._wa.fluxes[i], 
-        yerr=exoiris._wa.errors[i], fmt='.k')
-    ax[i].plot(exoiris._wa.times[i], fmodel[0, sl], '.r')
-    ax[i].set_title(cfg["EXOIRIS"]["INSTRUMENT"][str(i)]) 
-    ax[i].set_xlabel('Time')
-
-ax[0].set_ylabel('Normalized flux')
-fig.tight_layout()
-raise SystemExit("Configuration loaded. Exiting for testing purposes.")
-
-#%%
-_ncol = exoiris.data.size
-fig = exoiris.plot_white(figsize=(3*_ncol, 4), ncols=_ncol)
+with Pool(cfg["SAMPLER"]["npools"]) as pool:
+    analyze_white_lightcurve(exoiris, jitters=jitters, niter=500, npop=60, pool=pool)
+ 
+fig = exoiris.plot_white(figsize=(3 * exoiris.data.size, 8))
 outname = os.path.join(cfg['PATH']['output_dir'], 'white_fit.png')
 fig.tight_layout()
 fig.savefig(outname, dpi=100)
 print(f"A preview of white light curve fit saved as {outname}.")
 
-# update covariances with white systematics
-for i in range(len(exoiris.data)): 
-    if "STIS" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]:
-        _systematics = raw_data[i]["detrend_vectors"][:, 0]
-    elif "WFC3" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]:
-        _systematics = raw_data[i]["sky_background_level_array"][:]**-1
-    elif "JWST" in cfg["EXOIRIS"]["INSTRUMENT"][str(i)]:
-        sl = exoiris._wa.lcslices[i]
-        fm = exoiris._wa.flux_model(exoiris._wa._local_minimization.x)
-        _systematics = exoiris._wa.ofluxa[sl] - fm[sl]
-    exoiris.data[i].covs[:, -1] = _systematics
-    exoiris.data[i].covs[:, 1:] -= exoiris.data[i].covs[:, 1:].mean(axis=0)
-    exoiris.data[i].covs[:, 1:] /= exoiris.data[i].covs[:, 1:].std(axis=0)
+#%% update covariances with white systematics ##################################
+
+for i, (_t, _cov) in enumerate(zip(exoiris._wa.times, exoiris._wa.covariates)):
+    newt = exoiris.data[i].time
+    newcov = [np.interp(newt, _t, _c) for _c in _cov.T] 
+    exoiris.data[i].covs[:] = np.array(newcov).T  
+ 
 
 #%% test likelihood evaluation #################################################
 
@@ -287,6 +186,7 @@ pp = exoiris.lnposterior(initial_population)
 print("Evaluating test parameters:")
 for val in zip(ll, pp):
     print("ll={:.2f} \t\t pp={:.2f}".format(*val))
+
 # raise SystemExit("Test complete. Exiting.")
 
 #%% run DE evaluation ##########################################################
@@ -322,7 +222,7 @@ outname = os.path.join(cfg['PATH']['output_dir'], os.path.basename(py_args.confi
 shutil.copy(py_args.config, outname)
 print(f"Configuration file saved as {outname}.")
 
-#%% Plot posterior probabilities ####################################################
+#%% Plot likelihood evolutions #################################################
 
 lnp = exoiris.sampler.get_log_prob() 
 outputname = os.path.join(cfg['PATH']['output_dir'], 'lnprob.txt')
@@ -355,7 +255,7 @@ fig.savefig(outname, dpi=100)
 print(f"A preview of LD profiles is saved to {outname}.")
 
 
-#%% plot posterior distributions
+#%% plot posterior distributions ###############################################
 
 postsamples = exoiris._tsa.sampler.flatchain 
 maxlike_params = postsamples[lnp.flatten().argmax()]

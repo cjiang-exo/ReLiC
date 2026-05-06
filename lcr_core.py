@@ -1,93 +1,32 @@
 import numpy as np
-import matplotlib.pyplot as pl   
-import pytensor.tensor as pt
+import matplotlib.pyplot as pl    
 from astropy.stats import sigma_clip 
-from exoiris.tslpf import TSLPF
-from exoiris.wlpf import WhiteLPF
+from exoiris.tslpf import TSLPF 
 from exoiris.ldtkld import LDTkLD
-from exoiris import ExoIris, TSData
-from matplotlib.figure import Figure
+
+# from matplotlib.figure import Figure
 from numpy import array, average, atleast_2d, arctan2, diff, dstack, inf, isfinite, interp, log10, sqrt, where, unique, zeros_like, zeros, squeeze, ones_like
-from petitRADTRANS.physical_constants import m_jup, m_sun, r_jup_mean, r_sun, G as grav_const
-from petitRADTRANS.radtrans import Radtrans 
-from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
-from petitRADTRANS.chemistry.utils import compute_mean_molar_masses
-from petitRADTRANS.physics import temperature_profile_function_guillot_global as get_tprofile
+# from petitRADTRANS.physical_constants import m_jup, m_sun, r_jup_mean, r_sun, G as grav_const
+# from petitRADTRANS.radtrans import Radtrans 
+# from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
+# from petitRADTRANS.chemistry.utils import compute_mean_molar_masses
+# from petitRADTRANS.physics import temperature_profile_function_guillot_global as get_tprofile
 from petitRADTRANS.physics import rebin_spectrum_bin
 from pytransit.orbits import as_from_rhop, i_from_ba, epoch
-from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter
-from petitRADTRANS.fortran_chemistry import fortran_chemistry as fchem
-from lcr_fitwhite import NewWhiteLPF
-# from pytransit import BaseLPF
-# from pytransit import LogPosteriorFunction
+from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter  
 
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
 NM_GP_FREE = 2
 NM_WHITE_PROFILED = 3
-SMALL_MASS = 1e-6 * m_jup
 
-# class CustomWhiteLPF(WhiteLPF):
-#     def __init__(self, tsa: TSLPF):
-#         self.tsa = tsa
-#         fluxes, times, errors = [], [], []
-#         for t, f, e in zip(tsa.data.times, tsa.data.fluxes, tsa.data.errors):
-#             weights = where(isfinite(f) & isfinite(e), 1/e**2, 0.0)
-#             mf = average(where(isfinite(f), f, 0), axis=0, weights=weights)
-#             me = sqrt(1 / weights.sum(0))
-#             m = isfinite(mf)
-#             times.append(t[m])
-#             fluxes.append(mf[m])
-#             errors.append(me[m])
-#         covs = [(t-t.mean())[:, np.newaxis] for t in times]
-#         self.std_errors = errors
-#         self.neps = max(self.tsa.data.epoch_groups) + 1
-
-#         pbs = unique(tsa.data.noise_groups).astype('<U21')
-#         super(WhiteLPF, self).__init__('white', pbs, times, fluxes,
-#                         covariates=covs, wnids=tsa.data.noise_groups, pbids=tsa.data.noise_groups)
-
-#         self.tm.epids = array(self.tsa.data.epoch_groups)
-
-#         for i in range(self.neps):
-#             self.set_prior(f'tc_{i:02d}', tsa.ps[tsa.ps.find_pid(f'tc_{i:02d}')].prior)
-#         self.set_prior('p', tsa.ps[tsa.ps.find_pid('p')].prior)
-#         self.set_prior('rho', tsa.ps[tsa.ps.find_pid('rho')].prior)
-#         self.set_prior('b', tsa.ps[tsa.ps.find_pid('b')].prior) 
-#         self.set_prior('k2', 'UP', 0.01**2, 0.3**2) 
-#         ngids = tsa.data.noise_groups[self.lcids]
-#         for i in range(tsa.data.n_noise_groups):
-#             self.set_prior(f'wn_loge_{i}', 'NP', log10(diff(self.ofluxa[ngids==i]).std() / sqrt(2)), 0.1)
-
-#     def plot(self, axs=None, figsize=None, ncols=2) -> Figure:
-#         if axs is None:
-#             nrows = int(np.ceil(self.nlc / ncols))
-#             fig, axs = pl.subplots(nrows, ncols, figsize=figsize, sharey='all', squeeze=False, constrained_layout=True)
-#         else:
-#             fig = axs[0].get_figure()
-
-        
-#         fm = self.flux_model(self._local_minimization.x)
-#         t14 = self.transit_duration
-#         pv = self._local_minimization.x
-
-#         for i, sl in enumerate(self.lcslices):
-#             ax = axs.flat[i]
-#             tref = np.floor(self.timea[sl].min()) 
-#             tc = pv[3] + pv[0]*epoch(self.times[i].mean(), pv[3], pv[0])
-#             ax.plot(self.timea[sl] - tref, self.ofluxa[sl], '.k', alpha=0.25)
-#             ax.plot(self.timea[sl] - tref, fm[sl], 'r', zorder=9)
-#             ax.axvline(tc - tref, ls='--', c='0.5')
-#             ax.axvline(tc - tref - 0.5*t14, ls='--', c='0.5')
-#             ax.axvline(tc - tref + 0.5*t14, ls='--', c='0.5')
-#             pl.setp(ax, xlabel=f'Time - {tref:.0f} [BJD]', xlim=(self.times[i].min()-tref, self.times[i].max()-tref))
-#         pl.setp(axs[:,0], ylabel='Normalized flux')
-#         return fig
+def calculate_transmission_spectrum(self, atm_parameters): 
+    raise NotImplementedError()
 
 def custom_flux_model(self, pv, include_baseline: bool = True):
     pv_atm = atleast_2d(pv)[:, self._sl_atm]   
-    self._transmission_spectra = array([
-        self.get_ts_model(atm_params) for atm_params in pv_atm
+    self._transmission_spectra = array([ 
+        self.calculate_transmission_spectrum(atm_params) for atm_params in pv_atm
     ]) 
     transit_models = self.transit_model(pv)
     if self.spot_model is not None:
@@ -139,10 +78,10 @@ def custom_transit_model(self, pv, copy=True):
         for i, tm in enumerate(self.tms):
             fluxes.append(tm.evaluate(k[i], ldp[i], t0s[:, epids[i]], p, aor, inc, ecc, w, copy))
 
-    for i, d in enumerate(self.data):
-        if d.offset_group > 0:
-            biases = pv[:, self._start_bias + d.offset_group - 1][:, None, None]
-            fluxes[i] = biases + (1.0 - biases) * fluxes[i]
+    # for i, d in enumerate(self.data):
+    #     if d.offset_group > 0:
+    #         biases = pv[:, self._start_bias + d.offset_group - 1][:, None, None]
+    #         fluxes[i] = biases + (1.0 - biases) * fluxes[i]
     return fluxes 
 
 def custom_init_parameters(self):
@@ -173,8 +112,7 @@ def custom_init_p_atmosphere(self):
     pp = [
         GParameter('mp', 'planet_mass', 'M_jup', NP(1.0, 1e-2), (0, inf)),
         GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-8, 2), (-inf, inf)),
-        GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-8, 2), (-inf, inf)),
-        # GParameter('tp', 'temperature', 'K', UP(300, 3000), (0, inf)),
+        GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-8, 2), (-inf, inf)), 
         GParameter('kir', 'infrared opacity', 'log10 cm^2/g', UP(-5, 2), (-inf, inf)),
         GParameter('gamma', 'kv/kir', 'log10', UP(-3, 3), (-inf, inf)),
         GParameter('tint', 'intrinsic temperature', 'K', UP(10, 500), (0, inf)),
@@ -188,86 +126,11 @@ def custom_init_p_atmosphere(self):
     return
 
 def get_radius_ratios(self, pv):
-    radius_ratios = []
-    # pv_atm = pv[:, self._sl_atm]  
-    # ts_model  = array([self.get_ts_model(atm_params) for atm_params in pv_atm])  
+    radius_ratios = [] 
     for i, _d in enumerate(self.data):
         ts_rebinned = array([rebin_spectrum_bin(self.prt_wl, _ts, self.wavelengths[i], bin_widths=self.bin_widths[i]) for _ts in self._transmission_spectra])
         radius_ratios.append(ts_rebinned**0.5)
     return radius_ratios
-
-def init_prt_model(self, prt_atmosphere: Radtrans, prt_chem: PreCalculatedEquilibriumChemistryTable, planet_radius=1.0, star_radius=1.0, equilibrium_temperature=1000):
-    self.prt_atmosphere = prt_atmosphere
-    self.prt_wl = 1e4 * prt_atmosphere.get_wavelengths() # A to micron
-    self.prt_pbar = prt_atmosphere.pressures*1e-6 # cgs to bar
-    self.prt_chem = prt_chem
-    self.planet_radius = planet_radius * r_jup_mean # cm 
-    self.star_radius = star_radius * r_sun # cm
-    self.teq = equilibrium_temperature # K
-    self.generate_binwidths()
-    return
-
-def get_ts_model(self, atm_params):
-    planet_mass = max(atm_params[0]*m_jup, SMALL_MASS)  # g
-    ref_pressure = 10**atm_params[1] # bar
-    cloudtop_pbar = 10**atm_params[2] # bar
-    cloud_fraction = min(max(atm_params[-1], 0), 1.0)
-
-    # calculate the temperature profile
-    ref_gravity = grav_const * planet_mass / self.planet_radius**2
-    # temperatures = full_like(self.prt_pbar, atm_params[3]) 
-    temperatures = get_tprofile(
-        pressures               = self.prt_pbar, 
-        infrared_mean_opacity   = 10**atm_params[3],
-        gamma                   = 10**atm_params[4], 
-        gravities               = ref_gravity,
-        intrinsic_temperature   = atm_params[5],
-        equilibrium_temperature = self.teq,
-    )
-    
-    # calculate chemical abundances
-    metallicities = atm_params[6] * ones_like(self.prt_pbar)
-    co_ratios = atm_params[7] * ones_like(self.prt_pbar)
-
-    mass_fractions = self.prt_chem.interpolate_mass_fractions(
-        co_ratios               = co_ratios,
-        log10_metallicities     = metallicities,
-        temperatures            = temperatures,
-        pressures               = self.prt_pbar, 
-        full                    = False,
-    ) 
-
-    mmw = compute_mean_molar_masses(mass_fractions)
-
-    # calculate the transmission spectrum, with clouds
-    _, tr_c, _ = self.prt_atmosphere.calculate_transit_radii(
-        temperatures                = temperatures,
-        mass_fractions              = mass_fractions,
-        mean_molar_masses           = mmw,
-        reference_gravity           = ref_gravity,
-        planet_radius               = self.planet_radius,
-        reference_pressure          = ref_pressure,
-        opaque_cloud_top_pressure   = cloudtop_pbar,
-        cloud_fraction              = cloud_fraction,
-    ) 
-
-    transit_depths = (tr_c / self.star_radius)**2
-    return transit_depths
-
-# def generate_bandwidths(self):
-#     self.bin_widths = []
-#     for wl in self.wavelengths: 
-#         dwl         = zeros_like(wl)
-#         dwl[:-1]    = diff(wl)
-#         dwl[-1]     = dwl[-2] 
-#         self.bin_widths.append(dwl)
-#     return self.bin_widths
-
-def generate_binwidths(self):
-    self.bin_widths = []
-    for d in self.data:
-        self.bin_widths.append(d._wl_r_edges - d._wl_l_edges)
-
 
 def replace_outliers(time, flux, ferr, sigma=8):
     mask = sigma_clip(flux, sigma=sigma, axis=1, masked=True, copy=False).mask
@@ -280,28 +143,6 @@ def replace_outliers(time, flux, ferr, sigma=8):
             flux[i] = interp(time, x, y)
             ferr[i] = interp(time, x, ye) 
     return flux, ferr
-
-
-def analyze_white_lightcurve(exoiris:ExoIris, niter: int = 500, jitters:list[np.ndarray]=[None, ...]) -> None:
-    exoiris._wa = NewWhiteLPF(exoiris._tsa, jitters=jitters)
-    return exoiris
-
-def custom_fit_white(self, niter: int = 500, jitters:list[np.ndarray]=[None, ...]) -> None: 
-    """Fit a white light curve model and sets the out-of-transit mask.
-
-    Parameters
-    ----------
-    niter : int, optional
-        The number of iterations for the global optimization algorithm (default is 500).
-    """ 
-    self._wa = NewWhiteLPF(self._tsa, jitters=jitters)
-    self._wa.optimize_global(niter, plot_convergence=False, use_tqdm=False)
-    self._wa.optimize()
-    pv = self._wa._local_minimization.x
-    self.period = pv[0]
-    self.zero_epoch = self._wa.transit_center
-    self.transit_duration = self._wa.transit_duration
-    self.data.mask_transit(self.zero_epoch, self.period, self.transit_duration)
 
 def print_info(comm, string):
     """
@@ -332,18 +173,20 @@ def print_elapsed_time(elapsed_time:float):
     output_str = f"{int(hours):02}:{int(minutes):02}:{seconds:05.2f}"
     print("Time elapsed: "+output_str)
     return output_str
- 
+
+def generate_binwidths(tsa: TSLPF):
+    tsa.bin_widths = []
+    for d in tsa.data:
+        tsa.bin_widths.append(d._wl_r_edges - d._wl_l_edges)
+    return None
+
 TSLPF.flux_model          = custom_flux_model
 TSLPF.transit_model       = custom_transit_model
 TSLPF._init_parameters    = custom_init_parameters
 TSLPF._init_p_orbit       = custom_init_p_orbit
 TSLPF._init_p_atmosphere  = custom_init_p_atmosphere
-TSLPF.init_prt_model      = init_prt_model
-TSLPF.get_ts_model        = get_ts_model
-TSLPF.get_radius_ratios   = get_radius_ratios
-TSLPF.generate_binwidths  = generate_binwidths 
- 
-# ExoIris.custom_fit_white  = custom_fit_white
+TSLPF.get_radius_ratios   = get_radius_ratios 
+TSLPF.calculate_transmission_spectrum  = calculate_transmission_spectrum 
 
 if __name__ == "__main__":
     print("Testing ...")

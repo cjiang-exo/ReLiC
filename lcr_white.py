@@ -15,9 +15,10 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import numpy as np
 
+from exoiris import ExoIris
 from matplotlib.figure import Figure
 from matplotlib.pyplot import subplots, setp
-# from exoiris.tslpf import nlstsq
+from exoiris.tslpf import nlstsq
 from numpy.linalg import lstsq, LinAlgError
 from numpy.polynomial import Chebyshev
 from numpy import (
@@ -48,7 +49,7 @@ from numpy import (
 )
 from scipy.optimize import minimize
 
-from pytransit import BaseLPF, LinearModelBaseline
+from pytransit import BaseLPF
 from pytransit.orbits import as_from_rhop, i_from_ba, fold, i_from_baew, d_from_pkaiews, epoch
 from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP, PParameter
 from pytransit.lpf.lpf import map_ldc
@@ -73,7 +74,7 @@ class NewWhiteLPF(BaseLPF):
         self._period_hst = 95.42 / 1440.0 # [days]
 
         """ generate covariates for baseline detrending """
-        covariates = []
+        self.covariates = []
         _standardize = lambda x: 2 * (x - x.min()) / (x.max() - x.min()) - 1 # standardize to [-1, 1]
         for i, (d, t) in enumerate(zip(tsa.data, times)):
             if ("HST" in d.name) or ("STIS" in d.name) or ("WFC3" in d.name):
@@ -86,11 +87,11 @@ class NewWhiteLPF(BaseLPF):
             else:
                 x = _standardize(t)
                 _covs = array([np.ones_like(x), x]).T
-            covariates.append(_covs)
+            self.covariates.append(_covs)
 
         pbs = unique(tsa.data.noise_groups).astype('<U21')
         super().__init__('white', pbs, times, fluxes,
-                         covariates=covariates, wnids=tsa.data.noise_groups, pbids=tsa.data.noise_groups)
+                         covariates=self.covariates, wnids=tsa.data.noise_groups, pbids=tsa.data.noise_groups)
 
         self.tm.epids = array(self.tsa.data.epoch_groups)
 
@@ -141,9 +142,9 @@ class NewWhiteLPF(BaseLPF):
         return self.tm.evaluate(radius_ratio, ldc, zero_epoch, period, smaxis, inclination)
 
     def baseline(self, mtransit):
-
+        mtransit = atleast_2d(mtransit)
         npv = mtransit.shape[0] # number of parameter vectors
-        if self._baseline_models is None:
+        if (self._baseline_models is None) or (self._baseline_models.shape[0] != npv):
             self._baseline_models = np.zeros_like(mtransit)
         for ipv in range(npv):
             for ilc, f in enumerate(self.fluxes):
@@ -164,24 +165,25 @@ class NewWhiteLPF(BaseLPF):
 
         return baseline * mtransit 
 
-        
-    def optimize(self, pv0=None, method='powell', maxfev: int = 5000):
-        if pv0 is None:
-            if self.de is not None:
-                pv0 = self.de.minimum_location
-            else:
-                pv0 = self.ps.mean_pv
-        res = minimize(lambda pv: -self.lnposterior(pv), pv0, method=method, options={'maxfev':maxfev})
-        self._local_minimization = res
+    # def optimize(self, pv0=None, method='powell', maxfev: int = 5000):
+    #     if pv0 is None:
+    #         if self.de is not None:
+    #             pv0 = self.de.minimum_location
+    #         else:
+    #             pv0 = self.ps.mean_pv
+    #     res = minimize(lambda pv: -self.lnposterior(pv), pv0, method=method, options={'maxfev':maxfev})
+    #     self._local_minimization = res
 
     @property
     def transit_center(self):
-        pv = self._local_minimization.x
+        # pv = self._local_minimization.x
+        pv = self.de.minimum_location
         return pv[3] + pv[0]*epoch(self.times[0].mean(), pv[3], pv[0])
 
     @property
     def transit_duration(self):
-        pv = self._local_minimization.x
+        # pv = self._local_minimization.x
+        pv = self.de.minimum_location
         a = as_from_rhop(pv[1], pv[0])
         i = i_from_ba(pv[2], a)
         t14 = d_from_pkaiews(pv[0], sqrt(pv[self._start_k2]), a, i, 0., 0., 1, 14)
@@ -189,25 +191,57 @@ class NewWhiteLPF(BaseLPF):
 
     def plot(self, axs=None, figsize=None, ncols=2) -> Figure:
         if axs is None:
-            nrows = int(ceil(self.nlc / ncols))
-            fig, axs = subplots(nrows, ncols, figsize=figsize, sharey='all', squeeze=False, constrained_layout=True)
+            nrows, ncols = 3, self.nlc 
+            fig, axs = subplots(nrows, ncols, figsize=figsize, sharey='row', sharex='col', squeeze=False, constrained_layout=True)
         else:
             fig = axs[0].get_figure()
 
-        
-        fm = self.flux_model(self._local_minimization.x)
+        # pv = self._local_minimization.x
+        pv = self.de.minimum_location
+        mtransit = np.squeeze(self.transit_model(pv))
+        mflux = np.squeeze(self.flux_model(pv))
+        whitenoise = self.ofluxa - mflux
+        detrendedflux = mtransit + whitenoise
         t14 = self.transit_duration
-        pv = self._local_minimization.x
-
+        
         for i, sl in enumerate(self.lcslices):
-            ax = axs.flat[i]
-            tref = floor(self.timea[sl].min()) 
+            
+            tref = np.floor(self.timea[sl].min()) 
             tc = pv[3] + pv[0]*epoch(self.times[i].mean(), pv[3], pv[0])
-            ax.plot(self.timea[sl] - tref, self.ofluxa[sl], '.k', alpha=0.25)
-            ax.plot(self.timea[sl] - tref, fm[sl], 'r', zorder=9)
-            ax.axvline(tc - tref, ls='--', c='0.5')
-            ax.axvline(tc - tref - 0.5*t14, ls='--', c='0.5')
-            ax.axvline(tc - tref + 0.5*t14, ls='--', c='0.5')
-            setp(ax, xlabel=f'Time - {tref:.0f} [BJD]', xlim=(self.times[i].min()-tref, self.times[i].max()-tref))
-        setp(axs[:,0], ylabel='Normalized flux')
+
+            ax_raw = axs[0][i]
+            ax_raw.plot(self.timea[sl] - tref, self.ofluxa[sl], '.k', alpha=0.25)
+            ax_raw.plot(self.timea[sl] - tref, mflux[sl], 'r', zorder=9)  
+
+            ax_detrended = axs[1][i]
+            ax_detrended.plot(self.timea[sl] - tref, detrendedflux[sl], '.k', alpha=0.25)
+            ax_detrended.plot(self.timea[sl] - tref, mtransit[sl], 'r', zorder=9)  
+
+            ax_noise = axs[2][i]
+            ax_noise.plot(self.timea[sl] - tref, whitenoise[sl], '.k', alpha=0.25)
+            ax_noise.axhline(0, ls='--', c='r', zorder=9)
+
+            setp(ax_noise, xlabel=f'Time - {tref:.0f} [BJD]', xlim=(self.times[i].min()-tref, self.times[i].max()-tref))
+
+            for irow in range(3):
+                axs[irow][i].axvline(tc - tref, ls='--', c='0.5')
+                axs[irow][i].axvline(tc - tref - 0.5*t14, ls='--', c='0.5')
+                axs[irow][i].axvline(tc - tref + 0.5*t14, ls='--', c='0.5')
+
+        setp(axs[:, 0], ylabel='Normalized flux')
         return fig
+    
+def analyze_white_lightcurve(exoiris:ExoIris, jitters:list[np.ndarray]=[None, ...], niter: int = 500, npop=60, pool=None) -> None:
+    exoiris._wa = NewWhiteLPF(exoiris._tsa, jitters=jitters)
+    exoiris._wa.optimize_global(niter, npop=npop, pool=pool, plot_convergence=False, use_tqdm=True)
+
+    # exoiris._wa.optimize()
+    # pv = exoiris._wa._local_minimization.x
+
+    pv = exoiris._wa.de.minimum_location
+    exoiris.period = pv[0]
+    exoiris.zero_epoch = exoiris._wa.transit_center
+    exoiris.transit_duration = exoiris._wa.transit_duration
+    exoiris.data.mask_transit(exoiris.zero_epoch, exoiris.period, exoiris.transit_duration)
+
+    return 

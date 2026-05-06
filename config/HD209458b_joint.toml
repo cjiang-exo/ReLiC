@@ -8,7 +8,7 @@ input_file = [
   "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
   "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260503-joint/"
+output_dir = "../results/HD209458b/results-260506-joint/"
 
 [STAR]
 reference = "2017AJ....153..136S"
@@ -39,7 +39,7 @@ rayleigh_species = ["H2", "He"]
 continuum_species = ["H2--H2", "H2--He"]
 
 [EXOIRIS]
-bin_resolution = 20 # set to 0 for native resolution. Only used for JWST data.
+bin_resolution = 100 # set to 0 for native resolution. Only used for JWST data.
 
 [EXOIRIS.INSTRUMENT] # NO SPACE
 0 = "HST/STIS_G430L"
