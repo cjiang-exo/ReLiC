@@ -1,14 +1,14 @@
 [PATH]
 input_file = [
-  "../data/HD209458b/HST/results_G430L_20030503.h5",
-  "../data/HD209458b/HST/results_G430L_20030625.h5",
-  "../data/HD209458b/HST/results_G750L_20030531.h5",
-  "../data/HD209458b/HST/results_G750L_20030705.h5",
+  "../data/HD209458b/HST/new_results_G430L_20030503.h5",
+  "../data/HD209458b/HST/new_results_G430L_20030625.h5",
+  "../data/HD209458b/HST/new_results_G750L_20030531.h5",
+  "../data/HD209458b/HST/new_results_G750L_20030705.h5",
   "../data/HD209458b/HST/WFC3G141_Iraclis_Deming12181.h5",
   "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
   "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260506-joint/"
+output_dir = "../results/HD209458b/results-260507-joint/"
 
 [STAR]
 reference = "2017AJ....153..136S"
@@ -115,3 +115,4 @@ npools = 30
 nwalkers = 60
 niter_de = 500
 niter_mcmc = 1000
+niter_white = 1000

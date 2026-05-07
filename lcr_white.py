@@ -18,43 +18,19 @@ import numpy as np
 from exoiris import ExoIris
 from matplotlib.figure import Figure
 from matplotlib.pyplot import subplots, setp
-from exoiris.tslpf import nlstsq
+# from exoiris.tslpf import nlstsq
 from numpy.linalg import lstsq, LinAlgError
 from numpy.polynomial import Chebyshev
-from numpy import (
-    zeros,
-    outer,
-    exp,
-    dot,
-    log10,
-    diff,
-    sqrt,
-    floor,
-    ceil,
-    arange,
-    newaxis,
-    nanmean,
-    isfinite,
-    nan,
-    where,
-    nanstd,
-    inf,
-    atleast_2d,
-    repeat,
-    array,
-    average,
-    unique,
-    concatenate,
-    
-)
-from scipy.optimize import minimize
+from numpy import ( array, average, atleast_2d, diff, isfinite, isscalar, inf, 
+    log10, nan, repeat, sqrt, unique, where, 
+) 
 
 from pytransit import BaseLPF
 from pytransit.orbits import as_from_rhop, i_from_ba, fold, i_from_baew, d_from_pkaiews, epoch
 from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP, PParameter
 from pytransit.lpf.lpf import map_ldc
 
-from exoiris.tslpf import TSLPF 
+from exoiris.tslpf import TSLPF  
 
 class NewWhiteLPF(BaseLPF):
     def __init__(self, tsa: TSLPF, jitters: list[np.ndarray]=[None, ...]):
@@ -71,13 +47,14 @@ class NewWhiteLPF(BaseLPF):
             errors.append(me[m])  
         self.std_errors = errors
         self.neps = max(self.tsa.data.epoch_groups) + 1
-        self._period_hst = 95.42 / 1440.0 # [days]
+        
 
         """ generate covariates for baseline detrending """
         self.covariates = []
         _standardize = lambda x: 2 * (x - x.min()) / (x.max() - x.min()) - 1 # standardize to [-1, 1]
         for i, (d, t) in enumerate(zip(tsa.data, times)):
             if ("HST" in d.name) or ("STIS" in d.name) or ("WFC3" in d.name):
+                self._period_hst = 95.42 / 1440.0 # [days]
                 phases = (t - t[0]) % self._period_hst # folded phases
                 phases[phases >= 0.75*self._period_hst] -= self._period_hst
                 x = _standardize(phases)
@@ -90,8 +67,8 @@ class NewWhiteLPF(BaseLPF):
             self.covariates.append(_covs)
 
         pbs = unique(tsa.data.noise_groups).astype('<U21')
-        super().__init__('white', pbs, times, fluxes,
-                         covariates=self.covariates, wnids=tsa.data.noise_groups, pbids=tsa.data.noise_groups)
+        super().__init__('white', pbs, times, fluxes, covariates=self.covariates, 
+            wnids=tsa.data.noise_groups, pbids=tsa.data.noise_groups)
 
         self.tm.epids = array(self.tsa.data.epoch_groups)
 
@@ -165,14 +142,17 @@ class NewWhiteLPF(BaseLPF):
 
         return baseline * mtransit 
 
-    # def optimize(self, pv0=None, method='powell', maxfev: int = 5000):
-    #     if pv0 is None:
-    #         if self.de is not None:
-    #             pv0 = self.de.minimum_location
-    #         else:
-    #             pv0 = self.ps.mean_pv
-    #     res = minimize(lambda pv: -self.lnposterior(pv), pv0, method=method, options={'maxfev':maxfev})
-    #     self._local_minimization = res
+    def lnposterior(self, pv):
+        lnp = self.lnprior(pv)
+
+        if isscalar(lnp):
+            if isfinite(lnp):
+                lnp += self.lnlikelihood(pv)
+            return lnp if isfinite(lnp) else -inf 
+
+        mask = isfinite(lnp) 
+        lnp[mask] += self.lnlikelihood(pv[mask]) 
+        return where(isfinite(lnp), lnp, -inf)
 
     @property
     def transit_center(self):
@@ -232,11 +212,12 @@ class NewWhiteLPF(BaseLPF):
         return fig
     
 def analyze_white_lightcurve(exoiris:ExoIris, jitters:list[np.ndarray]=[None, ...], niter: int = 500, npop=60, pool=None) -> None:
-    exoiris._wa = NewWhiteLPF(exoiris._tsa, jitters=jitters)
-    exoiris._wa.optimize_global(niter, npop=npop, pool=pool, plot_convergence=False, use_tqdm=True)
+    exoiris._wa = NewWhiteLPF(exoiris._tsa, jitters=jitters) 
 
-    # exoiris._wa.optimize()
-    # pv = exoiris._wa._local_minimization.x
+    def lnpost(pv):
+        return exoiris._wa.lnposterior(pv)
+    
+    exoiris._wa.optimize_global(niter, npop=npop, pool=pool, lnpost=lnpost, plot_convergence=False, use_tqdm=True)
 
     pv = exoiris._wa.de.minimum_location
     exoiris.period = pv[0]

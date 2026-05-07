@@ -13,6 +13,7 @@ import argparse
 import tomllib
 import h5py
 import shutil
+import matplotlib.pyplot as pl    
 from lcr_core import *
 from lcr_atm import *
 from lcr_white import analyze_white_lightcurve
@@ -46,7 +47,6 @@ print("Loading data: ")
 [print(f"  {f}") for f in cfg["PATH"]["input_file"]]
 
 raw_data  = [h5py.File(f, 'r') for f in cfg["PATH"]["input_file"]]
-
 
 #%% initialize TSData #########################################################
 
@@ -117,14 +117,23 @@ ldmodel = LDTkLD(
 print("Initializing ExoIris model...")
 
 exoiris = ExoIris(cfg["PLANET"]["name"], ldmodel=ldmodel, data=tsdata, 
-    noise_model='white_profiled', nthreads=1)
+    noise_model='white_marginalized', nthreads=1)
 
-for i, (k, v) in enumerate(cfg["PRIORS"].items()): # update priors
-    exoiris.set_prior(k, *v) 
+exoiris.ps.thaw()
 
+""" Initialize the ParameterSet of atmospheric model"""
+init_p_atmosphere(exoiris, atm_ps)
+
+""" Update the bounds of stellar parameters based on LDTk model """
 exoiris.ps[exoiris.ps.names.index("teff")].bounds  = ldmodel.sc.client.teffl
 exoiris.ps[exoiris.ps.names.index("logg")].bounds  = ldmodel.sc.client.loggl 
 exoiris.ps[exoiris.ps.names.index("metal")].bounds = ldmodel.sc.client.zl
+
+""" Update all prior functions"""
+for i, (k, v) in enumerate(cfg["PRIORS"].items()): 
+    exoiris.set_prior(k, *v) 
+
+exoiris.ps.freeze()
 
 # raise SystemExit("Test complete. Exiting.")
 
@@ -160,6 +169,8 @@ generate_binwidths(exoiris._tsa)
 exoiris.print_parameters()
 print("Initialization complete.")
 
+# raise SystemExit("Initialization complete. Exiting.")
+
 #%% fit white light curves to validate the covariates ##########################
 
 jitters = []
@@ -170,7 +181,8 @@ for i, rd in enumerate(raw_data):
         jitters.append(None) 
 
 with Pool(cfg["SAMPLER"]["npools"]) as pool:
-    analyze_white_lightcurve(exoiris, jitters=jitters, niter=500, npop=60, pool=pool)
+    analyze_white_lightcurve(exoiris, jitters=jitters, pool=pool,
+        niter=cfg["SAMPLER"]["niter_white"], npop=cfg["SAMPLER"]["nwalkers"], )
  
 fig = exoiris.plot_white(figsize=(3 * exoiris.data.size, 8))
 outname = os.path.join(cfg['PATH']['output_dir'], 'white_fit.png')
@@ -184,15 +196,19 @@ for i, (_t, _cov) in enumerate(zip(exoiris._wa.times, exoiris._wa.covariates)):
     newt = exoiris.data[i].time
     newcov = [np.interp(newt, _t, _c) for _c in _cov.T] 
     exoiris.data[i].covs[:] = np.array(newcov).T  
- 
+
 
 #%% test likelihood evaluation #################################################
 
 print("Running a quick test of posterior evaluation...")
 
-initial_population = exoiris.ps.sample_from_prior(3) 
+initial_population = exoiris.ps.sample_from_prior(1) 
 pp = exoiris.lnposterior(initial_population) 
-[print(f"pp = {_v:.6e}") for _v in pp]
+print(f"lnprob = {pp:.6e}") 
+
+initial_population = exoiris.ps.sample_from_prior(3) 
+pp = exoiris.lnposterior(initial_population)  
+[print(f"lnprob = {_v:.6e}") for _v in pp]
 
 print("Test complete.")
 

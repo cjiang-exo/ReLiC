@@ -1,16 +1,12 @@
 import numpy as np
-import matplotlib.pyplot as pl    
 from astropy.stats import sigma_clip 
 from exoiris.tslpf import TSLPF 
 from exoiris.ldtkld import LDTkLD
+from exoiris import ExoIris
 
-# from matplotlib.figure import Figure
-from numpy import array, average, atleast_2d, arctan2, diff, dstack, inf, isfinite, interp, log10, sqrt, where, unique, zeros_like, zeros, squeeze, ones_like
-# from petitRADTRANS.physical_constants import m_jup, m_sun, r_jup_mean, r_sun, G as grav_const
-# from petitRADTRANS.radtrans import Radtrans 
-# from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
-# from petitRADTRANS.chemistry.utils import compute_mean_molar_masses
-# from petitRADTRANS.physics import temperature_profile_function_guillot_global as get_tprofile
+from numpy import (array, average, atleast_2d, arctan2, diff, dstack, inf, 
+    isfinite, interp, log10, sqrt, where, unique, zeros_like, zeros, squeeze, 
+    ones_like, isscalar)
 from petitRADTRANS.physics import rebin_spectrum_bin
 from pytransit.orbits import as_from_rhop, i_from_ba, epoch
 from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter  
@@ -89,8 +85,7 @@ def custom_init_parameters(self):
     self._init_p_star()
     self._init_p_orbit()
     self._init_p_transit_centers()
-    self._init_p_limb_darkening()
-    self._init_p_atmosphere()
+    self._init_p_limb_darkening() 
     self._init_p_noise()
     if self._nm == NM_GP_FREE:
         self._init_p_gp()
@@ -108,21 +103,10 @@ def custom_init_p_orbit(self):
     self._start_orbit = ps.blocks[-1].start
     self._sl_orbit = ps.blocks[-1].slice
 
-def custom_init_p_atmosphere(self): 
-    pp = [
-        GParameter('mp', 'planet_mass', 'M_jup', NP(1.0, 1e-2), (1e-4, inf)),
-        GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-10, 2), (-inf, inf)),
-        GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-10, 2), (-inf, inf)), 
-        GParameter('kir', 'infrared opacity', 'log10 cm^2/g', UP(-5, 2), (-inf, inf)),
-        GParameter('gamma', 'kv/kir', 'log10', UP(-3, 3), (-inf, inf)),
-        GParameter('tint', 'intrinsic temperature', 'K', UP(10, 500), (1, inf)),
-        GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-inf, inf)),
-        GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, inf)),
-        GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
-        ]
-    self.ps.add_global_block('atmosphere', pp)
-    self._start_atm = self.ps.blocks[-1].start
-    self._sl_atm = self.ps.blocks[-1].slice
+def init_p_atmosphere(exoiris: ExoIris, atmosphere_parameter_set: list[GParameter]):  
+    exoiris.ps.add_global_block('atmosphere', atmosphere_parameter_set)
+    exoiris._tsa._start_atm = exoiris.ps.blocks[-1].start
+    exoiris._tsa._sl_atm = exoiris.ps.blocks[-1].slice
     return
 
 def get_radius_ratios(self, pv):
@@ -134,8 +118,14 @@ def get_radius_ratios(self, pv):
 
 def custom_lnposterior(self, pv):
     lnp = self.lnprior(pv)
-    _mask = isfinite(lnp)
-    lnp[_mask] += self.lnlikelihood(pv[_mask])
+
+    if isscalar(lnp):
+        if isfinite(lnp):
+            lnp += self.lnlikelihood(pv)
+        return lnp if isfinite(lnp) else -inf 
+
+    mask = isfinite(lnp) 
+    lnp[mask] += self.lnlikelihood(pv[mask]) 
     return where(isfinite(lnp), lnp, -inf)
 
 def replace_outliers(time, flux, ferr, sigma=8):
@@ -190,7 +180,7 @@ TSLPF.flux_model          = custom_flux_model
 TSLPF.transit_model       = custom_transit_model
 TSLPF._init_parameters    = custom_init_parameters
 TSLPF._init_p_orbit       = custom_init_p_orbit
-TSLPF._init_p_atmosphere  = custom_init_p_atmosphere
+# TSLPF._init_p_atmosphere  = custom_init_p_atmosphere
 TSLPF.get_radius_ratios   = get_radius_ratios 
 TSLPF.lnposterior         = custom_lnposterior
 TSLPF.calculate_transmission_spectrum  = calculate_transmission_spectrum 
