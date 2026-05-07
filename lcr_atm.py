@@ -19,6 +19,7 @@ atm_ps = [
     GParameter('kir', 'infrared opacity', 'log10 cm^2/g', UP(-5, 2), (-inf, inf)),
     GParameter('gamma', 'kv/kir', 'log10', UP(-3, 3), (-inf, inf)),
     GParameter('tint', 'intrinsic temperature', 'K', UP(10, 500), (1, inf)),
+    GParameter('ab', 'Bond albedo', '', UP(0, 0.9), (0, 1)),
     GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-inf, inf)),
     GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, inf)),
     GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
@@ -47,8 +48,8 @@ def calc_ts_prt(atm_params, atmosphere: Radtrans,
     )
     
     # Assume equilibrium chemistry
-    metallicities = atm_params[6] * ones_like(pres_bar)
-    co_ratios = atm_params[7] * ones_like(pres_bar)
+    metallicities = atm_params[7] * ones_like(pres_bar)
+    co_ratios = atm_params[8] * ones_like(pres_bar)
     mass_fractions = chem.interpolate_mass_fractions(
         co_ratios               = co_ratios,
         log10_metallicities     = metallicities,
@@ -76,3 +77,21 @@ def calc_ts_prt(atm_params, atmosphere: Radtrans,
         return transit_depths
     return transit_depths, _add
     
+def calc_teq(teff, a_rs, albedo=0):
+    """Calculate the equilibrium temperature of a planet.
+    
+    Parameters
+    ----------
+    teff : float
+        Effective temperature of the star (K).
+    a_rs : float
+        Semi-major axis in units of stellar radii.
+    albedo : float, optional
+        Bond albedo of the planet, by default 0.
+    
+    Returns
+    -------
+    float
+        Equilibrium temperature of the planet (K).
+    """
+    return teff * (0.5 / a_rs)**0.5 * (1 - albedo)**0.25

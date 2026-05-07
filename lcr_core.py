@@ -16,13 +16,13 @@ NM_GP_FIXED = 1
 NM_GP_FREE = 2
 NM_WHITE_PROFILED = 3
 
-def calculate_transmission_spectrum(self, atm_parameters): 
+def calculate_transmission_spectrum(self, pv): 
     raise NotImplementedError()
 
-def custom_flux_model(self, pv, include_baseline: bool = True):
-    pv_atm = atleast_2d(pv)[:, self._sl_atm]   
+def custom_flux_model(self, pv, include_baseline: bool = True): 
+    pv = atleast_2d(pv)
     self._transmission_spectra = array([ 
-        self.calculate_transmission_spectrum(atm_params) for atm_params in pv_atm
+        self.calculate_transmission_spectrum(_p) for _p in pv
     ]) 
     transit_models = self.transit_model(pv)
     if self.spot_model is not None:
@@ -74,10 +74,6 @@ def custom_transit_model(self, pv, copy=True):
         for i, tm in enumerate(self.tms):
             fluxes.append(tm.evaluate(k[i], ldp[i], t0s[:, epids[i]], p, aor, inc, ecc, w, copy))
 
-    # for i, d in enumerate(self.data):
-    #     if d.offset_group > 0:
-    #         biases = pv[:, self._start_bias + d.offset_group - 1][:, None, None]
-    #         fluxes[i] = biases + (1.0 - biases) * fluxes[i]
     return fluxes 
 
 def custom_init_parameters(self):

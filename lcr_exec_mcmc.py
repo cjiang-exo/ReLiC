@@ -155,14 +155,22 @@ chem = PreCalculatedEquilibriumChemistryTable()
 """ EQUILIRBIUM TEMPERATURE SHOULD BE DERIVED BASED ON TEFF AND A_RS, 
 WITH A FREE PARAMTER OF BOND ALBEDO. """ #TODO
 
-def calculate_transmission_spectrum(atm_params: np.ndarray):
+SL_ATM = exoiris._tsa._sl_atm
+
+def calculate_transmission_spectrum(pv: np.ndarray):
+    
+    teff = pv[4]
+    a_rs = as_from_rhop(pv[0], pv[1])
+    albedo = pv[-4]
+    teq = calc_teq(teff, a_rs, albedo)
+
     return calc_ts_prt(
-        atm_params=atm_params, 
+        atm_params=pv[SL_ATM], 
         atmosphere=atmosphere,
         chem=chem,
         planet_radius_cm=cfg["PLANET"]["radius_rjup"][0] * r_jup_mean,
         star_radius_cm=cfg["STAR"]["radius_rsun"][0] * r_sun,
-        equilibrium_temperature=cfg["PLANET"]["equilibrium_temperature"][0]
+        equilibrium_temperature=teq,
     )
 
 exoiris._tsa.prt_wl = atmosphere.get_wavelengths() * 1e4 # A --> micron
