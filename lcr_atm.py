@@ -27,7 +27,7 @@ atm_ps = [
 def calc_ts_prt(atm_params, atmosphere: Radtrans, 
     chem: PreCalculatedEquilibriumChemistryTable, 
     planet_radius_cm: float, star_radius_cm: float,
-    equilibrium_temperature: float, ):
+    equilibrium_temperature: float, return_contribution=False):
 
     planet_mass     = atm_params[0]*m_jup # g
     ref_pressure    = 10**atm_params[1] # bar
@@ -59,7 +59,7 @@ def calc_ts_prt(atm_params, atmosphere: Radtrans,
     mmw = compute_mean_molar_masses(mass_fractions)
 
     # allow for partial cloud coverage
-    _, transit_radius_cm, _ = atmosphere.calculate_transit_radii(
+    _, transit_radius_cm, _add = atmosphere.calculate_transit_radii(
         temperatures                = temperatures,
         mass_fractions              = mass_fractions,
         mean_molar_masses           = mmw,
@@ -68,7 +68,11 @@ def calc_ts_prt(atm_params, atmosphere: Radtrans,
         reference_pressure          = ref_pressure,
         opaque_cloud_top_pressure   = cloudtop_pbar,
         cloud_fraction              = cloud_fraction,
+        return_contribution         = return_contribution,
     ) 
 
     transit_depths = (transit_radius_cm / star_radius_cm)**2
-    return transit_depths
+    if not return_contribution:
+        return transit_depths
+    return transit_depths, _add
+    

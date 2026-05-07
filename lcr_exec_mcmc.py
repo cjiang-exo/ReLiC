@@ -152,6 +152,9 @@ atmosphere = Radtrans(
 
 chem = PreCalculatedEquilibriumChemistryTable() 
 
+""" EQUILIRBIUM TEMPERATURE SHOULD BE DERIVED BASED ON TEFF AND A_RS, 
+WITH A FREE PARAMTER OF BOND ALBEDO. """ #TODO
+
 def calculate_transmission_spectrum(atm_params: np.ndarray):
     return calc_ts_prt(
         atm_params=atm_params, 
