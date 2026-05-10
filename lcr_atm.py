@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import ones_like, inf
+from numpy import ones_like, inf, full_like
 from petitRADTRANS.physical_constants import m_jup, m_sun, r_jup_mean, r_sun, G as grav_const
 from petitRADTRANS.radtrans import Radtrans 
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
@@ -16,19 +16,80 @@ atm_ps = [
     GParameter('mp', 'planet_mass', 'M_jup', NP(1.0, 1e-2), (1e-4, inf)),
     GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-10, 2), (-inf, inf)),
     GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-10, 2), (-inf, inf)), 
-    GParameter('kir', 'infrared opacity', 'log10 cm^2/g', UP(-5, 2), (-inf, inf)),
-    GParameter('gamma', 'kv/kir', 'log10', UP(-3, 3), (-inf, inf)),
-    GParameter('tint', 'intrinsic temperature', 'K', UP(10, 500), (1, inf)),
-    GParameter('ab', 'Bond albedo', '', UP(0, 0.9), (0, 1)),
+    GParameter('temp', 'isothermal temperature', 'K', UP(300, 3000), (1, inf)), 
     GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-inf, inf)),
-    GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, inf)),
+    GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0.1, 1.6)),
     GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
     ]
 
-def calc_ts_prt(atm_params, atmosphere: Radtrans, 
+# atm_ps = [
+#     GParameter('mp', 'planet_mass', 'M_jup', NP(1.0, 1e-2), (1e-4, inf)),
+#     GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-10, 2), (-inf, inf)),
+#     GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-10, 2), (-inf, inf)), 
+#     GParameter('kir', 'infrared opacity', 'log10 cm^2/g', UP(-5, 2), (-inf, inf)),
+#     GParameter('gamma', 'kv/kir', 'log10', UP(-3, 3), (-inf, inf)),
+#     GParameter('tint', 'intrinsic temperature', 'K', UP(10, 500), (1, inf)),
+#     GParameter('ab', 'Bond albedo', '', UP(0, 0.99), (0, 1)),
+#     GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-inf, inf)),
+#     GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, inf)),
+#     GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
+#     ]
+
+def calc_ts_prt_isothermal(atm_params, atmosphere: Radtrans, 
     chem: PreCalculatedEquilibriumChemistryTable, 
     planet_radius_cm: float, star_radius_cm: float,
-    equilibrium_temperature: float, return_contribution=False):
+    quench_id: int=1, return_contribution=False):
+
+    planet_mass     = atm_params[0]*m_jup # g
+    ref_pressure    = 10**atm_params[1] # bar
+    cloudtop_pbar   = 10**atm_params[2] # bar
+    cloud_fraction  = atm_params[-1]
+    pres_bar        = atmosphere.pressures*1e-6 # cgs to bar 
+
+    # Assume Guillot's T-P model
+    ref_gravity = grav_const * planet_mass / planet_radius_cm**2 
+    temperatures = full_like(pres_bar, atm_params[3]) # isothermal 
+    
+    # Assume equilibrium chemistry
+    metallicities = full_like(pres_bar, atm_params[4])
+    co_ratios = full_like(pres_bar, atm_params[5])
+    mass_fractions = chem.interpolate_mass_fractions(
+        co_ratios               = co_ratios,
+        log10_metallicities     = metallicities,
+        temperatures            = temperatures,
+        pressures               = pres_bar, 
+        full                    = False,
+    ) 
+
+    # quenching the chemistry above 1E-7 bar
+    for sp in atmosphere._line_species: 
+        mass_fractions[sp][:quench_id] = mass_fractions[sp][quench_id]
+
+    mmw = compute_mean_molar_masses(mass_fractions)
+
+    # allow for partial cloud coverage
+    _, transit_radius_cm, _add = atmosphere.calculate_transit_radii(
+        temperatures                = temperatures,
+        mass_fractions              = mass_fractions,
+        mean_molar_masses           = mmw,
+        reference_gravity           = ref_gravity,
+        planet_radius               = planet_radius_cm,
+        reference_pressure          = ref_pressure,
+        opaque_cloud_top_pressure   = cloudtop_pbar,
+        cloud_fraction              = cloud_fraction,
+        return_contribution         = return_contribution,
+    ) 
+
+    transit_depths = (transit_radius_cm / star_radius_cm)**2
+    if not return_contribution:
+        return transit_depths
+    return transit_depths, _add
+
+def calc_ts_prt_guillot(atm_params, atmosphere: Radtrans, 
+    chem: PreCalculatedEquilibriumChemistryTable, 
+    planet_radius_cm: float, star_radius_cm: float,
+    equilibrium_temperature: float, quench_id: int=1,
+    return_contribution=False):
 
     planet_mass     = atm_params[0]*m_jup # g
     ref_pressure    = 10**atm_params[1] # bar
@@ -57,6 +118,11 @@ def calc_ts_prt(atm_params, atmosphere: Radtrans,
         pressures               = pres_bar, 
         full                    = False,
     ) 
+
+    # quenching the chemistry above 1E-7 bar
+    for sp in atmosphere._line_species: 
+        mass_fractions[sp][:quench_id] = mass_fractions[sp][quench_id]
+
     mmw = compute_mean_molar_masses(mass_fractions)
 
     # allow for partial cloud coverage

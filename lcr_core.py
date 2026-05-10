@@ -4,12 +4,12 @@ from exoiris.tslpf import TSLPF
 from exoiris.ldtkld import LDTkLD
 from exoiris import ExoIris
 
-from numpy import (array, average, atleast_2d, arctan2, diff, dstack, inf, 
+from numpy import (array, average, atleast_2d, arctan2, asarray, diff, dstack, inf, 
     isfinite, interp, log10, sqrt, where, unique, zeros_like, zeros, squeeze, 
-    ones_like, isscalar)
+    ones_like, isscalar, newaxis, arange, linspace, meshgrid, errstate, transpose)
 from petitRADTRANS.physics import rebin_spectrum_bin
 from pytransit.orbits import as_from_rhop, i_from_ba, epoch
-from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter  
+from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter   
 
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -172,14 +172,15 @@ def generate_binwidths(tsa: TSLPF):
         tsa.bin_widths.append(d._wl_r_edges - d._wl_l_edges)
     return None
 
+
 TSLPF.flux_model          = custom_flux_model
 TSLPF.transit_model       = custom_transit_model
 TSLPF._init_parameters    = custom_init_parameters
-TSLPF._init_p_orbit       = custom_init_p_orbit
-# TSLPF._init_p_atmosphere  = custom_init_p_atmosphere
+TSLPF._init_p_orbit       = custom_init_p_orbit 
 TSLPF.get_radius_ratios   = get_radius_ratios 
 TSLPF.lnposterior         = custom_lnposterior
 TSLPF.calculate_transmission_spectrum  = calculate_transmission_spectrum 
+
 
 if __name__ == "__main__":
     print("Testing ...")

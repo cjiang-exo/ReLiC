@@ -24,7 +24,7 @@ from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquili
 from multiprocessing import Pool 
 from functools import reduce 
 
-DEFAULT_CFG = 'config/HD209458b_joint.toml'
+DEFAULT_CFG = 'config/HD209458b_benchmark-r100.toml'
 
 if 'get_ipython' in globals():
     class Args:
@@ -158,21 +158,22 @@ chem = PreCalculatedEquilibriumChemistryTable()
 
 SL_ATM = exoiris._tsa._sl_atm
 QUENCH_ID = np.where(atmosphere.pressures*1e-6 >= 1e-7)[0][0]
+RADIUS_P = cfg["PLANET"]["radius_rjup"][0] * r_jup_mean
+RADIUS_S = cfg["STAR"]["radius_rsun"][0] * r_sun
 
 def calculate_transmission_spectrum(pv: np.ndarray):
     
-    teff = pv[4]
-    a_rs = as_from_rhop(pv[0], pv[1])
-    albedo = pv[-4]
-    teq = calc_teq(teff, a_rs, albedo)
+    # teff = pv[4]
+    # a_rs = as_from_rhop(pv[0], pv[1])
+    # albedo = pv[-4]
+    # teq = calc_teq(teff, a_rs, albedo)
 
-    return calc_ts_prt(
+    return calc_ts_prt_isothermal(
         atm_params=pv[SL_ATM], 
         atmosphere=atmosphere,
         chem=chem,
-        planet_radius_cm=cfg["PLANET"]["radius_rjup"][0] * r_jup_mean,
-        star_radius_cm=cfg["STAR"]["radius_rsun"][0] * r_sun,
-        equilibrium_temperature=teq,
+        planet_radius_cm=RADIUS_P,
+        star_radius_cm=RADIUS_S,
         quench_id=QUENCH_ID,
     )
 
@@ -184,6 +185,20 @@ exoiris.print_parameters()
 print("Initialization complete.")
 
 # raise SystemExit("Initialization complete. Exiting.")
+
+#%% Define a injection model
+
+inject_pv = array([
+    1.00, 3.52474859, 0.50, 2459890.20, 
+    6000, 4.5, 0.0, 
+    1.5, 1.5, 
+    0.8, -3, -5, 1500, 0.0, 0.5, 0.5
+])
+inject_fmodel = exoiris._tsa.flux_model(inject_pv, include_baseline=False)
+for i in range(exoiris.data.size):
+    _errors = exoiris.data[i].errors
+    exoiris.data[i].fluxes = inject_fmodel[i][0] + np.random.normal(np.zeros_like(_errors), 1.5*_errors)
+
 
 #%% fit white light curves to validate the covariates ##########################
 
@@ -198,7 +213,7 @@ with Pool(cfg["SAMPLER"]["npools"]) as pool:
     analyze_white_lightcurve(exoiris, jitters=jitters, pool=pool,
         niter=cfg["SAMPLER"]["niter_white"], npop=cfg["SAMPLER"]["nwalkers"], )
  
-fig = exoiris.plot_white(figsize=(3 * exoiris.data.size, 8))
+fig = exoiris.plot_white(figsize=(3 * exoiris.data.size, 7.2))
 outname = os.path.join(cfg['PATH']['output_dir'], 'white_fit.png')
 fig.tight_layout()
 fig.savefig(outname, dpi=100)
@@ -206,16 +221,7 @@ print(f"A preview of white light curve fit saved as {outname}.")
 
 #%% update covariances for spectral light curves ###############################
 
-fm = squeeze(exoiris._wa.flux_model(exoiris._wa.de.minimum_location))
-for i, (_t, _cov) in enumerate(zip(exoiris._wa.times, exoiris._wa.covariates)):
-    newt = exoiris.data[i].time
-    if "JWST" in exoiris.data[i].name:
-        sl = exoiris._wa.lcslices[i]
-        white_systematics = exoiris._wa.ofluxa[sl] - fm[sl] 
-        exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
-    else: # HST
-        newcov = [np.interp(newt, _t, _c) for _c in _cov.T] 
-        exoiris.data[i].covs[:] = np.array(newcov).T  
+pass
 
 
 #%% test likelihood evaluation #################################################
@@ -314,14 +320,14 @@ postsamples = exoiris._tsa.sampler.flatchain
 maxlike_params = postsamples[lnp.flatten().argmax()]
 
 plot_corners(postsamples, labels=[p.name for p in exoiris.ps],
-    truths=maxlike_params, outputdir=cfg['PATH']['output_dir'])
+    truths=inject_pv, outputdir=cfg['PATH']['output_dir'])
 
 #%% plot best-fit residuals
  
 fmod = exoiris._tsa.flux_model(maxlike_params, include_baseline=True)
 plot_residuals(exoiris.data, fmod, outputdir=cfg['PATH']['output_dir']) 
 
-outname = os.path.join(cfg['PATH']['output_dir'], 'output.log') 
-shutil.copy('output.log', outname)
+# outname = os.path.join(cfg['PATH']['output_dir'], 'output.log') 
+# shutil.copy('output.log', outname)
 print("Done!")
 # %%
