@@ -18,13 +18,11 @@ from lcr_core import *
 from lcr_atm import *
 from lcr_white import analyze_white_lightcurve
 from lcr_plots import plot_2dfluxes, plot_corners, plot_residuals
-from exoiris import ExoIris, TSData
-from petitRADTRANS.radtrans import Radtrans 
-from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
+from exoiris import ExoIris, TSData 
 from multiprocessing import Pool 
 from functools import reduce 
 
-DEFAULT_CFG = 'config/HD209458b_joint.toml'
+DEFAULT_CFG = 'config/HD209458b_joint_flatmass.toml'
 
 if 'get_ipython' in globals():
     class Args:
@@ -122,6 +120,19 @@ exoiris = ExoIris(cfg["PLANET"]["name"], ldmodel=ldmodel, data=tsdata,
 exoiris.ps.thaw()
 
 """ Initialize the ParameterSet of atmospheric model"""
+atm_ps = [
+    GParameter('mp', 'planet_mass', 'M_jup', NP(1.0, 1e-2), (1e-4, inf)),
+    GParameter('ref_p', 'reference pressure', 'log10 bar', UP(-10, 2), (-inf, inf)),
+    GParameter('cloud_p', 'cloud-top pressure', 'log10 bar', UP(-10, 2), (-inf, inf)), 
+    GParameter('kir', 'infrared opacity', 'log10 cm^2/g', UP(-5, 2), (-inf, inf)),
+    GParameter('gamma', 'kv/kir', 'log10', UP(-3, 3), (-inf, inf)),
+    GParameter('tint', 'intrinsic temperature', 'K', UP(0, 500), (1, inf)),
+    GParameter('ab', 'Bond albedo', '', UP(0, 0.99), (0, 1)),
+    GParameter('m2h', 'metallicity', 'log10 solar', UP(-1, 3), (-inf, inf)),
+    GParameter('c2o', 'C/O ratio', '', UP(0.1, 1.6), (0, inf)),
+    GParameter('cloud_f', 'cloud fraction', '', UP(0.0, 1.0), (0, 1)),
+    ]
+
 init_p_atmosphere(exoiris, atm_ps)
 
 """ Update all prior functions"""
@@ -133,9 +144,10 @@ exoiris.ps[exoiris.ps.names.index("teff")].bounds  = ldmodel.sc.client.teffl
 exoiris.ps[exoiris.ps.names.index("logg")].bounds  = ldmodel.sc.client.loggl 
 exoiris.ps[exoiris.ps.names.index("metal")].bounds = ldmodel.sc.client.zl
 
-_mp_min = max(cfg["PRIORS"]["mp"][1] - 5 * cfg["PRIORS"]["mp"][2], 1e-4)
-_mp_max = cfg["PRIORS"]["mp"][1] + 5 * cfg["PRIORS"]["mp"][2]
-exoiris.ps[exoiris.ps.names.index("mp")].bounds = [_mp_min, _mp_max]
+if "NP" in cfg["PRIORS"]["mp"]:
+    _mp_min = max(cfg["PRIORS"]["mp"][1] - 5 * cfg["PRIORS"]["mp"][2], 1e-4)
+    _mp_max = cfg["PRIORS"]["mp"][1] + 5 * cfg["PRIORS"]["mp"][2]
+    exoiris.ps[exoiris.ps.names.index("mp")].bounds = [_mp_min, _mp_max]
 
 exoiris.ps.freeze()
 
@@ -166,7 +178,7 @@ def calculate_transmission_spectrum(pv: np.ndarray):
     albedo = pv[-4]
     teq = calc_teq(teff, a_rs, albedo)
 
-    return calc_ts_prt(
+    return calc_ts_prt_guillot(
         atm_params=pv[SL_ATM], 
         atmosphere=atmosphere,
         chem=chem,

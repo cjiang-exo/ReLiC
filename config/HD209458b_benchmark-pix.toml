@@ -27,7 +27,7 @@ equilibrium_temperature = [1459, 12]
 
 [ATMOSPHERE]
 opacity_mode = "lbl"
-pressure_bounds_log10bar = [-10, 2]
+pressure_bounds_log10bar = [-8, 2]
 wavelength_bounds_micron = [2.35, 5.1]
 chemical_species = ["H2O", "CO", "CO2", "CH4", "NH3", "SiO", "C2H2", "HCN", ]
 rayleigh_species = ["H2", "He"]
