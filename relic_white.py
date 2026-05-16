@@ -1,43 +1,24 @@
-#  ExoIris: fast, flexible, and easy exoplanet transmission spectroscopy in Python.
-#  Copyright (C) 2024 Hannu Parviainen
-#
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import numpy as np
-
-from exoiris import ExoIris
+# import numpy as np
+ 
 from matplotlib.figure import Figure
-from matplotlib.pyplot import subplots, setp
-# from exoiris.tslpf import nlstsq
-from numpy.linalg import lstsq, LinAlgError
-from numpy.polynomial import Chebyshev
-from numpy import ( array, average, atleast_2d, diff, isfinite, isscalar, inf, 
-    log10, nan, repeat, sqrt, unique, where, 
+from matplotlib.pyplot import subplots, setp 
+from numpy.linalg import lstsq, LinAlgError 
+from numpy import ( array, average, atleast_2d, diff, floor, isfinite, isscalar, inf, 
+    log10, nan, repeat, sqrt, squeeze, unique, where, ndarray, zeros_like, ones_like
 ) 
-
+from scipy.optimize import minimize
 from pytransit import BaseLPF
 from pytransit.orbits import as_from_rhop, i_from_ba, fold, i_from_baew, d_from_pkaiews, epoch
 from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP, PParameter
 from pytransit.lpf.lpf import map_ldc
 
-from exoiris.tslpf import TSLPF  
+from relic_tslpf import NewTSLPF
 
 class NewWhiteLPF(BaseLPF):
-    def __init__(self, tsa: TSLPF, jitters: list[np.ndarray]=[None, ...]):
-
-        self.tsa = tsa
+    def __init__(self, tsa: NewTSLPF, covariates: list[ndarray] = [None, ...]):
+ 
         fluxes, times, errors = [], [], []
-        for t, f, e in zip(tsa.data.times, tsa.data.fluxes, tsa.data.errors):
+        for i, (t, f, e, cov) in enumerate(zip(tsa.data.times, tsa.data.fluxes, tsa.data.errors, covariates)):
             weights = where(isfinite(f) & isfinite(e), 1/e**2, 0.0)
             mf = average(where(isfinite(f), f, 0), axis=0, weights=weights)
             me = sqrt(1 / weights.sum(0))
@@ -45,32 +26,16 @@ class NewWhiteLPF(BaseLPF):
             times.append(t[m])
             fluxes.append(mf[m])
             errors.append(me[m])  
+            covariates[i] = None if cov is None else cov[m]
         self.std_errors = errors
-        self.neps = max(self.tsa.data.epoch_groups) + 1
-        
-
-        """ generate covariates for baseline detrending """
-        self.covariates = []
-        _standardize = lambda x: 2 * (x - x.min()) / (x.max() - x.min()) - 1 # standardize to [-1, 1]
-        for i, (d, t) in enumerate(zip(tsa.data, times)):
-            if ("HST" in d.name) or ("STIS" in d.name) or ("WFC3" in d.name):
-                self._period_hst = 95.42 / 1440.0 # [days]
-                phases = (t - t[0]) % self._period_hst # folded phases
-                phases[phases >= 0.75*self._period_hst] -= self._period_hst
-                x = _standardize(phases)
-                _covs = array([Chebyshev.basis(deg)(x) for deg in range(5)]).T
-                if "STIS" in d.name:
-                    _covs = np.hstack((_covs, jitters[i])) 
-            else:
-                x = _standardize(t)
-                _covs = array([np.ones_like(x), x]).T
-            self.covariates.append(_covs)
+        self.neps = max(tsa.data.epoch_groups) + 1
+        self.covariates = covariates
 
         pbs = unique(tsa.data.noise_groups).astype('<U21')
         super().__init__('white', pbs, times, fluxes, covariates=self.covariates, 
             wnids=tsa.data.noise_groups, pbids=tsa.data.noise_groups)
 
-        self.tm.epids = array(self.tsa.data.epoch_groups)
+        self.tm.epids = array(tsa.data.epoch_groups)
 
         for i in range(self.neps):
             self.set_prior(f'tc_{i:02d}', tsa.ps[tsa.ps.find_pid(f'tc_{i:02d}')].prior)
@@ -80,7 +45,8 @@ class NewWhiteLPF(BaseLPF):
         ngids = tsa.data.noise_groups[self.lcids]
         for i in range(tsa.data.n_noise_groups):
             self.set_prior(f'wn_loge_{i}', 'NP', log10(diff(self.ofluxa[ngids==i]).std() / sqrt(2)), 0.1)
-        self._baseline_models = None
+
+        self._baseline_models = ones_like(self.ofluxa)
 
     def _init_p_orbit(self):
         """Orbit parameter initialisation.
@@ -100,15 +66,14 @@ class NewWhiteLPF(BaseLPF):
 
     def _init_p_planet(self):
         """Planet parameter initialisation.
-        """
-        # A unique transit depth for each passband
+        """ 
         pk2 = [PParameter(f'k2_{pb}', 'area_ratio', 'A_s', UP(0.001, 0.1), (0, inf)) for pb in self.passbands]
         self.ps.add_passband_block('k2', 1, self.npb, pk2)
         self._pid_k2 = repeat(self.ps.blocks[-1].start, self.npb)
         self._start_k2 = self.ps.blocks[-1].start
         self._sl_k2 = self.ps.blocks[-1].slice
 
-    def transit_model(self, pv, copy=True):
+    def transit_model(self, pv):
         pv = atleast_2d(pv)
         ldc = map_ldc(pv[:, self._sl_ld])
         zero_epoch = pv[:, self._sl_tc] - self._tref
@@ -122,7 +87,7 @@ class NewWhiteLPF(BaseLPF):
         mtransit = atleast_2d(mtransit)
         npv = mtransit.shape[0] # number of parameter vectors
         if (self._baseline_models is None) or (self._baseline_models.shape[0] != npv):
-            self._baseline_models = np.zeros_like(mtransit)
+            self._baseline_models = zeros_like(mtransit)
         for ipv in range(npv):
             for ilc, f in enumerate(self.fluxes):
                 res = f / mtransit[ipv, self.lcids == ilc]
@@ -140,7 +105,7 @@ class NewWhiteLPF(BaseLPF):
         mtransit  = self.transit_model(pv)
         baseline  = self.baseline(mtransit) 
 
-        return baseline * mtransit 
+        return squeeze(baseline * mtransit) 
 
     def lnposterior(self, pv):
         lnp = self.lnprior(pv)
@@ -154,16 +119,25 @@ class NewWhiteLPF(BaseLPF):
         lnp[mask] += self.lnlikelihood(pv[mask]) 
         return where(isfinite(lnp), lnp, -inf)
 
+    def optimize(self, pv0=None, method='powell', maxfev: int = 5000):
+        if pv0 is None:
+            if self.de is not None:
+                pv0 = self.de.minimum_location
+            else:
+                pv0 = self.ps.mean_pv
+        res = minimize(lambda pv: -self.lnposterior(pv), pv0, method=method, options={'maxfev':maxfev})
+        self._local_minimization = res
+
     @property
     def transit_center(self):
-        # pv = self._local_minimization.x
-        pv = self.de.minimum_location
+        pv = self._local_minimization.x
+        # pv = self.de.minimum_location
         return pv[3] + pv[0]*epoch(self.times[0].mean(), pv[3], pv[0])
 
     @property
     def transit_duration(self):
-        # pv = self._local_minimization.x
-        pv = self.de.minimum_location
+        pv = self._local_minimization.x
+        # pv = self.de.minimum_location
         a = as_from_rhop(pv[1], pv[0])
         i = i_from_ba(pv[2], a)
         t14 = d_from_pkaiews(pv[0], sqrt(pv[self._start_k2]), a, i, 0., 0., 1, 14)
@@ -178,15 +152,15 @@ class NewWhiteLPF(BaseLPF):
 
         # pv = self._local_minimization.x
         pv = self.de.minimum_location
-        mtransit = np.squeeze(self.transit_model(pv))
-        mflux = np.squeeze(self.flux_model(pv))
+        mtransit = squeeze(self.transit_model(pv))
+        mflux = squeeze(self.flux_model(pv))
         whitenoise = self.ofluxa - mflux
         detrendedflux = mtransit + whitenoise
         t14 = self.transit_duration
         
         for i, sl in enumerate(self.lcslices):
             
-            tref = np.floor(self.timea[sl].min()) 
+            tref = floor(self.timea[sl].min()) 
             tc = pv[3] + pv[0]*epoch(self.times[i].mean(), pv[3], pv[0])
 
             ax_raw = axs[0][i]
@@ -211,18 +185,3 @@ class NewWhiteLPF(BaseLPF):
         setp(axs[:, 0], ylabel='Normalized flux')
         return fig
     
-def analyze_white_lightcurve(exoiris:ExoIris, jitters:list[np.ndarray]=[None, ...], niter: int = 500, npop=60, pool=None) -> None:
-    exoiris._wa = NewWhiteLPF(exoiris._tsa, jitters=jitters) 
-
-    def lnpost(pv):
-        return exoiris._wa.lnposterior(pv)
-    
-    exoiris._wa.optimize_global(niter, npop=npop, pool=pool, lnpost=lnpost, plot_convergence=False, use_tqdm=True)
-
-    pv = exoiris._wa.de.minimum_location
-    exoiris.period = pv[0]
-    exoiris.zero_epoch = exoiris._wa.transit_center
-    exoiris.transit_duration = exoiris._wa.transit_duration
-    exoiris.data.mask_transit(exoiris.zero_epoch, exoiris.period, exoiris.transit_duration)
-
-    return 

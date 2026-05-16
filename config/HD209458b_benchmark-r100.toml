@@ -3,81 +3,86 @@ input_file = [
   "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
   "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260510-benchmark-r100-isothermal/"
+output_dir = "../results/HD209458b/results-260515-benchmark-r100-MadhuTP/"
 
 [STAR]
-reference = "2017AJ....153..136S"
-name = "HD209458"
-teff = [6000, 60]
-logg = [4.5, 0.05]
-metal = [0.0, 0.05]
-radius_rsun = [1.19, 0.02]
-density_cgs = [1.04, 0.07]
+reference   = "2017AJ....153..136S"
+name        = "HD209458" 
+teff        = [6000, 60]
+logg        = [4.50, 0.05]
+metal       = [0.00, 0.05]
+radius_rsun = [1.2, 0.02] 
 
-[PLANET]
-reference = "2017AJ....153..136S"
-name = "HD209458b"
-radius_rjup = [1.4, 0.02]
-mass_mjup = [0.8, 0.04]
-orb_t0_bjd = [2455216.405640, 0.000094]
-orb_p_d = [3.52474859, 0.00000038]
-transit_duration_d = [0.127, 0.0]
-impact_parameter = [0.5, 0.0133]
-equilibrium_temperature = [1459, 12]
+[PLANET] 
+reference               = "2017AJ....153..136S"
+name                    = "HD209458b"
+transit_epoch_bjd       = [7.00, 0.000094]
+transit_period_d        = [3.50, 0.00000038]
+transit_duration_d      = [0.127, 0.0] 
+radius_rjup             = [1.4, 0.02]  
+mass_mjup               = [0.8, 0.04]
+equilibrium_temperature = [1500, 12]
+circular_orbit          = true
 
 [ATMOSPHERE]
-opacity_mode = "lbl"
-pressure_bounds_log10bar = [-10, 2]
-wavelength_bounds_micron = [2.35, 5.1]
-chemical_species = ["H2O", "CO", "CO2", "CH4", "NH3", "SiO", "C2H2", "HCN",]
-rayleigh_species = ["H2", "He"]
+pressure_layers          = 101
+pressure_bounds_log10bar = [-6, 2]
+wavelength_bounds_micron = [2.35, 5.05]
+chemical_species = [
+  # "Na", "K", "TiO", "VO", "FeH", 
+  "H2O", "CO", "CO2", "CH4", "NH3", 
+  "C2H2", "HCN", "SiO", "H2S", "PH3"
+]
+rayleigh_species  = ["H2", "He"]
 continuum_species = ["H2--H2", "H2--He"]
+opacity_mode      = "lbl"
 
 [EXOIRIS]
-bin_resolution = 100 # set to 0 for native resolution. Only used for JWST data.
+instruments = [ # NO SPACE 
+  "JWST/NIRCam_F322W2", 
+  "JWST/NIRCam_F444W"
+]
+wl_range_micron   = [ [2.4, 4.0], [3.9, 5.0] ]
+time_range_bjd    = [ [], [] ]
+noise_groups      = [0, 1]
+n_baselines       = [2, 2] 
+rebin_resolutions = [100, 100] # set to 0 for native resolution. 
+noise_model        = "white_marginalized"
 
-[EXOIRIS.INSTRUMENT] # NO SPACE 
-0 = "JWST/NIRCam_F322W2"
-1 = "JWST/NIRCam_F444W"
 
-[EXOIRIS.NOISE_GROUP]
-0 = 0
-1 = 1 
+[PRIORS.TRANSIT]
+rho         = ["NP", 1.00, 0.05, 0.75, 1.25, "stellar density", "cgs"]
+p           = ["NP", 3.5, 4E-7, 0, inf, "transit period", "days"]
+b           = ["NP", 0.5, 0.02, 0, 1, "impact parameter", "R_s"]
+tc_00       = ["UP", -0.05, 0.05, -inf, inf, "transit epoch", "BJD_TDB"]
 
-[EXOIRIS.N_BASELINE]
-0 = 1 # fourth order of orbital phases, second order of PC jitters 
-1 = 1 # fourth order of orbital phases, second order of PC jitters 
+[PRIORS.STAR]
+teff        = ["NP", 6000, 60, 5000, 7000, "stellar effective temperature", "K"]
+logg        = ["NP", 4.5, 0.05, 4, 5, "stellar gravity", "log10 cgs"]
+metal       = ["NP", 0.0, 0.05, -1, 1, "stellar metallicity", ""]
 
-[EXOIRIS.WL_RANGE_MICRON]
-0 = [2.4, 4.0]
-1 = [3.9, 5.0] 
+[PRIORS.NOISE]
+sigma_m_00  = ["UP", 0.2, 5, -inf, inf, "noise factor 00", ""]
+sigma_m_01  = ["UP", 0.2, 5, -inf, inf, "noise factor 01", ""] 
 
-[EXOIRIS.TIME_RANGE_BJD] 
-0 = []
-1 = [2459890.03, 2459890.3]
-
-[PRIORS]
-rho = ["NP", 1.00, 0.05]
-p = ["NP", 3.52474859, 0.00000038]
-b = ["NP", 0.50, 0.02]
-tc_00 = ["UP", 2459890.15, 2459890.25]
-teff = ["NP", 6000, 60]
-logg = ["NP", 4.5, 0.05]
-metal = ["NP", 0.0, 0.05]
-sigma_m_00 = ["UP", 0.2, 5]
-sigma_m_01 = ["UP", 0.2, 5] 
-mp = ["NP", 0.8, 0.04]
-ref_p = ["UP", -10, 2]
-cloud_p = ["UP", -10, 2]
-temp = ["UP", 300, 3000]  
-m2h = ["UP", -1, 3]
-c2o = ["UP", 0.1, 1.6]
-cloud_f = ["UP", 0.0, 1.0]
+[PRIORS.ATMOSPHERE]
+mp          = ["NP", 0.80, 0.04, 0.6, 1.0, "planet mass", "M_j"]
+ref_p       = ["UP", -6, 2, -inf, inf, "reference pressure", "log10bar"] 
+cloud_p     = ["UP", -6, 2, -inf, inf, "cloud-top pressure", "log10bar"] 
+cloud_f     = ["UP", 0.0, 1.0, 0, 1.0, "cloud fraction", ""]
+temp0       = ["UP", 0, 3000, -inf, inf, "temperature 0", "K"]
+a1          = ["UP", 0.1, 10, -inf, inf, "temperature profile parameter a1", ""]
+a2          = ["UP", 0.1, 10, -inf, inf, "temperature profile parameter a2", ""]
+p1          = ["UP", -6, 2, -inf, inf, "temperature profile parameter p1", "log10bar"]
+p2          = ["UP", -6, 2, -inf, inf, "temperature profile parameter p2", "log10bar"]
+p3          = ["UP", -6, 2, -inf, inf, "temperature profile parameter p3", "log10bar"]
+m2h         = ["UP", -1, 3, -1, 3, "atmospheric metallicity", ""]
+c2o         = ["UP", 0.1, 1.6, 0.1, 1.6, "C/O ratio", ""]
 
 [SAMPLER]
-method = "emcee"
-npools = 15
-nwalkers = 60
-niter_de = 1000
-niter_mcmc = 2000
+method      = "emcee"
+npools      = 15
+nwalkers    = 60
+niter_de    = 1000
+niter_mcmc  = 1000
 niter_white = 1000

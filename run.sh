@@ -4,11 +4,10 @@
 
 set -e
 
-# python lcr_exec_mcmc.py -c "config/HD209458b_joint.toml"
+# python lcr_exec_mcmc.py -c "config/HD209458b_joint_flatmass.toml"
 
-python lcr_injection_test.py -c "config/HD209458b_benchmark-r100.toml"
+python relic_benchmark.py -c "config/HD209458b_benchmark-r100.toml"
 
-# mpiexec -n 30 python lcr_exec_ns.py -c "config/HD209458b_ns.json"
-
-# python lcr_test_injection.py -c "config/HD209458b_mcmc.json"
+# python relic_benchmark.py -c "config/HD209458b_benchmark-pix.toml"
+ 
 
