@@ -85,17 +85,6 @@ pp = [relic.lnposterior(_p) for _p in initial_population]
 
 print("Test complete.")
 
-#%% test tp6
-
-from relic_atmosphere import parametric_temperature_madhu
-
-temp = parametric_temperature_madhu(relic.atmos_model.pressures_bar, 1400, 0.8, 0.5, 0.1, 1.0, 10.0)
-
-fig, ax  = pl.subplots(figsize=(6,4))
-ax.plot(temp, relic.atmos_model.pressures_bar)
-ax.set_xlabel("Temperature (K)")
-ax.set_yscale("log")
-ax.invert_yaxis()
 
 #%% run DE optimization ########################################################
 
@@ -123,7 +112,7 @@ with Pool(cfg["SAMPLER"]["npools"]) as pool:
 
 
 #%% Post analysis and plotting #################################################
-relic.save(overwrite=True, config_file=py_args.config)
+relic.save_mcmc(overwrite=True, config_file=py_args.config)
 
 """ Plot likelihood evolutions """
 plot_lnprob_evolution(relic, figname='lnprob.png', dpi=100, save=True)

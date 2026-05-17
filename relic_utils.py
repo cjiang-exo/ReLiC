@@ -1,8 +1,9 @@
 from astropy.stats import sigma_clip 
-from numpy import any, interp, sum as np_sum, array, hstack, ones_like, ndarray
+from numpy import any, interp, sum as np_sum, array, hstack, ndarray
 from mpi4py import MPI
-from relic_core import ReLic
 from numpy.polynomial import Chebyshev
+
+from relic_core import ReLic
 
 def replace_outliers(time, flux, ferr, sigma=8):
     mask = sigma_clip(flux, sigma=sigma, axis=1, masked=True, copy=False).mask

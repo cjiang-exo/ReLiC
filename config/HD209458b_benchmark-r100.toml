@@ -3,7 +3,7 @@ input_file = [
   "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
   "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260515-benchmark-r100-MadhuTP/"
+output_dir = "../results/HD209458b/results-260516-benchmark-r100-MadhuTP-ns2/"
 
 [STAR]
 reference   = "2017AJ....153..136S"
@@ -45,7 +45,7 @@ instruments = [ # NO SPACE
 wl_range_micron   = [ [2.4, 4.0], [3.9, 5.0] ]
 time_range_bjd    = [ [], [] ]
 noise_groups      = [0, 1]
-n_baselines       = [2, 2] 
+n_baselines       = [0, 0] 
 rebin_resolutions = [100, 100] # set to 0 for native resolution. 
 noise_model        = "white_marginalized"
 
@@ -71,18 +71,22 @@ ref_p       = ["UP", -6, 2, -inf, inf, "reference pressure", "log10bar"]
 cloud_p     = ["UP", -6, 2, -inf, inf, "cloud-top pressure", "log10bar"] 
 cloud_f     = ["UP", 0.0, 1.0, 0, 1.0, "cloud fraction", ""]
 temp0       = ["UP", 0, 3000, -inf, inf, "temperature 0", "K"]
-a1          = ["UP", 0.1, 10, -inf, inf, "temperature profile parameter a1", ""]
-a2          = ["UP", 0.1, 10, -inf, inf, "temperature profile parameter a2", ""]
-p1          = ["UP", -6, 2, -inf, inf, "temperature profile parameter p1", "log10bar"]
-p2          = ["UP", -6, 2, -inf, inf, "temperature profile parameter p2", "log10bar"]
-p3          = ["UP", -6, 2, -inf, inf, "temperature profile parameter p3", "log10bar"]
+lga1        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a1", ""]
+lga2        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a2", ""]
+lgp1        = ["UP", -6, 2, -inf, inf, "temperature profile parameter p1", "log10bar"]
+lgp2        = ["UP", -6, 2, -inf, inf, "temperature profile parameter p2", "log10bar"]
+lgp3        = ["UP", -6, 2, -inf, inf, "temperature profile parameter p3", "log10bar"]
 m2h         = ["UP", -1, 3, -1, 3, "atmospheric metallicity", ""]
 c2o         = ["UP", 0.1, 1.6, 0.1, 1.6, "C/O ratio", ""]
 
 [SAMPLER]
-method      = "emcee"
-npools      = 15
-nwalkers    = 60
-niter_de    = 1000
-niter_mcmc  = 1000
+# method      = "emcee"
+# npools      = 30
+# nwalkers    = 60
+# niter_de    = 1000
+# niter_mcmc  = 2000
+method        = "multinest" 
+n_live_points = 60
+evidence_tolerance  = 1
+sampling_efficiency = 0.05 
 niter_white = 1000

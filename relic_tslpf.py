@@ -178,3 +178,10 @@ class NewTSLPF(TSLPF):
             for i in range(self.data.size):
                 lnl += self._gp[i].log_likelihood(self._gp_flux[i] - fmod[i][self.data[i].mask])
         return lnl 
+
+    def lnlikelihood_ns(self, pv: ndarray) -> float:
+        if any(pv <= self.ps.lbounds) | any(pv >= self.ps.ubounds):
+            return -inf
+        lnp = self.additional_priors(pv)
+        return -inf if not isfinite(lnp) else self.lnlikelihood(pv) 
+    

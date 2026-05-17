@@ -6,13 +6,15 @@ from exoiris.ldtkld import LDTkLD
 from exoiris import TSData, TSDataGroup
 from functools import reduce
 
-from numpy import squeeze, ndarray
+from numpy import array, squeeze, ndarray, asarray, isfinite, zeros
 from pytransit.param import UniformPrior as UP, NormalPrior as NP, GParameter   
 from typing import Callable, Literal, Tuple, Optional, Union
 from relic_atmosphere import BaseAtmosphere
 from relic_exoiris import ReLicExoIris 
 from relic_white import NewWhiteLPF
 from multiprocessing.pool import Pool
+from scipy.stats import norm, truncnorm
+
 
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -171,7 +173,10 @@ class ReLic:
             return self.exoiris._wa.lnposterior(pv)
         
         niter = self.cfg["SAMPLER"]["niter_white"]
-        npop = self.cfg["SAMPLER"]["nwalkers"]
+        try:
+            npop = self.cfg["SAMPLER"]["nwalkers"]
+        except KeyError:
+            npop = 50
 
         self.exoiris._wa.optimize_global(niter=niter, npop=npop, pool=pool, 
             lnpost=lnpost, plot_convergence=False, use_tqdm=True, leave=True)
@@ -200,9 +205,16 @@ class ReLic:
     def sample_from_prior(self, size: int) -> ndarray:
         return squeeze(self.exoiris.ps.sample_from_prior(size))
 
+    def prior_transform(self, unit_cube: ndarray) -> ndarray:
+        ...
+
     def lnposterior(self, pv: ndarray) -> float:
         """  Evaluate the log posterior for a given parameter vector pv. """
         return self.exoiris._tsa.lnposterior(pv)
+    
+    def lnlikelihood_ns(self, pv: ndarray) -> float:
+        """ Evaluate the log likelihood for MultiNest sampling. """
+        return self.exoiris._tsa.lnlikelihood_ns(pv)
 
     def run_de(self, niter: int = 200, npop: Optional[int] = None, 
         initial_population: Optional[ndarray] = None, pool: Optional[Pool] = None, 
@@ -272,7 +284,7 @@ class ReLic:
             thin=thin, repeats=repeats, pool=pool, lnpost=lnpost, use_tqdm=use_tqdm,
             leave=True, vectorize=False, save=False)
 
-    def save(self, overwrite: bool = False, config_file: str = None):
+    def save_mcmc(self, overwrite: bool = False, config_file: str = None):
         # Results from ExoIris
         self.exoiris.save(overwrite=overwrite)
         outname = os.path.join(self.cfg['PATH']['output_dir'], self.exoiris.name+'.fits')
@@ -282,3 +294,116 @@ class ReLic:
             outname = os.path.join(self.cfg['PATH']['output_dir'], os.path.basename(config_file))
             shutil.copy(config_file, outname)
             print(f"Configuration file copied to {outname}.")
+
+    def run_multinest(self, LogLikelihood: Callable, Prior: Callable, n_live_points: int = 400, evidence_tolerance: float = 0.5, sampling_efficiency: float = 0.8, resume=False, **kwargs):
+        print("\nRunning MultiNest sampling...")
+        from pymultinest.run import run 
+        
+        def SafePrior(cube, ndim, nparams):
+            try: 
+                a = array([cube[i] for i in range(ndim)])
+                b = Prior(a)
+                for i in range(ndim):
+                    cube[i] = b[i]
+            except Exception as e:
+                import sys
+                sys.stderr.write('ERROR in prior: %s\n' % e)
+                sys.exit(1)
+                
+        def SafeLoglikelihood(cube, ndim, nparams, lnew):
+            try:
+                a = array([cube[i] for i in range(ndim)])
+                l = float(LogLikelihood(a)) 
+                return l
+            except Exception as e:
+                import sys
+                sys.stderr.write('ERROR in loglikelihood: %s\n' % e)
+                sys.exit(1)
+            
+        run(
+            LogLikelihood=SafeLoglikelihood,
+            Prior=SafePrior,
+            n_dims=len(self.exoiris.ps),
+            importance_nested_sampling=True,
+            const_efficiency_mode=True,
+            n_iter_before_update=1000,
+            n_live_points=n_live_points,
+            evidence_tolerance=evidence_tolerance,
+            sampling_efficiency=sampling_efficiency,
+            outputfiles_basename=self.cfg['PATH']['output_dir'],
+            resume=resume,
+            verbose=True,
+            **kwargs
+        )
+
+
+
+class Priors:
+    def __init__(self, prior_list: list[GParameter]):
+
+        # initialize lists for different prior types
+        u_idx, u_a, u_b = [], [], []
+        n_idx, n_mean, n_std = [], [], []
+        t_idx, t_a, t_b, t_mean, t_std = [], [], [], [], []
+
+        for i, item in enumerate(prior_list):
+            if isinstance(item.prior, UP):
+                u_idx.append(i)
+                u_a.append(item.prior.a)
+                u_b.append(item.prior.b)
+            elif isinstance(item.prior, NP):
+                lb, ub = item.bounds
+                mean, std = item.prior.mean, item.prior.std
+                if isfinite(lb) and isfinite(ub):
+                    # truncated normal
+                    t_idx.append(i)
+                    t_a.append((lb - mean) / std)
+                    t_b.append((ub - mean) / std)
+                    t_mean.append(mean)
+                    t_std.append(std)
+                else:
+                    # unbounded normal
+                    n_idx.append(i)
+                    n_mean.append(mean)
+                    n_std.append(std)
+            else:
+                raise TypeError(f"Unsupported prior type: {type(item.prior)}")
+
+        self.u_idx = array(u_idx)
+        self.u_a = array(u_a)
+        self.u_b = array(u_b)
+
+        self.n_idx = array(n_idx)
+        self.n_mean = array(n_mean)
+        self.n_std = array(n_std)
+
+        self.tn_idx = array(t_idx)
+        self.tn_a = array(t_a)
+        self.tn_b = array(t_b)
+        self.tn_mean = array(t_mean)
+        self.tn_std = array(t_std)
+
+        self.pv = zeros(len(prior_list), dtype=float)
+
+    def prior_transform(self, cube):
+        """ Transforms a unit cube to the parameter space defined by the priors. """
+        cube = asarray(cube) 
+
+        if len(self.u_idx) > 0: # uniform priors
+            self.pv[self.u_idx] = self.u_a + cube[self.u_idx] * (self.u_b - self.u_a)
+
+        if len(self.n_idx) > 0: # normal priors
+            self.pv[self.n_idx] = norm.ppf(
+                cube[self.n_idx], loc=self.n_mean, scale=self.n_std
+            )
+
+        if len(self.tn_idx) > 0: # truncated normal priors
+            self.pv[self.tn_idx] = truncnorm.ppf(
+                cube[self.tn_idx],
+                self.tn_a,
+                self.tn_b,
+                loc=self.tn_mean,
+                scale=self.tn_std,
+            )
+
+        return self.pv

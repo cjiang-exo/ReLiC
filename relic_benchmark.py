@@ -133,7 +133,7 @@ with Pool(cfg["SAMPLER"]["npools"]) as pool:
 
 
 #%% Post analysis and plotting #################################################
-relic.save(overwrite=True, config_file=py_args.config)
+relic.save_mcmc(overwrite=True, config_file=py_args.config)
 
 """ Plot likelihood evolutions """
 plot_lnprob_evolution(relic, figname='lnprob.png', dpi=100, save=True)

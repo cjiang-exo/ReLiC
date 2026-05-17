@@ -175,21 +175,20 @@ class TP6EqChem(BaseAtmosphere):
         if not return_contribution:
             return transit_depths
         return transit_depths, _add
-    
-    def tp6madhu(self, pbar: ndarray, t0: float, a1: float, a2: float, 
-            logp1: float, logp2: float, logp3: float) -> ndarray:
+
+    def tp6madhu(self, pbar: ndarray, t0: float, lga1: float, lga2: float, 
+            lgp1: float, lgp2: float, lgp3: float) -> ndarray:
         """
         Parametric T-P profile from Madhusudhan & Seager 2009 (2009ApJ...707...24M).
 
         `pbar` should be in ascending order.
         """
 
-        # t = empty_like(pbar)
-
-        # _ln10 = log(10)
-        p1 = 10**logp1
-        p2 = 10**logp2
-        p3 = 10**logp3
+        a1 = 10**lga1
+        a2 = 10**lga2
+        p1 = 10**lgp1
+        p2 = 10**lgp2
+        p3 = 10**lgp3
 
         t1 = t0 + (log(p1 / pbar[0]) / a1)**2 
         t2 = t1 - (log(p1 / p2) / a2)**2
