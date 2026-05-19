@@ -10,5 +10,5 @@ set -e
 # python relic_benchmark.py -c "config/HD209458b_benchmark-pix.toml"
 
 # mpiexec -n 30 python relic_benchmark_ns.py -c "config/HD209458b_benchmark-r100.toml"
-mpiexec -n 30 python relic_benchmark_ns.py -c "config/HD209458b_benchmark-pix.toml"
+python relic_benchmark_dynesty.py -c "config/HD209458b_benchmark-pix.toml"
 

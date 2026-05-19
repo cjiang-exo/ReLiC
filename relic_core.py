@@ -1,12 +1,15 @@
+# import gc
 import shutil
 import h5py
 import numpy as np 
 import os
+import pickle
 from exoiris.ldtkld import LDTkLD
 from exoiris import TSData, TSDataGroup
 from functools import reduce
 
-from numpy import array, squeeze, ndarray, asarray, isfinite, zeros
+from numpy import array, squeeze, ndarray, asarray, isfinite, zeros, empty_like
+# from numpy.random import rand
 from pytransit.param import UniformPrior as UP, NormalPrior as NP, GParameter   
 from typing import Callable, Literal, Tuple, Optional, Union
 from relic_atmosphere import BaseAtmosphere
@@ -14,7 +17,8 @@ from relic_exoiris import ReLicExoIris
 from relic_white import NewWhiteLPF
 from multiprocessing.pool import Pool
 from scipy.stats import norm, truncnorm
-
+from dynesty import DynamicNestedSampler
+from dynesty import plotting as dyplot
 
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -37,10 +41,9 @@ class ReLic:
         self.raw_data    = self._load_raw_data()
         self.tsdata      = self._init_TSData()
         self.ldmodel     = self._init_LDModel()
-        self.exoiris     = self._init_ExoIris()
+        self.exoiris     = self._init_ExoIris() 
 
-        self._update_parameters()
-
+        self._update_parameters() 
         
     def _load_raw_data(self) -> list[h5py.File]:
         filelist = self.cfg["PATH"]["input_file"]
@@ -56,6 +59,12 @@ class ReLic:
             except KeyError:
                 wl_edges = None
 
+            _flux = rd['flux'][:]
+            _flux_err = rd['flux_err'][:] 
+            if _flux.shape[0] != len(rd['wavelength'][:]):
+                _flux = _flux.T
+                _flux_err = _flux_err.T
+
             #######################################
             _time  = rd['bjd_tdb'][:]
             _time -= np.median(_time)  
@@ -63,8 +72,8 @@ class ReLic:
             dlist.append(TSData(
                 time        = _time, 
                 wavelength  = rd['wavelength'][:], 
-                fluxes      = rd['flux'][:], 
-                errors      = rd['flux_err'][:], 
+                fluxes      = _flux, 
+                errors      = _flux_err, 
                 wl_edges    = wl_edges, 
                 name        = self.cfg['EXOIRIS']['instruments'][i] + f"_d{i}", 
                 noise_group = self.cfg["EXOIRIS"]["noise_groups"][i], 
@@ -165,6 +174,9 @@ class ReLic:
         self.exoiris.ps.freeze()
         self.exoiris.print_parameters()
 
+    def init_prior_transform(self,):
+        self.prior_transform = Priors(self.exoiris.ps)
+
     def fit_white(self, covariates: list[np.ndarray]=None, pool:Optional[Pool]=None):
         print("Fitting white light curves to validate covariates...")
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa, covariates=covariates)
@@ -205,15 +217,18 @@ class ReLic:
     def sample_from_prior(self, size: int) -> ndarray:
         return squeeze(self.exoiris.ps.sample_from_prior(size))
 
-    def prior_transform(self, unit_cube: ndarray) -> ndarray:
-        ...
+    # def prior_transform(self, unit_cube: ndarray) -> ndarray:
+    #     """ Input a unit cube and output a transformed parameter vector """
+    #     ...
 
     def lnposterior(self, pv: ndarray) -> float:
         """  Evaluate the log posterior for a given parameter vector pv. """
         return self.exoiris._tsa.lnposterior(pv)
     
     def lnlikelihood_ns(self, pv: ndarray) -> float:
-        """ Evaluate the log likelihood for MultiNest sampling. """
+        """ Evaluate the log likelihood for nested sampling. """
+        # if rand() < 1e-3: # prevent memory leak in long runs 
+        #     gc.collect()
         return self.exoiris._tsa.lnlikelihood_ns(pv)
 
     def run_de(self, niter: int = 200, npop: Optional[int] = None, 
@@ -336,6 +351,48 @@ class ReLic:
             **kwargs
         )
 
+    def run_dynesty(self, pool: Optional[Pool] = None, nlivepoints: int = 100, bound='multi', sample='rwalk', n_effective: int = None, maxbatch: int = None, queue_size: int = None): 
+ 
+        def loglikelihood(pv):
+            return self.lnlikelihood_ns(pv)
+        def prior_transform(uv):
+            return self.prior_transform(uv)
+
+        sampler = DynamicNestedSampler( 
+            loglikelihood,
+            prior_transform,
+            len(self.exoiris._tsa.ps), 
+            pool=pool,
+            nlive=nlivepoints, 
+            bound=bound,
+            sample=sample,
+            queue_size=queue_size,
+            use_pool={"prior_transform": False}
+        ) 
+        sampler.run_nested(
+            dlogz_init=self.cfg["SAMPLER"]["evidence_tolerance"], 
+            n_effective=n_effective,
+            maxbatch=maxbatch,
+        )
+
+        results = sampler.results
+        with open(os.path.join(self.cfg["PATH"]["output_dir"], 'ns_results.pkl'), 'wb') as f:
+            pickle.dump(results, f)
+            print(f"Dynesty results saved to {os.path.join(self.cfg['PATH']['output_dir'], 'ns_results.pkl')}")
+
+        results.summary()
+        samples = results.samples_equal()
+        print(f"Posterior samples collected: {samples.shape[0]}")
+
+        try:
+            fig, axes = dyplot.runplot(results) 
+            fig.tight_layout()
+            fig.savefig(os.path.join(self.cfg["PATH"]["output_dir"], 'dynesty_runplot.png'), dpi=100)
+        except Exception as e:
+            print(f"Error generating dynesty runplot: {e}")
+
+        return results
+
 
 
 class Priors:
@@ -382,23 +439,22 @@ class Priors:
         self.tn_b = array(t_b)
         self.tn_mean = array(t_mean)
         self.tn_std = array(t_std)
-
-        self.pv = zeros(len(prior_list), dtype=float)
-
-    def prior_transform(self, cube):
+ 
+    def __call__(self, cube):
         """ Transforms a unit cube to the parameter space defined by the priors. """
         cube = asarray(cube) 
+        pv = empty_like(cube)
 
         if len(self.u_idx) > 0: # uniform priors
-            self.pv[self.u_idx] = self.u_a + cube[self.u_idx] * (self.u_b - self.u_a)
+            pv[self.u_idx] = self.u_a + cube[self.u_idx] * (self.u_b - self.u_a)
 
         if len(self.n_idx) > 0: # normal priors
-            self.pv[self.n_idx] = norm.ppf(
+            pv[self.n_idx] = norm.ppf(
                 cube[self.n_idx], loc=self.n_mean, scale=self.n_std
             )
 
         if len(self.tn_idx) > 0: # truncated normal priors
-            self.pv[self.tn_idx] = truncnorm.ppf(
+            pv[self.tn_idx] = truncnorm.ppf(
                 cube[self.tn_idx],
                 self.tn_a,
                 self.tn_b,
@@ -406,4 +462,4 @@ class Priors:
                 scale=self.tn_std,
             )
 
-        return self.pv
+        return pv

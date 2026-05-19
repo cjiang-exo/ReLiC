@@ -42,14 +42,6 @@ atmos_model = AtmosModel(cfg) # user-defined
 
 relic = ReLic(atmos_model)
 
-def additional_priors(pv):
-    p1, p2, p3 = pv[16:19]
-    if (p1 > p3) or (p2 > p3):
-        return -inf
-    return 0.0
-
-relic.exoiris._tsa.additional_priors = additional_priors
-
 print("Initialization complete.") 
 
 #%% fit white light curves to validate the covariates ##########################

@@ -83,7 +83,7 @@ def plot_residuals(relic: ReLic, maxlike_params: ndarray, figname:str = "residua
             fig.savefig(outname, dpi=dpi)
             print(f"A preview of residuals is saved as {outname}.")
 
-def plot_corners(relic: ReLic, samples=None, truths=None, figname="corners.pdf", save:bool=True):
+def plot_corners(relic: ReLic, samples=None, truths=None, figname="corners.pdf", dpi=100, save:bool=True):
 
     samples = samples if samples is not None else relic.exoiris._tsa.sampler.flatchain
 
@@ -99,7 +99,7 @@ def plot_corners(relic: ReLic, samples=None, truths=None, figname="corners.pdf",
     
     if save:
         outname = os.path.join(relic.cfg['PATH']['output_dir'], figname)
-        fig.savefig(outname) 
+        fig.savefig(outname, dpi=dpi) 
         print(f"A preview of posterior distributions is saved as {outname}.") 
 
 

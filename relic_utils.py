@@ -1,5 +1,5 @@
 from astropy.stats import sigma_clip 
-from numpy import any, interp, sum as np_sum, array, hstack, ndarray
+from numpy import any, interp, sum as np_sum, array, hstack, ndarray, log2, round
 from mpi4py import MPI
 from numpy.polynomial import Chebyshev
 
@@ -55,7 +55,7 @@ def print_elapsed_time(elapsed_time:float):
     time_end = current_time() 
     elapsed_time = time_end - time_start
 
-    Args:
+    Parameters:
         elapsed_time (float): The elapsed time in seconds.
 
     Returns:
@@ -75,3 +75,33 @@ def get_maxlike_estimates(relic: ReLic):
         raise RuntimeError("MCMC sampling not performed.") from e
     maxlike_params = postsamples[lnp.flatten().argmax()] 
     return maxlike_params
+
+def optimize_parallelization(nlivepoints:int, npools:int, allow_memoryleak: float = 1.0):
+    """    
+    Optimize nested-sampling parallelization settings for multiprocessing.
+ 
+    Args:
+        nlivepoints (int):
+            Initial number of nested-sampling live points.
+        npools (int):
+            Number of worker pools/processes available.
+        allow_memoryleak (float, optional):
+            Allowed memory growth budget in GiB used to scale `maxtasksperchild`.
+            Defaults to 1.0.
+    Returns:
+        tuple:
+            - suggested_nlivepoints (int): Adjusted number of live points for better parallel efficiency.
+            - maxtasks (int): Suggested `maxtasksperchild` to mitigate memory leaks during sampling.
+    """
+
+    _d = log2(nlivepoints/npools) 
+    suggested_nlivepoints = max(int(2**round(_d) * npools), npools)
+    
+    _chunksize, _extra = divmod(suggested_nlivepoints, (npools * 4))
+    if _extra:
+        _chunksize += 1 
+    maxtasks = max(4, int(40000 * allow_memoryleak // nlivepoints) // 4 * 4)
+
+    print(f"Suggested n_live_points: {suggested_nlivepoints} (rounded from {nlivepoints})")
+    print(f"Suggested maxtasksperchild: {maxtasks}")
+    return suggested_nlivepoints, maxtasks
