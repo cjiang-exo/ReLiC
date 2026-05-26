@@ -255,7 +255,7 @@ class NewTSLPF(TSLPF):
                     self.set_gp_hyperparameters(*gp_pv[n*3:(n+1)*3], idata=n)
             for i in range(self.data.size):
                 lnl += self._gp[i].log_likelihood(self._gp_flux[i] - fmod[i][self.data[i].mask])
-        return lnl 
+        return lnl if isfinite(lnl) else -inf
 
     def lnlikelihood_ns(self, pv: ndarray) -> float:
         if any(pv <= self.ps.lbounds) | any(pv >= self.ps.ubounds):
