@@ -3,12 +3,10 @@
 # tail -f output.log
 
 set -e
-
-# python lcr_exec_mcmc.py -c "config/HD209458b_joint_flatmass.toml"
-
+ 
 # python relic_benchmark.py -c "config/HD209458b_benchmark-r100.toml"
 # python relic_benchmark.py -c "config/HD209458b_benchmark-pix.toml"
-
-# mpiexec -n 30 python relic_benchmark_ns.py -c "config/HD209458b_benchmark-r100.toml"
-python relic_benchmark_dynesty.py -c "config/HD209458b_benchmark-pix.toml"
-
+ 
+# python relic_exec_ns.py -c "config/HD209458b-joint-r100-tp6eqc.toml"
+# python relic_exec_ns.py -c "config/HD209458b-joint-pix-tp6eqc.toml"
+python relic_exec_ns.py -c "config/HD209458b-jwst-r100-gp-tp6eqc.toml"

@@ -6,6 +6,11 @@ import os
 from relic_core import ReLic
 from numpy import ndarray, savetxt, where, diff, median
 
+NM_WHITE_MARGINALIZED = 0
+NM_GP_FIXED = 1
+NM_GP_FREE = 2
+NM_WHITE_PROFILED = 3
+
 def plot_white(relic: ReLic, figname="white_fit.png", dpi=100):
     fig = relic.exoiris.plot_white(figsize=(3 * relic.exoiris.data.size, 7.2))
     outname = os.path.join(relic.cfg['PATH']['output_dir'], figname)
@@ -47,16 +52,30 @@ def plot_2dfluxes(relic: ReLic, figname="fluxes.png", dpi=100, save:bool=True):
             print(f"A preview of 2D fluxes is saved as {outname}.")
 
 def plot_residuals(relic: ReLic, maxlike_params: ndarray, figname:str = "residuals.png", dpi:int=100, save:bool=True):
+    
+    tsa = relic.exoiris._tsa
 
-    fmod = relic.exoiris._tsa.flux_model(maxlike_params, include_baseline=True)
+    fmod = tsa.flux_model(maxlike_params, include_baseline=False)
+    ffit = tsa.flux_model(maxlike_params, include_baseline=True)
 
     for i, d in enumerate(relic.exoiris.data):
-        fres = d.fluxes - fmod[i]
-        zres = fres/d.errors
+        if tsa._nm in (NM_WHITE_PROFILED, NM_WHITE_PROFILED):
+            fresidual = d.fluxes - ffit[i]
+            fdetrend = fresidual + fmod[i] 
+        elif tsa._nm in (NM_GP_FIXED, NM_GP_FREE): # using GP
+            if tsa._nm == NM_GP_FREE: 
+                    gp_pv = 10**maxlike_params[tsa._sl_gp]
+                    for n in relic.exoiris.data.noise_groups: 
+                        tsa.set_gp_hyperparameters(*gp_pv[n*3:(n+1)*3], idata=n) 
+            fresidual = tsa._gp_flux[i] - fmod[i][tsa.data[i].mask]
+            gp_trend = tsa._gp[i].predict(fresidual, tsa._gp_time[i])
+            fresidual -= gp_trend
+            fdetrend = fresidual.reshape(fmod[i].shape) + fmod[i]
+        zres = fresidual / d.errors
 
         fig, ax = pl.subplots(2,1, figsize=(6, 6))
 
-        im_f = ax[0].pcolormesh(d.time, d.wavelength, d.fluxes, shading='auto')
+        im_f = ax[0].pcolormesh(d.time, d.wavelength, fdetrend, shading='auto')
         im_z = ax[1].pcolormesh(d.time, d.wavelength, zres, shading='auto', 
                                 vmin=-5, vmax=5, cmap='PuOr_r')
         

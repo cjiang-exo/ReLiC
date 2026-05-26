@@ -31,7 +31,7 @@ wavelength_bounds_micron = [2.35, 5.05]
 chemical_species = [
   # "Na", "K", "TiO", "VO", "FeH", 
   "H2O", "CO", "CO2", "CH4", "NH3", 
-  "C2H2", "HCN", "SiO", "H2S", "PH3"
+  # "C2H2", "HCN", "SiO", "H2S", "PH3"
 ]
 rayleigh_species  = ["H2", "He"]
 continuum_species = ["H2--H2", "H2--He"]
@@ -86,5 +86,5 @@ npools      = 30
 # niter_mcmc  = 2000 
 n_live_points = 120
 evidence_tolerance  = 1.0
-n_effective = 1000 
+n_effective = nan 
 niter_white = 1000

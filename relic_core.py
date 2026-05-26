@@ -1,4 +1,3 @@
-# import gc
 import shutil
 import h5py
 import numpy as np 
@@ -8,8 +7,7 @@ from exoiris.ldtkld import LDTkLD
 from exoiris import TSData, TSDataGroup
 from functools import reduce
 
-from numpy import array, squeeze, ndarray, asarray, isfinite, zeros, empty_like
-# from numpy.random import rand
+from numpy import array, squeeze, ndarray, asarray, isfinite, zeros, empty_like 
 from pytransit.param import UniformPrior as UP, NormalPrior as NP, GParameter   
 from typing import Callable, Literal, Tuple, Optional, Union
 from relic_atmosphere import BaseAtmosphere
@@ -19,6 +17,7 @@ from multiprocessing.pool import Pool
 from scipy.stats import norm, truncnorm
 from dynesty import DynamicNestedSampler
 from dynesty import plotting as dyplot
+from dynesty.utils import get_neff_from_logwt
 
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -64,13 +63,9 @@ class ReLic:
             if _flux.shape[0] != len(rd['wavelength'][:]):
                 _flux = _flux.T
                 _flux_err = _flux_err.T
-
-            #######################################
-            _time  = rd['bjd_tdb'][:]
-            _time -= np.median(_time)  
-            #######################################
+ 
             dlist.append(TSData(
-                time        = _time, 
+                time        = rd['bjd_tdb'][:], 
                 wavelength  = rd['wavelength'][:], 
                 fluxes      = _flux, 
                 errors      = _flux_err, 
@@ -177,22 +172,19 @@ class ReLic:
     def init_prior_transform(self,):
         self.prior_transform = Priors(self.exoiris.ps)
 
-    def fit_white(self, covariates: list[np.ndarray]=None, pool:Optional[Pool]=None):
+    def fit_white(self, covariates: list[np.ndarray], pool:Optional[Pool]=None):
         print("Fitting white light curves to validate covariates...")
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa, covariates=covariates)
 
-        def lnpost(pv):
+        niter = self.cfg["SAMPLER"]["niter_white"]
+        npop = self.cfg["SAMPLER"]["nwalkers"]
+
+        def white_lnpost(pv):
             return self.exoiris._wa.lnposterior(pv)
         
-        niter = self.cfg["SAMPLER"]["niter_white"]
-        try:
-            npop = self.cfg["SAMPLER"]["nwalkers"]
-        except KeyError:
-            npop = 50
-
         self.exoiris._wa.optimize_global(niter=niter, npop=npop, pool=pool, 
-            lnpost=lnpost, plot_convergence=False, use_tqdm=True, leave=True)
-        
+            lnpost=white_lnpost, plot_convergence=False, use_tqdm=True, leave=True)
+
         self.exoiris._wa.optimize()
 
         self.exoiris.period = self.exoiris._wa.de.minimum_location[0]
@@ -205,22 +197,18 @@ class ReLic:
         fm = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location))
         for i, (_t, _cov) in enumerate(zip(self.exoiris._wa.times, self.exoiris._wa.covariates)):
             newt = self.exoiris.data[i].time
-            if "JWST" in self.exoiris.data[i].name:
-                sl = self.exoiris._wa.lcslices[i]
-                white_systematics = self.exoiris._wa.ofluxa[sl] - fm[sl]
-                self.exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
-            else: # HST
-                newcov = [np.interp(newt, _t, _c) for _c in _cov.T]
-                self.exoiris.data[i].covs[:] = np.array(newcov).T
+            # if "JWST" in self.exoiris.data[i].name:
+            sl = self.exoiris._wa.lcslices[i]
+            white_systematics = self.exoiris._wa.ofluxa[sl] - fm[sl]
+            self.exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
+            # else: # HST
+            #     newcov = [np.interp(newt, _t, _c) for _c in _cov.T]
+            #     self.exoiris.data[i].covs[:] = np.array(newcov).T
         print("Covariates updated based on white light curve fit.")
 
     def sample_from_prior(self, size: int) -> ndarray:
         return squeeze(self.exoiris.ps.sample_from_prior(size))
-
-    # def prior_transform(self, unit_cube: ndarray) -> ndarray:
-    #     """ Input a unit cube and output a transformed parameter vector """
-    #     ...
-
+ 
     def lnposterior(self, pv: ndarray) -> float:
         """  Evaluate the log posterior for a given parameter vector pv. """
         return self.exoiris._tsa.lnposterior(pv)
@@ -310,54 +298,8 @@ class ReLic:
             shutil.copy(config_file, outname)
             print(f"Configuration file copied to {outname}.")
 
-    def run_multinest(self, LogLikelihood: Callable, Prior: Callable, n_live_points: int = 400, evidence_tolerance: float = 0.5, sampling_efficiency: float = 0.8, resume=False, **kwargs):
-        print("\nRunning MultiNest sampling...")
-        from pymultinest.run import run 
-        
-        def SafePrior(cube, ndim, nparams):
-            try: 
-                a = array([cube[i] for i in range(ndim)])
-                b = Prior(a)
-                for i in range(ndim):
-                    cube[i] = b[i]
-            except Exception as e:
-                import sys
-                sys.stderr.write('ERROR in prior: %s\n' % e)
-                sys.exit(1)
-                
-        def SafeLoglikelihood(cube, ndim, nparams, lnew):
-            try:
-                a = array([cube[i] for i in range(ndim)])
-                l = float(LogLikelihood(a)) 
-                return l
-            except Exception as e:
-                import sys
-                sys.stderr.write('ERROR in loglikelihood: %s\n' % e)
-                sys.exit(1)
-            
-        run(
-            LogLikelihood=SafeLoglikelihood,
-            Prior=SafePrior,
-            n_dims=len(self.exoiris.ps),
-            importance_nested_sampling=True,
-            const_efficiency_mode=True,
-            n_iter_before_update=1000,
-            n_live_points=n_live_points,
-            evidence_tolerance=evidence_tolerance,
-            sampling_efficiency=sampling_efficiency,
-            outputfiles_basename=self.cfg['PATH']['output_dir'],
-            resume=resume,
-            verbose=True,
-            **kwargs
-        )
-
-    def run_dynesty(self, pool: Optional[Pool] = None, nlivepoints: int = 100, bound='multi', sample='rwalk', n_effective: int = None, maxbatch: int = None, queue_size: int = None): 
+    def run_dynesty(self, loglikelihood: Callable, prior_transform: Callable, pool: Optional[Pool] = None, nlivepoints: int = 100, bound='multi', sample='rwalk', queue_size: int = None): 
  
-        def loglikelihood(pv):
-            return self.lnlikelihood_ns(pv)
-        def prior_transform(uv):
-            return self.prior_transform(uv)
-
         sampler = DynamicNestedSampler( 
             loglikelihood,
             prior_transform,
@@ -366,33 +308,33 @@ class ReLic:
             nlive=nlivepoints, 
             bound=bound,
             sample=sample,
-            queue_size=queue_size,
-            use_pool={"prior_transform": False}
+            queue_size=queue_size, 
         ) 
         sampler.run_nested(
-            dlogz_init=self.cfg["SAMPLER"]["evidence_tolerance"], 
-            n_effective=n_effective,
-            maxbatch=maxbatch,
+            dlogz_init=self.cfg["SAMPLER"].get("dlogz_init", 1.0),
+            n_effective=self.cfg["SAMPLER"].get("n_effective", None),
+            maxiter_batch=self.cfg["SAMPLER"].get("maxiter_batch", None),
+            maxbatch=self.cfg["SAMPLER"].get("maxbatch", None),
         )
 
         results = sampler.results
-        with open(os.path.join(self.cfg["PATH"]["output_dir"], 'ns_results.pkl'), 'wb') as f:
+        odir = self.cfg["PATH"]["output_dir"]
+        with open(os.path.join(odir, 'ns_results.pkl'), 'wb') as f:
             pickle.dump(results, f)
-            print(f"Dynesty results saved to {os.path.join(self.cfg['PATH']['output_dir'], 'ns_results.pkl')}")
+            print(f"Dynesty results saved to {os.path.join(odir, 'ns_results.pkl')}")
 
-        results.summary()
-        samples = results.samples_equal()
-        print(f"Posterior samples collected: {samples.shape[0]}")
+        results.summary() 
+        n_effective = get_neff_from_logwt(results.logwt)
+        print(f"Number of effective samples: {n_effective}")
 
         try:
             fig, axes = dyplot.runplot(results) 
             fig.tight_layout()
-            fig.savefig(os.path.join(self.cfg["PATH"]["output_dir"], 'dynesty_runplot.png'), dpi=100)
+            fig.savefig(os.path.join(odir, 'dynesty_runplot.png'), dpi=100)
         except Exception as e:
             print(f"Error generating dynesty runplot: {e}")
 
         return results
-
 
 
 class Priors:

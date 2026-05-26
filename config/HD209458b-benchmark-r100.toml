@@ -3,7 +3,7 @@ input_file = [
   "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
   "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260518-benchmark-pix-dynesty/"
+output_dir = "../results/HD209458b/results-test/"
 
 [STAR]
 reference   = "2017AJ....153..136S"
@@ -31,7 +31,7 @@ wavelength_bounds_micron = [2.35, 5.05]
 chemical_species = [
   # "Na", "K", "TiO", "VO", "FeH", 
   "H2O", "CO", "CO2", "CH4", "NH3", 
-  "C2H2", "HCN", "SiO", "H2S", "PH3"
+  # "C2H2", "HCN", "SiO", "H2S", "PH3"
 ]
 rayleigh_species  = ["H2", "He"]
 continuum_species = ["H2--H2", "H2--He"]

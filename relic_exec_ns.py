@@ -1,5 +1,5 @@
 #%% 
-import os 
+import os
 os.environ["OMP_NUM_THREADS"] =        "1"
 os.environ["OPENBLAS_NUM_THREADS"] =   "1"
 os.environ["MKL_NUM_THREADS"] =        "1"
@@ -7,20 +7,19 @@ os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] =    "1"
 os.environ["NUMBA_NUM_THREADS"] =      "1" 
 os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'   
-
 import argparse
 import numpy as np
 import tomllib     
 import shutil
 
 from relic_core import ReLic
-from relic_atmosphere import TP6EqChem as AtmosModel
+from relic_atmosphere import TP6EqChem
 from relic_plots import *
-from relic_utils import generate_covariates, get_maxlike_estimates, print_elapsed_time, optimize_parallelization
+from relic_utils import generate_covariates, optimize_parallelization
  
 from multiprocessing import Pool
  
-DEFAULT_CFG = 'config/HD209458b-benchmark-r100.toml'
+DEFAULT_CFG = 'config/HD209458b-jwst-r100-gp-tp6eqc.toml'
 
 if 'get_ipython' in globals():
     class Args:
@@ -39,61 +38,32 @@ print(f"Configuration file loaded: {py_args.config}")
 shutil.copy(py_args.config, os.path.join(cfg["PATH"]["output_dir"], os.path.basename(py_args.config)))
 
 #%% Initialization #############################################################
- 
-atmos_model = AtmosModel(cfg) # user-defined
+
+atmos_model = TP6EqChem(cfg) # user-defined
 
 relic = ReLic(atmos_model)
- 
+
 relic.init_prior_transform() # if using nested sampling
 
 print("Initialization complete.") 
 
-#%% inject a truth spectrum for testing ########################################
+#%% fit white light curves to validate the covariates ##########################
+ 
+jitters = []
+for i, rd in enumerate(relic.raw_data):
+    _jit = rd["detrend_vectors"][:, :2] if "STIS" in relic.exoiris.data[i].name else None 
+    jitters.append(_jit) 
 
-truth_pv = np.array([
-    1.0, 3.5, 0.5, 0.00, 6000.0, 4.5, 0.0, 
-    # -3.5, -1, -3.5, -3.5, -1, -3.5,
-    1.5, 1.5,
-    0.8, -2, -1, 0.5, 1400, 0, -0.3, -3, -3, 0.0, 0.5
-])
+white_covariates = generate_covariates(relic, jitters)
 
-rng = np.random.default_rng(42)
-truth_fmod = relic.exoiris._tsa.flux_model(truth_pv, include_baseline=False)
+with Pool(cfg["SAMPLER"]["npools"]) as pool:
+    relic.fit_white(covariates=white_covariates, pool=pool)
 
-# for i in range(relic.exoiris.data.size):
-#     relic.exoiris._tsa.set_gp_hyperparameters(10**-3.5, 10**-1, 10**-3.5, idata=i)
-# gp_sim = [relic.exoiris._tsa._gp[i].sample(include_mean=False).reshape(relic.exoiris.data[i].fluxes.shape) for i in range(relic.exoiris.data.size)]
+relic.update_covariates()
 
-for i in range(relic.exoiris.data.size):
-    _errors = relic.exoiris.data[i].errors
-    relic.exoiris.data[i].fluxes = truth_fmod[i] + rng.normal(np.zeros_like(_errors), 1.5*_errors)
-
+plot_white(relic)
 
 #%% test likelihood evaluation #################################################
-
-''' 
-测试单线程运行是否存在内存溢出问题 
-
-import tracemalloc
-
-tracemalloc.start()
-snap1 = tracemalloc.take_snapshot()
-for _ in range(10):
-    print("iteration", _)
-    initial_cube = np.random.uniform(size=(30, len(relic.exoiris._tsa.ps)))
-    initial_population = [nsprior.prior_transform(c) for c in initial_cube]
-    pp = [relic.exoiris._tsa.lnlikelihood(_p) for _p in initial_population]
-snap2 = tracemalloc.take_snapshot()
-tracemalloc.stop()
-
-# 获取内存增长最大的代码行
-stats = snap2.compare_to(snap1, 'lineno')
-for stat in stats[:10]:
-    print(stat)
-
-    165 ms, when using five molecules, GP, JWST NIRCam R100
-    151 ms, when using five molecules, BF, JWST NIRCam R100
-'''
 
 print("Running a quick test of posterior evaluation...")
 
@@ -113,21 +83,18 @@ def prior_transform(uv):
     return relic.prior_transform(uv)
 
 nlivepoints, maxtasks = optimize_parallelization(
-    cfg["SAMPLER"]["n_live_points"], cfg["SAMPLER"]["npools"]
-)
+    cfg["SAMPLER"]["n_live_points"], cfg["SAMPLER"]["npools"])
 
 with Pool(cfg["SAMPLER"]["npools"], maxtasksperchild=maxtasks) as pool:
     results = relic.run_dynesty(
         loglikelihood   = loglikelihood,
         prior_transform = prior_transform,
         pool            = pool,
+        queue_size      = cfg["SAMPLER"]["npools"],
         nlivepoints     = nlivepoints,
-        bound           = "single",
-        sample          = "rwalk",
-        maxbatch        = 1,
-        queue_size      = nlivepoints
+        bound           = "multi",
+        sample          = "rwalk", 
     )
-
 
 #%% Post analysis and plotting #################################################
 
@@ -137,13 +104,13 @@ plot_2dfluxes(relic, figname='fluxes.png', dpi=100, save=True)
 """ Plot limb darkening profiles """
 plot_ldprofiles(relic, figname='ldprofiles.png', dpi=100, save=True)
 
-""" Plot posterior distributions """ 
-samples = results.samples_equal()
-plot_corners(relic, samples=samples, truths=truth_pv, figname='corners.pdf', save=True)
+""" Plot posterior distributions """  
+maxlike_params = results['samples'][results['logl'].argmax()]
+plot_corners(relic, samples=results.samples_equal(), truths=maxlike_params, figname='corners.pdf', save=True) 
 
 """ Plot best-fit residuals """ 
-median_params = np.median(samples, axis=0)
-plot_residuals(relic, median_params, figname='residuals.png', dpi=100, save=True)
+plot_residuals(relic, maxlike_params, figname='residuals.png', dpi=100, save=True)
 
 print("Done!")
+
 # %%
