@@ -13,13 +13,13 @@ import tomllib
 import shutil
 
 from relic_core import ReLic
-from relic_atmosphere import TP6EqChem
+from relic_atmosphere import TP6EqChem, IsothermalFreeChem
 from relic_plots import *
 from relic_utils import generate_covariates, optimize_parallelization
  
 from multiprocessing import Pool
  
-DEFAULT_CFG = 'config/HD209458b-jwst-r100-gp-tp6eqc.toml'
+DEFAULT_CFG = 'config/HD209458b-hst-fc.toml'
 
 if 'get_ipython' in globals():
     class Args:
@@ -39,7 +39,7 @@ shutil.copy(py_args.config, os.path.join(cfg["PATH"]["output_dir"], os.path.base
 
 #%% Initialization #############################################################
 
-atmos_model = TP6EqChem(cfg) # user-defined
+atmos_model = IsothermalFreeChem(cfg) # user-defined
 
 relic = ReLic(atmos_model)
 
@@ -110,6 +110,9 @@ plot_corners(relic, samples=results.samples_equal(), truths=maxlike_params, fign
 
 """ Plot best-fit residuals """ 
 plot_residuals(relic, maxlike_params, figname='residuals.png', dpi=100, save=True)
+
+""" Plot transmission spectra """
+plot_transmission_spectra(relic, maxlike_params, samples=results.samples_equal(), figname='ts_preview.png', dpi=100, save=True)
 
 print("Done!")
 

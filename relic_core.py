@@ -194,12 +194,15 @@ class ReLic:
             self.exoiris.period, self.exoiris.transit_duration)
         
     def update_covariates(self,):
-        fm = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location))
+        fmod = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=False))
+        ffit = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=True))
         for i, (_t, _cov) in enumerate(zip(self.exoiris._wa.times, self.exoiris._wa.covariates)):
             newt = self.exoiris.data[i].time
             # if "JWST" in self.exoiris.data[i].name:
             sl = self.exoiris._wa.lcslices[i]
-            white_systematics = self.exoiris._wa.ofluxa[sl] - fm[sl]
+            white_systematics = ffit[sl] - fmod[sl]
+            white_systematics -= np.mean(white_systematics)
+            white_systematics /= np.std(white_systematics) 
             self.exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
             # else: # HST
             #     newcov = [np.interp(newt, _t, _c) for _c in _cov.T]
@@ -214,9 +217,7 @@ class ReLic:
         return self.exoiris._tsa.lnposterior(pv)
     
     def lnlikelihood_ns(self, pv: ndarray) -> float:
-        """ Evaluate the log likelihood for nested sampling. """
-        # if rand() < 1e-3: # prevent memory leak in long runs 
-        #     gc.collect()
+        """ Evaluate the log likelihood for nested sampling. """ 
         return self.exoiris._tsa.lnlikelihood_ns(pv)
 
     def run_de(self, niter: int = 200, npop: Optional[int] = None, 

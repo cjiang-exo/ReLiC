@@ -1,10 +1,12 @@
 import corner 
 import numpy as np
 import matplotlib.pyplot as pl
-import os
-# from exoiris import TSDataGroup
+import os 
 from relic_core import ReLic
-from numpy import ndarray, savetxt, where, diff, median
+from relic_atmosphere import BaseAtmosphere
+from numpy import ndarray, savetxt, where, diff, median, sqrt
+from astropy.visualization import ZScaleInterval
+from petitRADTRANS.physics import rebin_spectrum_bin, rebin_spectrum
 
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -17,6 +19,7 @@ def plot_white(relic: ReLic, figname="white_fit.png", dpi=100):
     fig.tight_layout()
     fig.savefig(outname, dpi=dpi)
     print(f"A preview of white light curve fit saved as {outname}.")
+    return fig
 
 def plot_2dfluxes(relic: ReLic, figname="fluxes.png", dpi=100, save:bool=True): 
     for i, d in enumerate(relic.exoiris.data):
@@ -50,6 +53,7 @@ def plot_2dfluxes(relic: ReLic, figname="fluxes.png", dpi=100, save:bool=True):
             outname = os.path.join(relic.cfg["PATH"]["output_dir"], outname)
             fig.savefig(outname, dpi=dpi)
             print(f"A preview of 2D fluxes is saved as {outname}.")
+        return fig
 
 def plot_residuals(relic: ReLic, maxlike_params: ndarray, figname:str = "residuals.png", dpi:int=100, save:bool=True):
     
@@ -59,9 +63,11 @@ def plot_residuals(relic: ReLic, maxlike_params: ndarray, figname:str = "residua
     ffit = tsa.flux_model(maxlike_params, include_baseline=True)
 
     for i, d in enumerate(relic.exoiris.data):
-        if tsa._nm in (NM_WHITE_PROFILED, NM_WHITE_PROFILED):
+        if tsa._nm in (NM_WHITE_MARGINALIZED, NM_WHITE_PROFILED):
+            wn_multiplier = maxlike_params[tsa._sl_wnm][d.noise_group]
             fresidual = d.fluxes - ffit[i]
             fdetrend = fresidual + fmod[i] 
+            zres = fresidual / (d.errors * wn_multiplier)
         elif tsa._nm in (NM_GP_FIXED, NM_GP_FREE): # using GP
             if tsa._nm == NM_GP_FREE: 
                     gp_pv = 10**maxlike_params[tsa._sl_gp]
@@ -69,16 +75,19 @@ def plot_residuals(relic: ReLic, maxlike_params: ndarray, figname:str = "residua
                         tsa.set_gp_hyperparameters(*gp_pv[n*3:(n+1)*3], idata=n) 
             fresidual = tsa._gp_flux[i] - fmod[i][tsa.data[i].mask]
             gp_trend = tsa._gp[i].predict(fresidual, tsa._gp_time[i])
-            fresidual -= gp_trend
-            fdetrend = fresidual.reshape(fmod[i].shape) + fmod[i]
-        zres = fresidual / d.errors
+            fresidual = (fresidual - gp_trend).reshape(fmod[i].shape) 
+            fdetrend = fresidual + fmod[i]
+            zres = fresidual / sqrt(tsa._gp[i]._diag.reshape(fmod[i].shape))
 
         fig, ax = pl.subplots(2,1, figsize=(6, 6))
 
+        zscale = ZScaleInterval()
+        vmin, vmax = zscale.get_limits(zres)
+
         im_f = ax[0].pcolormesh(d.time, d.wavelength, fdetrend, shading='auto')
         im_z = ax[1].pcolormesh(d.time, d.wavelength, zres, shading='auto', 
-                                vmin=-5, vmax=5, cmap='PuOr_r')
-        
+                                vmin=vmin, vmax=vmax, cmap='PuOr_r')
+
         _t = d.time
         disc_cols = where(diff(_t) > 2*median(diff(_t)))[0]
         for _c in disc_cols:
@@ -101,6 +110,7 @@ def plot_residuals(relic: ReLic, maxlike_params: ndarray, figname:str = "residua
             outname = os.path.join(relic.cfg["PATH"]["output_dir"], outname)
             fig.savefig(outname, dpi=dpi)
             print(f"A preview of residuals is saved as {outname}.")
+        return fig
 
 def plot_corners(relic: ReLic, samples=None, truths=None, figname="corners.pdf", dpi=100, save:bool=True):
 
@@ -120,6 +130,8 @@ def plot_corners(relic: ReLic, samples=None, truths=None, figname="corners.pdf",
         outname = os.path.join(relic.cfg['PATH']['output_dir'], figname)
         fig.savefig(outname, dpi=dpi) 
         print(f"A preview of posterior distributions is saved as {outname}.") 
+    
+    return fig
 
 
 def plot_ldprofiles(relic: ReLic, teff:float=None, logg:float=None, 
@@ -162,4 +174,44 @@ def plot_lnprob_evolution(relic: ReLic, figname: str = "lnprob.png", dpi:int=100
         fig.savefig(outputname, dpi=dpi)
         print(f"Evolution of posterior probability saved as {outputname}.")
     return fig
- 
+
+def plot_transmission_spectra(relic: ReLic, maxlike_param: ndarray, samples: ndarray=None, samplesize:int=100, fiducial_resolution:int=100, logscalex:bool=False, figname:str="ts_preview.png", dpi:int=100, save:bool=True):
+    tsa = relic.exoiris._tsa
+    trans_spec = 100 * relic.atmos_model(maxlike_param)
+    ts_rebin_best = [ rebin_spectrum_bin(tsa.model_wl, trans_spec, data_wl,
+            bin_widths=tsa.bin_widths[i]) for i, data_wl in enumerate(tsa.wavelengths)
+        ]
+    
+    _flatwl = np.hstack(relic.exoiris._tsa.wavelengths)
+    wl_min, wl_max = _flatwl.min(), _flatwl.max() 
+    len_wl = np.log(wl_max / wl_min) * fiducial_resolution
+    len_wl = int(np.round(len_wl))
+    wl_fiducial = np.logspace(np.log10(wl_min), np.log10(wl_max), len_wl)
+    ts_rebin_fiducial = rebin_spectrum(tsa.model_wl, trans_spec, wl_fiducial)
+
+    fig, ax = pl.subplots(1,1,figsize=(6,4))
+
+    ax.plot(wl_fiducial, ts_rebin_fiducial, c='k', lw=1, label=f'model at R={fiducial_resolution:d}')
+
+    if samples is not None:
+        for _isample in range(samplesize):
+            trans_spec_sample = 100 * relic.atmos_model(samples[_isample])
+            ts_rebin_sample = [ rebin_spectrum_bin(tsa.model_wl, trans_spec_sample, data_wl,
+                    bin_widths=tsa.bin_widths[i]) for i, data_wl in enumerate(tsa.wavelengths)
+                ]
+            for i, data_wl in enumerate(tsa.wavelengths):
+                ax.plot(data_wl, ts_rebin_sample[i], c='C0', lw=0.5, alpha=0.2)
+
+    for i, data_wl in enumerate(tsa.wavelengths):
+        ax.plot(data_wl, ts_rebin_best[i], c='k', lw=2, zorder=3)
+    
+    ax.set_xlabel('Wavelength [micron]')
+    ax.set_ylabel('Transit depth (%)')
+    if logscalex:
+        ax.set_xscale('log')
+    fig.tight_layout()
+    if save:
+        outname = os.path.join(relic.cfg['PATH']['output_dir'], figname)
+        fig.savefig(outname, dpi=dpi)
+        print(f"A preview of transmission spectra is saved as {outname}.")
+    return fig

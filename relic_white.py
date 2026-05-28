@@ -100,12 +100,13 @@ class NewWhiteLPF(BaseLPF):
 
         return self._baseline_models 
     
-    def flux_model(self, pv):
-        
-        mtransit  = self.transit_model(pv)
-        baseline  = self.baseline(mtransit) 
-
-        return squeeze(baseline * mtransit) 
+    def flux_model(self, pv, add_baseline:bool=True):
+        mtransit = self.transit_model(pv)
+        if add_baseline:
+            baseline = self.baseline(mtransit)
+        else:
+            baseline = ones_like(mtransit)
+        return squeeze(baseline * mtransit)
 
     def lnposterior(self, pv):
         lnp = self.lnprior(pv)

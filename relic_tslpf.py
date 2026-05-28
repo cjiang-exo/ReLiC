@@ -3,7 +3,7 @@ from exoiris import TSDataGroup
 from exoiris.lmlikelihood import marginalized_loglike_mbl2d
 from numpy import isfinite, nan, ndarray, inf, arctan2, dstack, zeros_like, ones_like, empty, newaxis, tile, arange
 from celerite2 import GaussianProcess as GP
-from celerite2.terms import Term, Matern32Term
+from celerite2.terms import Term, Matern32Term, SHOTerm
 from numpy.linalg import LinAlgError 
 from petitRADTRANS.physics import rebin_spectrum_bin
 from pytransit.orbits import as_from_rhop, i_from_ba

@@ -9,4 +9,7 @@ set -e
  
 # python relic_exec_ns.py -c "config/HD209458b-joint-r100-tp6eqc.toml"
 # python relic_exec_ns.py -c "config/HD209458b-joint-pix-tp6eqc.toml"
-python relic_exec_ns.py -c "config/HD209458b-jwst-r100-gp-tp6eqc.toml"
+# python relic_exec_ns.py -c "config/HD209458b-jwst-r100-gp-tp6eqc.toml"
+
+python relic_exec_ns.py -c "config/HD209458b-hst-fc-tio.toml"
+# python relic_exec_ns.py -c "config/HD209458b-hst-noalkali.toml"
