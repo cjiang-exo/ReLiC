@@ -8,7 +8,7 @@ input_file = [
   "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
   "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260529-pix-tp6eqc/"
+output_dir = "../results/HD209458b/results-260529-pix-tp6fc/"
 
 [STAR]
 reference   = "2017AJ....153..136S"
@@ -31,7 +31,7 @@ circular_orbit          = true
 
 [ATMOSPHERE]
 pressure_layers          = 101
-pressure_bounds_log10bar = [-8, 2]
+pressure_bounds_log10bar = [-6, 2]
 wavelength_bounds_micron = [0.298, 5.05]
 chemical_species = [
   "Na", "K", 
@@ -41,7 +41,7 @@ chemical_species = [
 rayleigh_species  = ["H2", "He"]
 continuum_species = ["H2--H2", "H2--He"]
 opacity_mode      = "lbl"
-model_class       = "TP6EqChem"
+model_class       = "TP6FreeChem"
 
 [EXOIRIS]
 instruments = [ # NO SPACE
@@ -56,7 +56,7 @@ instruments = [ # NO SPACE
 wl_range_micron   = [ [], [], [], [], [], [2.4, 4.0], [3.9, 5.0] ]
 time_range_bjd    = [ [], [], [], [], [], [], [2459890.03, 2459890.3] ]
 noise_groups      = [0, 0, 1, 1, 2, 3, 4]
-n_baselines       = [2, 2, 2, 2, 2, 2, 2] 
+n_baselines       = [6, 6, 6, 6, 4, 2, 2] 
 rebin_resolutions = [0, 0, 0, 0, 0, 0, 0] # set to 0 for native resolution. 
 noise_model        = "white_marginalized"
 
@@ -88,8 +88,14 @@ lga1        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a1", ""]
 lga2        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a2", ""]
 lgp1        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p1", "log10bar"] 
 lgp2        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p2", "log10bar"] 
-m2h         = ["UP", -1, 3, -1, 3, "atmospheric metallicity", ""]
-c2o         = ["UP", 0.1, 1.6, 0.1, 1.6, "C/O ratio", ""]
+x_na        = ["UP", -12, -1, -inf, inf, "abundance of Na", "log10"]
+x_k         = ["UP", -12, -1, -inf, inf, "C/O ratio", "log10"]
+x_h2o       = ["UP", -12, -1, -inf, inf, "abundance of H2O", "log10"]
+x_co        = ["UP", -12, -1, -inf, inf, "abundance of CO", "log10"]
+x_co2       = ["UP", -12, -1, -inf, inf, "abundance of CO2", "log10"]
+x_ch4       = ["UP", -12, -1, -inf, inf, "abundance of CH4", "log10"]
+x_nh3       = ["UP", -12, -1, -inf, inf, "abundance of NH3", "log10"]
+x_hcn       = ["UP", -12, -1, -inf, inf, "abundance of HCN", "log10"]
 
 
 [SAMPLER]

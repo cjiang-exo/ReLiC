@@ -19,6 +19,19 @@ class BaseAtmosphere:
     def __call__(self, pv: ndarray) -> ndarray:
         """ Given a parameter vector, return a transmission or emission spectra."""
         raise NotImplementedError()
+    
+
+#%% 
+
+# chem = PreCalculatedEquilibriumChemistryTable() 
+# mdict = chem.interpolate_mass_fractions(
+#     co_ratios           = full_like(logspace(-8, 2, 10), 0.5),
+#     log10_metallicities = full_like(logspace(-8, 2, 10), 0.0),
+#     temperatures        = full_like(logspace(-8, 2, 10), 1000),
+#     pressures           = logspace(-8, 2, 10),
+#     full                = False
+# )
+
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -118,7 +131,7 @@ class IsothermalFreeChem(BaseAtmosphere):
 
         self.mass_fractions = {
             "H2": full_like(self.pressures_bar, 0.74),
-            "He": full_like(self.pressures_bar, 0.24),
+            "He": full_like(self.pressures_bar, 0.25),
         }
         self.mass_fractions.update({
             sp: full_like(self.pressures_bar, 1e-3) for sp in self.radtrans._line_species
@@ -146,7 +159,7 @@ class IsothermalFreeChem(BaseAtmosphere):
         _msum = sum([self.mass_fractions[sp][0] for sp in self.radtrans._line_species])
         if _msum < 1.0:
             self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.74 * (1 - _msum))
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.24 * (1 - _msum))
+            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.25 * (1 - _msum))
         else:
             self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.0)
             self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.0)
@@ -212,12 +225,13 @@ class TP6EqChem(BaseAtmosphere):
         ref_pressure    = 10**atm_params[1] # bar
         cloudtop_pbar   = 10**atm_params[2] # bar
         cloud_fraction  = atm_params[3] 
+        haze_factor     = 10**atm_params[4]
 
-        temperatures = self.tp6madhu(self.pressures_bar, *atm_params[4:9])
+        temperatures = self.tp6madhu(self.pressures_bar, *atm_params[5:10])
 
         # Assume equilibrium chemistry
-        metallicities = full_like(self.pressures_bar, atm_params[9])
-        co_ratios = full_like(self.pressures_bar, atm_params[10])
+        metallicities = full_like(self.pressures_bar, atm_params[10])
+        co_ratios = full_like(self.pressures_bar, atm_params[11])
         mass_fractions = self.chem.interpolate_mass_fractions(
             co_ratios           = co_ratios,
             log10_metallicities = metallicities,
@@ -237,6 +251,7 @@ class TP6EqChem(BaseAtmosphere):
             planet_radius               = self.planet_radius_cm,
             reference_pressure          = ref_pressure,
             opaque_cloud_top_pressure   = cloudtop_pbar,
+            haze_factor                 = haze_factor,
             cloud_fraction              = cloud_fraction,
             return_contribution         = return_contribution,
         ) 
@@ -279,6 +294,63 @@ class TP6EqChem(BaseAtmosphere):
 
         return temperatures
 
+class TP6FreeChem(TP6EqChem):
+    def __init__(self, cfg):
+        super().__init__(cfg) 
+
+        self.mass_fractions = {
+            "H2": full_like(self.pressures_bar, 0.74),
+            "He": full_like(self.pressures_bar, 0.25),
+        }
+        self.mass_fractions.update({
+            sp: full_like(self.pressures_bar, 1e-3) for sp in self.radtrans._line_species
+        })
+
+    def __call__(self, pv: ndarray, return_contribution: bool = False) -> ndarray:
+
+        atm_params      = pv[self._sl_atm]
+        ref_gravity     = atm_params[0] * self._cgravity # cgs
+        ref_pressure    = 10**atm_params[1] # bar
+        cloudtop_pbar   = 10**atm_params[2] # bar
+        cloud_fraction  = atm_params[3] 
+        haze_factor     = 10**atm_params[4]
+
+        temperatures = self.tp6madhu(self.pressures_bar, *atm_params[5:10])
+
+        for i, sp in enumerate(self.radtrans._line_species):
+            self.mass_fractions[sp][:] = full_like(self.pressures_bar, 10**atm_params[10+i])
+
+        _msum = sum([self.mass_fractions[sp][0] for sp in self.radtrans._line_species])
+        if _msum < 1.0:
+            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.74 * (1 - _msum))
+            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.25 * (1 - _msum))
+        else:
+            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.0)
+            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.0)
+            for sp in self.radtrans._line_species:
+                self.mass_fractions[sp] /= _msum
+
+        mmw = compute_mean_molar_masses(self.mass_fractions)
+
+        _, transit_radius_cm, _add = self.radtrans.calculate_transit_radii(
+            temperatures                = temperatures,
+            mass_fractions              = self.mass_fractions,
+            mean_molar_masses           = mmw,
+            reference_gravity           = ref_gravity,
+            planet_radius               = self.planet_radius_cm,
+            reference_pressure          = ref_pressure,
+            opaque_cloud_top_pressure   = cloudtop_pbar,
+            haze_factor                 = haze_factor,
+            cloud_fraction              = cloud_fraction,
+            return_contribution         = return_contribution,
+        ) 
+        transit_depths = (transit_radius_cm / self.star_radius_cm)**2
+
+        if not return_contribution:
+            return transit_depths
+        return transit_depths, _add
+    
+    
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class GuillotEQChem(BaseAtmosphere):

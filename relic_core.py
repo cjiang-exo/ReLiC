@@ -198,15 +198,15 @@ class ReLic:
         ffit = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=True))
         for i, (_t, _cov) in enumerate(zip(self.exoiris._wa.times, self.exoiris._wa.covariates)):
             newt = self.exoiris.data[i].time
-            # if "JWST" in self.exoiris.data[i].name:
-            sl = self.exoiris._wa.lcslices[i]
-            white_systematics = ffit[sl] - fmod[sl]
-            white_systematics -= np.mean(white_systematics)
-            white_systematics /= np.std(white_systematics) 
-            self.exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
-            # else: # HST
-            #     newcov = [np.interp(newt, _t, _c) for _c in _cov.T]
-            #     self.exoiris.data[i].covs[:] = np.array(newcov).T
+            if "JWST" in self.exoiris.data[i].name:
+                sl = self.exoiris._wa.lcslices[i]
+                white_systematics = ffit[sl] - fmod[sl]
+                white_systematics -= np.mean(white_systematics)
+                white_systematics /= np.std(white_systematics) 
+                self.exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
+            else: # HST
+                newcov = [np.interp(newt, _t, _c) for _c in _cov.T]
+                self.exoiris.data[i].covs[:] = np.array(newcov).T
         print("Covariates updated based on white light curve fit.")
 
     def sample_from_prior(self, size: int) -> ndarray:
@@ -312,10 +312,14 @@ class ReLic:
             queue_size=queue_size, 
         ) 
         sampler.run_nested(
-            dlogz_init=self.cfg["SAMPLER"].get("dlogz_init", 1.0),
+            dlogz_init=self.cfg["SAMPLER"].get("dlogz_init", 0.1),
             n_effective=self.cfg["SAMPLER"].get("n_effective", None),
+            maxiter_init=self.cfg["SAMPLER"].get("maxiter_init", None),
             maxiter_batch=self.cfg["SAMPLER"].get("maxiter_batch", None),
-            maxbatch=self.cfg["SAMPLER"].get("maxbatch", None),
+            maxbatch=self.cfg["SAMPLER"].get("maxbatch", 0),
+            # resume=self.cfg["SAMPLER"].get("resume", False),
+            checkpoint_file=self.cfg["SAMPLER"].get("checkpoint_file", None),
+            checkpoint_every=self.cfg["SAMPLER"].get("checkpoint_every", 300),
         )
 
         results = sampler.results

@@ -27,7 +27,10 @@ def plot_2dfluxes(relic: ReLic, figname="fluxes.png", dpi=100, save:bool=True):
         _t = d.time
         _w = d.wavelength
 
-        _im0 = ax[0].pcolormesh(_t, _w, d.fluxes, shading='auto', zorder=0)
+        zscale = ZScaleInterval()
+        vmin, vmax = zscale.get_limits(d.fluxes)
+
+        _im0 = ax[0].pcolormesh(_t, _w, d.fluxes, shading='auto', vmin=vmin, vmax=vmax, zorder=0)
         _im1 = ax[1].pcolormesh(_t, _w, d.errors, shading='auto', zorder=0)
 
         disc_cols = where(diff(_t) > 2*median(diff(_t)))[0]
@@ -53,7 +56,7 @@ def plot_2dfluxes(relic: ReLic, figname="fluxes.png", dpi=100, save:bool=True):
             outname = os.path.join(relic.cfg["PATH"]["output_dir"], outname)
             fig.savefig(outname, dpi=dpi)
             print(f"A preview of 2D fluxes is saved as {outname}.")
-        return fig
+        
 
 def plot_residuals(relic: ReLic, maxlike_params: ndarray, figname:str = "residuals.png", dpi:int=100, save:bool=True):
     
@@ -81,12 +84,12 @@ def plot_residuals(relic: ReLic, maxlike_params: ndarray, figname:str = "residua
 
         fig, ax = pl.subplots(2,1, figsize=(6, 6))
 
-        zscale = ZScaleInterval()
-        vmin, vmax = zscale.get_limits(zres)
+        # zscale = ZScaleInterval()
+        # vmin, vmax = zscale.get_limits(zres)
 
         im_f = ax[0].pcolormesh(d.time, d.wavelength, fdetrend, shading='auto')
         im_z = ax[1].pcolormesh(d.time, d.wavelength, zres, shading='auto', 
-                                vmin=vmin, vmax=vmax, cmap='PuOr_r')
+                                vmin=-5, vmax=5, cmap='PuOr_r')
 
         _t = d.time
         disc_cols = where(diff(_t) > 2*median(diff(_t)))[0]
@@ -110,7 +113,7 @@ def plot_residuals(relic: ReLic, maxlike_params: ndarray, figname:str = "residua
             outname = os.path.join(relic.cfg["PATH"]["output_dir"], outname)
             fig.savefig(outname, dpi=dpi)
             print(f"A preview of residuals is saved as {outname}.")
-        return fig
+        
 
 def plot_corners(relic: ReLic, samples=None, truths=None, figname="corners.pdf", dpi=100, save:bool=True):
 

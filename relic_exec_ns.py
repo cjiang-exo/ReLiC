@@ -13,13 +13,13 @@ import tomllib
 import shutil
 
 from relic_core import ReLic
-from relic_atmosphere import TP6EqChem, IsothermalFreeChem
+from relic_atmosphere import TP6EqChem, TP6FreeChem
 from relic_plots import *
 from relic_utils import generate_covariates, optimize_parallelization
- 
+
 from multiprocessing import Pool
- 
-DEFAULT_CFG = 'config/HD209458b-hst-fc.toml'
+
+DEFAULT_CFG = 'config/HD209458b-joint-r100-tp6fc.toml'
 
 if 'get_ipython' in globals():
     class Args:
@@ -39,7 +39,8 @@ shutil.copy(py_args.config, os.path.join(cfg["PATH"]["output_dir"], os.path.base
 
 #%% Initialization #############################################################
 
-atmos_model = IsothermalFreeChem(cfg) # user-defined
+atmclass = eval(cfg['ATMOSPHERE']['model_class'])
+atmos_model = atmclass(cfg) # user-defined
 
 relic = ReLic(atmos_model)
 
