@@ -3,7 +3,7 @@ input_file = [
   "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
   "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260608-jwst-r100-fastchem/"
+output_dir = "../results/HD209458b/results-260608-jwst-pix-fastchem/"
 
 [STAR]
 reference   = "2017AJ....153..136S"
@@ -47,7 +47,7 @@ wl_range_micron   = [ [2.4, 4.0], [3.9, 5.0] ]
 time_range_bjd    = [ [], [2459890.03, 2459890.3] ]
 noise_groups      = [0, 1]
 n_baselines       = [2, 2] 
-rebin_resolutions = [100, 100] # set to 0 for native resolution. 
+rebin_resolutions = [0, 0] # set to 0 for native resolution. 
 noise_model        = "white_marginalized"
 
 [PRIORS.TRANSIT]

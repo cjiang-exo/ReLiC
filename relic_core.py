@@ -300,7 +300,13 @@ class ReLic:
             print(f"Configuration file copied to {outname}.")
 
     def run_dynesty(self, loglikelihood: Callable, prior_transform: Callable, pool: Optional[Pool] = None, nlivepoints: int = 100, bound='multi', sample='rwalk', queue_size: int = None): 
- 
+
+        save_checkpoint = self.cfg["SAMPLER"].get("save_checkpoint", False)
+        if save_checkpoint:
+            checkpoint_file = os.path.join(self.cfg["PATH"]["output_dir"], 'checkpoint_dynesty.pkl')
+        else:
+            checkpoint_file = None
+
         sampler = DynamicNestedSampler( 
             loglikelihood,
             prior_transform,
@@ -311,15 +317,16 @@ class ReLic:
             sample=sample,
             queue_size=queue_size, 
         ) 
+
         sampler.run_nested(
             dlogz_init=self.cfg["SAMPLER"].get("dlogz_init", 0.1),
             n_effective=self.cfg["SAMPLER"].get("n_effective", None),
             maxiter_init=self.cfg["SAMPLER"].get("maxiter_init", None),
             maxiter_batch=self.cfg["SAMPLER"].get("maxiter_batch", None),
-            maxbatch=self.cfg["SAMPLER"].get("maxbatch", 0),
+            maxbatch=self.cfg["SAMPLER"].get("maxbatch", None),
             # resume=self.cfg["SAMPLER"].get("resume", False),
-            checkpoint_file=self.cfg["SAMPLER"].get("checkpoint_file", None),
-            checkpoint_every=self.cfg["SAMPLER"].get("checkpoint_every", 300),
+            checkpoint_file=checkpoint_file,
+            checkpoint_every=300,
         )
 
         results = sampler.results

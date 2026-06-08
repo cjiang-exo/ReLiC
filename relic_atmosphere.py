@@ -358,6 +358,7 @@ class TP6FastChem(BaseAtmosphere):
             n for n in range(self.fastchem.getElementNumber())
             if self.fastchem.getElementSymbol(n) not in ('H', 'He')
         ])
+        self.sum_CO = self.init_abundances[self.index_C] + self.init_abundances[self.index_O]
 
         _ = self.fastchem.calcDensities(self.fastchem_input, self.fastchem_output)
 
@@ -395,9 +396,11 @@ class TP6FastChem(BaseAtmosphere):
         co_ratios = atm_params[11] 
  
         self._new_abundances[:] = self.init_abundances
-        self._new_abundances[self.index_C] = self._new_abundances[self.index_O] * co_ratios
         self._new_abundances[self.index_M] *= metallicity
-
+        _c1 = self.sum_CO * metallicity / (1 + co_ratios)
+        self._new_abundances[self.index_C] = _c1 * co_ratios 
+        self._new_abundances[self.index_O] = _c1 
+        
         self.fastchem.setElementAbundances(self._new_abundances)
         _ = self.fastchem.calcDensities(self.fastchem_input, self.fastchem_output) 
 
