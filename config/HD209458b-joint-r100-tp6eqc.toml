@@ -106,5 +106,5 @@ n_effective = 400
 dlogz_init  = 0.1
 # maxiter_init = 10000
 resume       = false
-checkpoint_file = "../results/HD209458b/results-260601-joint-r100-tp6eqc/checkpoint_dynesty.pkl"
+checkpoint_file = "checkpoint_dynesty.pkl"
 # maxiter_batch = 2000
