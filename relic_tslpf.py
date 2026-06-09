@@ -152,6 +152,9 @@ class NewTSLPF(TSLPF):
 
     def flux_model(self, pv: ndarray, include_baseline: bool = True):   
         transit_model = self.transit_model(pv)
+        if not transit_model:
+            return [] # capture and reject
+        
         if self.spot_model is not None:
             self.spot_model.apply_spots(pv, transit_model)
             if self.spot_model.include_tlse:
@@ -175,6 +178,9 @@ class NewTSLPF(TSLPF):
         2D fluxes for each dataset: list[ndarray]
         """  
         transpec = self.atmos_model(pv)
+        if not all(transpec>0):
+            return [] # capture and reject
+        
         k = [ rebin_spectrum_bin(self.model_wl, transpec, data_wl,
             bin_widths=self.bin_widths[i])**0.5
             for i, data_wl in enumerate(self.wavelengths)
@@ -237,6 +243,8 @@ class NewTSLPF(TSLPF):
         if self._nm == NM_WHITE_MARGINALIZED:
             wn_multipliers = pv[self._sl_wnm]
             fmod = self.flux_model(pv, include_baseline=False) 
+            if not fmod:
+                return -inf # capture and reject
             try:
                 for i, d in enumerate(self.data):
                     lnl += marginalized_loglike_mbl2d(d.fluxes, fmod[i], d.errors*wn_multipliers[d.noise_group], d.covs, d.mask)
@@ -245,10 +253,14 @@ class NewTSLPF(TSLPF):
         elif self._nm == NM_WHITE_PROFILED:
             wn_multipliers = pv[self._sl_wnm]
             fmod = self.flux_model(pv, include_baseline=True)
+            if not fmod:
+                return -inf # capture and reject
             for i, d in enumerate(self.data):
                 lnl += lnlike_normal(d.fluxes, fmod[i], d.errors, wn_multipliers[d.noise_group], d.mask)
         else: # GP
             fmod = self.flux_model(pv, include_baseline=False) 
+            if not fmod:
+                return -inf # capture and reject
             if self._nm == NM_GP_FREE: 
                 gp_pv = 10**pv[self._sl_gp]
                 for n in self.data.noise_groups: 

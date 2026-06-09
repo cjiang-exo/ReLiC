@@ -3,7 +3,7 @@ input_file = [
   "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
   "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260608-jwst-r100-fastchem/"
+output_dir = "../results/HD209458b/results-260609-jwst-r100-fastchem/"
 
 [STAR]
 reference   = "2017AJ....153..136S"
@@ -45,7 +45,7 @@ instruments = [ # NO SPACE
 ]
 wl_range_micron   = [ [2.4, 4.0], [3.9, 5.0] ]
 time_range_bjd    = [ [], [2459890.03, 2459890.3] ]
-noise_groups      = [0, 1]
+noise_groups      = [0, 1] 
 n_baselines       = [2, 2] 
 rebin_resolutions = [100, 100] # set to 0 for native resolution. 
 noise_model        = "white_marginalized"
@@ -71,7 +71,7 @@ ref_p       = ["UP", -8, 2, -inf, inf, "reference pressure", "log10bar"]
 cloud_p     = ["UP", -8, 2, -inf, inf, "cloud-top pressure", "log10bar"] 
 cloud_f     = ["UP", 0.0, 1.0, 0, 1.0, "cloud fraction", ""]
 haze_f      = ["UP", -3, 3, -inf, inf, "haze factor", "log10"]
-temp0       = ["UP", 0, 3000, -inf, inf, "temperature 0", "K"]
+temp0       = ["UP", 100, 3000, -inf, inf, "temperature 0", "K"]
 lga1        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a1", ""]
 lga2        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a2", ""]
 lgp1        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p1", "log10bar"]
@@ -79,12 +79,11 @@ lgp2        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p2", "log1
 m2h         = ["UP", -3, 3, -inf, inf, "atmospheric metallicity", "log10"]
 c2o         = ["UP", 0.1, 2, -inf, inf, "C/O ratio", " "]
 
-
 [SAMPLER]
 method      = "dynesty" 
-npools      = 120 
+npools      = 60 
 niter_white = 1000
-nwalkers    = 120 
+nwalkers    = 60 
 # niter_de    = 1000 
 # niter_mcmc  = 2000 
 bound       = "multi"

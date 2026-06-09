@@ -3,7 +3,7 @@ This is where users define their own atmospheric models.
 """
 
 from astropy import constants as const 
-from numpy import array, copy, ones, ones_like, full_like, logspace, ndarray, where, ndarray, log, empty_like, convolve, pad, zeros_like, sort, zeros
+from numpy import array, copy, ones, ones_like, full_like, logspace, ndarray, where, ndarray, log, empty_like, convolve, pad, zeros_like, sort, zeros, isnan
 from petitRADTRANS.physical_constants import m_jup, r_jup_mean, r_sun, G as g_const
 from petitRADTRANS.radtrans import Radtrans 
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
@@ -205,10 +205,8 @@ class TP6EqChem(BaseAtmosphere):
         self.wavelengths      = self.radtrans.get_wavelengths() * 1e4 # micron
         self.planet_radius_cm = cfg["PLANET"]["radius_rjup"][0] * r_jup_mean
         self.star_radius_cm   = cfg["STAR"]["radius_rsun"][0] * r_sun 
-        self._cgravity        = g_const * m_jup / self.planet_radius_cm**2 
-        self.boxcar10         = ones(10) / 10.0
+        self._cgravity        = g_const * m_jup / self.planet_radius_cm**2  
         
-
     def __call__(self, pv: ndarray, return_contribution: bool = False) -> ndarray:
 
         atm_params      = pv[self._sl_atm]
@@ -328,7 +326,7 @@ class TP6FastChem(BaseAtmosphere):
         self.wavelengths      = self.radtrans.get_wavelengths() * 1e4 # micron
         self.planet_radius_cm = cfg["PLANET"]["radius_rjup"][0] * r_jup_mean 
         self.star_radius_cm   = cfg["STAR"]["radius_rsun"][0] * r_sun 
-        self._cgravity        = g_const * m_jup / self.planet_radius_cm**2  
+        self._cgravity        = g_const * m_jup / self.planet_radius_cm**2   
         
         self.fastchem = fc.FastChem(
             cfg["FASTCHEM"]["element_abundances"],
@@ -379,8 +377,8 @@ class TP6FastChem(BaseAtmosphere):
         self._mass_frac_dict  = { 
             n: zeros_like(self.pressures_bar) for n in ['H2', 'He'] + self.radtrans._line_species
         }
-        
-    def __call__(self, pv: ndarray, return_contribution: bool = False) -> ndarray:
+
+    def __call__(self, pv: ndarray, return_contribution: bool = False):
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
@@ -390,36 +388,18 @@ class TP6FastChem(BaseAtmosphere):
         haze_factor     = 10**atm_params[4] 
 
         temperatures = tp6madhu(self.pressures_bar, *atm_params[5:10]) # ascending
-        self.fastchem_input.temperature = temperatures[::-1] # descending
+        temperatures = temperatures.clip(100, 3400)  
  
         metallicity = 10**atm_params[10]
         co_ratios = atm_params[11] 
  
-        self._new_abundances[:] = self.init_abundances
-        self._new_abundances[self.index_M] *= metallicity
-        _c1 = self.sum_CO * metallicity / (1 + co_ratios)
-        self._new_abundances[self.index_C] = _c1 * co_ratios 
-        self._new_abundances[self.index_O] = _c1 
-        
-        self.fastchem.setElementAbundances(self._new_abundances)
-        _ = self.fastchem.calcDensities(self.fastchem_input, self.fastchem_output) 
-
-        self._gas_num_density[:] = array(self.fastchem_output.number_densities)[::-1, self.species_indices] # ascending
-        self.mmw[:] = array(self.fastchem_output.mean_molecular_weight)[::-1] # ascending
-        
-        ''' 
-        total mass density = P / (k_B T) * mean molar mass 
-        mass fraction = number density of species * species molar mass / total mass density
-        '''
-        self._tot_mass_density[:] = self._p_over_kb / temperatures * self.mmw # ascending 
-        self._gas_mass_frac[:] = self._gas_num_density * self.species_weights[None, :] / self._tot_mass_density[:, None]  # ascending
-         
-        for i, n in enumerate(self._mass_frac_dict.keys()):
-            self._mass_frac_dict[n][:] = self._gas_mass_frac[:, i]
+        mass_fractions = self.get_mass_fractions(metallicity, co_ratios, temperatures)
+        if mass_fractions == -1:
+            return zeros_like(self.wavelengths) # capture and return null values
  
         _, transit_radius_cm, _add = self.radtrans.calculate_transit_radii(
             temperatures                = temperatures,
-            mass_fractions              = self._mass_frac_dict,
+            mass_fractions              = mass_fractions,
             mean_molar_masses           = self.mmw,
             reference_gravity           = ref_gravity,
             planet_radius               = self.planet_radius_cm,
@@ -429,12 +409,38 @@ class TP6FastChem(BaseAtmosphere):
             cloud_fraction              = cloud_fraction,
             return_contribution         = return_contribution,
         ) 
-        transit_depths = (transit_radius_cm / self.star_radius_cm)**2
+        transit_depths = (transit_radius_cm / self.star_radius_cm)**2 
 
         if not return_contribution:
             return transit_depths
         return transit_depths, _add
 
+    def get_mass_fractions(self, metallicity: float, co_ratios: float, temperatures: ndarray) -> dict:
+
+        self._new_abundances[:] = self.init_abundances
+        self._new_abundances[self.index_M] *= metallicity
+        _c1 = self.sum_CO * metallicity / (1 + co_ratios)
+        self._new_abundances[self.index_C] = _c1 * co_ratios 
+        self._new_abundances[self.index_O] = _c1 
+        
+        self.fastchem_input.temperature = temperatures[::-1] # descending
+        self.fastchem.setElementAbundances(self._new_abundances)
+        _flag = self.fastchem.calcDensities(self.fastchem_input, self.fastchem_output) 
+        if _flag != 0:
+            return -1 # capture and reject
+
+        self._gas_num_density[:] = array(self.fastchem_output.number_densities)[::-1, self.species_indices] # ascending
+        self.mmw[:] = array(self.fastchem_output.mean_molecular_weight)[::-1] # ascending
+        
+        # temperatures = self.fastchem_input.temperature[::-1] # ascending
+        self._tot_mass_density[:] = self._p_over_kb / temperatures * self.mmw # ascending 
+        self._gas_mass_frac[:] = self._gas_num_density * self.species_weights[None, :] / self._tot_mass_density[:, None]  # ascending
+         
+        for i, n in enumerate(self._mass_frac_dict.keys()):
+            self._mass_frac_dict[n][:] = self._gas_mass_frac[:, i] + 1e-99
+        
+        return self._mass_frac_dict
+    
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class GuillotEQChem(BaseAtmosphere):

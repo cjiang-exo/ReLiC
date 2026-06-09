@@ -1,5 +1,5 @@
 nohup: ignoring input
-Configuration file loaded: config/HD209458b_benchmark-pix.toml
+Configuration file loaded: config/HD209458b-jwst-pix-tp6fastchem.toml
 Loading Radtrans opacities...
  Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/H2O/1H2-16O/1H2-16O__POKAZATEL.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
  Loading line opacities of species 'CO' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/CO/12C-16O/12C-16O__Li2015.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
@@ -16,1068 +16,153 @@ Loading Radtrans opacities...
  Loading CIA opacities for H2--He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
  Successfully loaded all CIA opacities
 Successfully loaded all opacities
-Loading chemical equilibrium chemistry table from file '/home/ubuntu/petitRADTRANS/input_data/pre_calculated_chemistry/equilibrium_chemistry/equilibrium_chemistry.chemtable.petitRADTRANS.h5'... Done.
 
 Loading data: 
   ../data/HD209458b/JWST/NIRCAM_F322W2_new.h5
   ../data/HD209458b/JWST/NIRCAM_F444W_new.h5
 Loaded dataset #0 with nwl=1548, nt=9472.
   No wavelength binning applied, using native resolution.
-Loaded dataset #1 with nwl=1119, nt=7106.
+Loaded dataset #1 with nwl=1119, nt=5701.
   No wavelength binning applied, using native resolution.
 
 Initializing LDTk model... It takes 1 -- 30 minutes. Be patient!
 
 Initializing ExoIris model...
 Updating parameters and priors...
-  0 |G| rho            N(μ = 1.0, σ = 0.05)                     [    0.00 ..      inf]
-  1 |G| p              N(μ = 3.5, σ = 4e-07)                    [    0.00 ..      inf]
-  2 |G| b              N(μ = 0.5, σ = 0.02)                     [    0.00 ..      inf]
-  3 |G| tc_00          U(a = -0.05, b = 0.05)                   [    -inf ..      inf]
-  4 |G| teff           N(μ = 6000.0, σ = 60.0)                  [ 5800.00 ..  6200.00]
-  5 |G| logg           N(μ = 4.5, σ = 0.05)                     [    4.00 ..     5.00]
-  6 |G| metal          N(μ = 0.0, σ = 0.05)                     [   -1.00 ..     0.50]
+  0 |G| rho            N(μ = 1.04, σ = 0.07)                    [    0.00 ..      inf]
+  1 |G| p              N(μ = 3.52474859, σ = 3.8e-07)           [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5056, σ = 0.0133)                [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2459890.15, b = 2459890.25)        [    -inf ..      inf]
+  4 |G| teff           N(μ = 6091.0, σ = 50.0)                  [ 5900.00 ..  6300.00]
+  5 |G| logg           N(μ = 4.45, σ = 0.02)                    [    4.00 ..     5.00]
+  6 |G| metal          N(μ = 0.01, σ = 0.05)                    [   -1.00 ..     0.50]
   7 |G| sigma_m_00     U(a = 0.2, b = 5)                        [    0.00 ..      inf]
   8 |G| sigma_m_01     U(a = 0.2, b = 5)                        [    0.00 ..      inf]
-  9 |G| mp             N(μ = 0.8, σ = 0.04)                     [    0.60 ..     1.00]
- 10 |G| ref_p          U(a = -6, b = 2)                         [    -inf ..      inf]
- 11 |G| cloud_p        U(a = -6, b = 2)                         [    -inf ..      inf]
+  9 |G| mp             N(μ = 0.73, σ = 0.04)                    [    0.53 ..     0.93]
+ 10 |G| ref_p          U(a = -8, b = 2)                         [    -inf ..      inf]
+ 11 |G| cloud_p        U(a = -8, b = 2)                         [    -inf ..      inf]
  12 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
- 13 |G| temp0          U(a = 0, b = 3000)                       [    -inf ..      inf]
- 14 |G| a1             U(a = 0.1, b = 10)                       [    -inf ..      inf]
- 15 |G| a2             U(a = 0.1, b = 10)                       [    -inf ..      inf]
- 16 |G| p1             U(a = -6, b = 2)                         [    -inf ..      inf]
- 17 |G| p2             U(a = -6, b = 2)                         [    -inf ..      inf]
- 18 |G| p3             U(a = -6, b = 2)                         [    -inf ..      inf]
- 19 |G| m2h            U(a = -1, b = 3)                         [   -1.00 ..     3.00]
- 20 |G| c2o            U(a = 0.1, b = 1.6)                      [    0.10 ..     1.60]
+ 13 |G| haze_f         U(a = -3, b = 3)                         [    -inf ..      inf]
+ 14 |G| temp0          U(a = 100, b = 3000)                     [    -inf ..      inf]
+ 15 |G| lga1           U(a = -1, b = 1)                         [    -inf ..      inf]
+ 16 |G| lga2           U(a = -1, b = 1)                         [    -inf ..      inf]
+ 17 |G| lgp1           U(a = -8, b = 0)                         [    -inf ..      inf]
+ 18 |G| lgp2           U(a = -8, b = 0)                         [    -inf ..      inf]
+ 19 |G| m2h            U(a = -3, b = 3)                         [    -inf ..      inf]
+ 20 |G| c2o            U(a = 0.1, b = 2)                        [    -inf ..      inf]
 Initialization complete.
 Fitting white light curves to validate covariates...
-Global optimisation:   0%|          | 0/1000 [00:00<?, ?it/s]Global optimisation:   0%|          | 1/1000 [00:11<3:09:56, 11.41s/it]Global optimisation:   0%|          | 4/1000 [00:11<36:29,  2.20s/it]  Global optimisation:   1%|          | 7/1000 [00:11<17:18,  1.05s/it]Global optimisation:   1%|          | 9/1000 [00:11<11:47,  1.40it/s]Global optimisation:   1%|          | 11/1000 [00:11<08:15,  2.00it/s]Global optimisation:   1%|▏         | 13/1000 [00:12<05:57,  2.76it/s]Global optimisation:   2%|▏         | 15/1000 [00:12<04:26,  3.69it/s]Global optimisation:   2%|▏         | 17/1000 [00:12<03:19,  4.92it/s]Global optimisation:   2%|▏         | 19/1000 [00:12<02:37,  6.25it/s]Global optimisation:   2%|▏         | 21/1000 [00:12<02:10,  7.48it/s]Global optimisation:   2%|▏         | 23/1000 [00:12<01:53,  8.62it/s]Global optimisation:   2%|▎         | 25/1000 [00:12<01:40,  9.71it/s]Global optimisation:   3%|▎         | 27/1000 [00:13<01:27, 11.11it/s]Global optimisation:   3%|▎         | 29/1000 [00:13<01:19, 12.15it/s]Global optimisation:   3%|▎         | 31/1000 [00:13<01:15, 12.90it/s]Global optimisation:   3%|▎         | 33/1000 [00:13<01:14, 13.04it/s]Global optimisation:   4%|▎         | 35/1000 [00:13<01:11, 13.56it/s]Global optimisation:   4%|▎         | 37/1000 [00:13<01:07, 14.26it/s]Global optimisation:   4%|▍         | 39/1000 [00:13<01:07, 14.34it/s]Global optimisation:   4%|▍         | 41/1000 [00:13<01:06, 14.44it/s]Global optimisation:   4%|▍         | 43/1000 [00:14<01:03, 15.04it/s]Global optimisation:   4%|▍         | 45/1000 [00:14<01:01, 15.41it/s]Global optimisation:   5%|▍         | 47/1000 [00:14<01:01, 15.49it/s]Global optimisation:   5%|▍         | 49/1000 [00:14<01:02, 15.17it/s]Global optimisation:   5%|▌         | 51/1000 [00:14<01:03, 15.05it/s]Global optimisation:   5%|▌         | 53/1000 [00:14<01:01, 15.32it/s]Global optimisation:   6%|▌         | 55/1000 [00:14<01:02, 15.03it/s]Global optimisation:   6%|▌         | 57/1000 [00:14<00:59, 15.76it/s]Global optimisation:   6%|▌         | 59/1000 [00:15<01:02, 15.13it/s]Global optimisation:   6%|▌         | 61/1000 [00:15<01:03, 14.78it/s]Global optimisation:   6%|▋         | 63/1000 [00:15<01:01, 15.11it/s]Global optimisation:   6%|▋         | 65/1000 [00:15<01:03, 14.70it/s]Global optimisation:   7%|▋         | 67/1000 [00:15<01:03, 14.79it/s]Global optimisation:   7%|▋         | 69/1000 [00:15<01:00, 15.34it/s]Global optimisation:   7%|▋         | 71/1000 [00:15<01:01, 15.08it/s]Global optimisation:   7%|▋         | 73/1000 [00:16<01:02, 14.78it/s]Global optimisation:   8%|▊         | 75/1000 [00:16<01:04, 14.31it/s]Global optimisation:   8%|▊         | 77/1000 [00:16<01:06, 13.90it/s]Global optimisation:   8%|▊         | 79/1000 [00:16<01:06, 13.87it/s]Global optimisation:   8%|▊         | 81/1000 [00:16<01:02, 14.77it/s]Global optimisation:   8%|▊         | 83/1000 [00:16<01:02, 14.62it/s]Global optimisation:   8%|▊         | 85/1000 [00:16<01:00, 15.15it/s]Global optimisation:   9%|▊         | 87/1000 [00:17<00:59, 15.32it/s]Global optimisation:   9%|▉         | 89/1000 [00:17<01:00, 14.94it/s]Global optimisation:   9%|▉         | 91/1000 [00:17<01:00, 15.00it/s]Global optimisation:   9%|▉         | 93/1000 [00:17<01:02, 14.42it/s]Global optimisation:  10%|▉         | 95/1000 [00:17<01:04, 14.13it/s]Global optimisation:  10%|▉         | 97/1000 [00:17<01:05, 13.87it/s]Global optimisation:  10%|▉         | 99/1000 [00:17<01:06, 13.56it/s]Global optimisation:  10%|█         | 101/1000 [00:18<01:06, 13.60it/s]Global optimisation:  10%|█         | 103/1000 [00:18<01:05, 13.62it/s]Global optimisation:  10%|█         | 105/1000 [00:18<01:03, 14.03it/s]Global optimisation:  11%|█         | 107/1000 [00:18<01:02, 14.26it/s]Global optimisation:  11%|█         | 109/1000 [00:18<01:03, 14.10it/s]Global optimisation:  11%|█         | 111/1000 [00:18<01:03, 13.97it/s]Global optimisation:  11%|█▏        | 113/1000 [00:18<01:03, 14.04it/s]Global optimisation:  12%|█▏        | 115/1000 [00:19<01:04, 13.79it/s]Global optimisation:  12%|█▏        | 117/1000 [00:19<01:01, 14.37it/s]Global optimisation:  12%|█▏        | 119/1000 [00:19<01:03, 13.82it/s]Global optimisation:  12%|█▏        | 121/1000 [00:19<01:03, 13.91it/s]Global optimisation:  12%|█▏        | 123/1000 [00:19<01:03, 13.79it/s]Global optimisation:  12%|█▎        | 125/1000 [00:19<01:01, 14.13it/s]Global optimisation:  13%|█▎        | 127/1000 [00:19<01:01, 14.26it/s]Global optimisation:  13%|█▎        | 129/1000 [00:20<01:02, 14.03it/s]Global optimisation:  13%|█▎        | 131/1000 [00:20<01:03, 13.69it/s]Global optimisation:  13%|█▎        | 133/1000 [00:20<01:04, 13.53it/s]Global optimisation:  14%|█▎        | 135/1000 [00:20<01:03, 13.71it/s]Global optimisation:  14%|█▎        | 137/1000 [00:20<01:03, 13.62it/s]Global optimisation:  14%|█▍        | 139/1000 [00:20<01:04, 13.35it/s]Global optimisation:  14%|█▍        | 141/1000 [00:20<01:04, 13.38it/s]Global optimisation:  14%|█▍        | 143/1000 [00:21<01:04, 13.35it/s]Global optimisation:  14%|█▍        | 145/1000 [00:21<01:04, 13.25it/s]Global optimisation:  15%|█▍        | 147/1000 [00:21<01:04, 13.16it/s]Global optimisation:  15%|█▍        | 149/1000 [00:21<01:04, 13.11it/s]Global optimisation:  15%|█▌        | 151/1000 [00:21<01:02, 13.57it/s]Global optimisation:  15%|█▌        | 153/1000 [00:21<01:02, 13.46it/s]Global optimisation:  16%|█▌        | 155/1000 [00:21<01:02, 13.60it/s]Global optimisation:  16%|█▌        | 157/1000 [00:22<01:03, 13.21it/s]Global optimisation:  16%|█▌        | 159/1000 [00:22<01:04, 13.01it/s]Global optimisation:  16%|█▌        | 161/1000 [00:22<01:03, 13.17it/s]Global optimisation:  16%|█▋        | 163/1000 [00:22<01:02, 13.36it/s]Global optimisation:  16%|█▋        | 165/1000 [00:22<01:02, 13.28it/s]Global optimisation:  17%|█▋        | 167/1000 [00:22<01:01, 13.47it/s]Global optimisation:  17%|█▋        | 169/1000 [00:23<01:01, 13.47it/s]Global optimisation:  17%|█▋        | 171/1000 [00:23<01:04, 12.86it/s]Global optimisation:  17%|█▋        | 173/1000 [00:23<01:03, 13.07it/s]Global optimisation:  18%|█▊        | 175/1000 [00:23<01:03, 12.99it/s]Global optimisation:  18%|█▊        | 177/1000 [00:23<01:01, 13.44it/s]Global optimisation:  18%|█▊        | 179/1000 [00:23<01:01, 13.42it/s]Global optimisation:  18%|█▊        | 181/1000 [00:23<01:01, 13.42it/s]Global optimisation:  18%|█▊        | 183/1000 [00:24<01:03, 12.78it/s]Global optimisation:  18%|█▊        | 185/1000 [00:24<01:03, 12.74it/s]Global optimisation:  19%|█▊        | 187/1000 [00:24<01:02, 13.06it/s]Global optimisation:  19%|█▉        | 189/1000 [00:24<01:01, 13.17it/s]Global optimisation:  19%|█▉        | 191/1000 [00:24<01:00, 13.27it/s]Global optimisation:  19%|█▉        | 193/1000 [00:24<01:00, 13.25it/s]Global optimisation:  20%|█▉        | 195/1000 [00:25<01:01, 13.14it/s]Global optimisation:  20%|█▉        | 197/1000 [00:25<01:00, 13.17it/s]Global optimisation:  20%|█▉        | 199/1000 [00:25<01:01, 13.10it/s]Global optimisation:  20%|██        | 201/1000 [00:25<01:01, 13.00it/s]Global optimisation:  20%|██        | 203/1000 [00:25<01:00, 13.09it/s]Global optimisation:  20%|██        | 205/1000 [00:25<01:00, 13.07it/s]Global optimisation:  21%|██        | 207/1000 [00:25<01:01, 12.90it/s]Global optimisation:  21%|██        | 209/1000 [00:26<01:02, 12.63it/s]Global optimisation:  21%|██        | 211/1000 [00:26<01:02, 12.66it/s]Global optimisation:  21%|██▏       | 213/1000 [00:26<01:02, 12.65it/s]Global optimisation:  22%|██▏       | 215/1000 [00:26<01:00, 12.90it/s]Global optimisation:  22%|██▏       | 217/1000 [00:26<01:00, 12.99it/s]Global optimisation:  22%|██▏       | 219/1000 [00:26<01:00, 12.83it/s]Global optimisation:  22%|██▏       | 221/1000 [00:27<01:00, 12.80it/s]Global optimisation:  22%|██▏       | 223/1000 [00:27<01:01, 12.67it/s]Global optimisation:  22%|██▎       | 225/1000 [00:27<01:01, 12.62it/s]Global optimisation:  23%|██▎       | 227/1000 [00:27<01:01, 12.50it/s]Global optimisation:  23%|██▎       | 229/1000 [00:27<01:01, 12.47it/s]Global optimisation:  23%|██▎       | 231/1000 [00:27<01:01, 12.59it/s]Global optimisation:  23%|██▎       | 233/1000 [00:28<01:01, 12.55it/s]Global optimisation:  24%|██▎       | 235/1000 [00:28<01:01, 12.51it/s]Global optimisation:  24%|██▎       | 237/1000 [00:28<01:00, 12.56it/s]Global optimisation:  24%|██▍       | 239/1000 [00:28<01:01, 12.42it/s]Global optimisation:  24%|██▍       | 241/1000 [00:28<01:01, 12.41it/s]Global optimisation:  24%|██▍       | 243/1000 [00:28<01:00, 12.46it/s]Global optimisation:  24%|██▍       | 245/1000 [00:28<01:00, 12.48it/s]Global optimisation:  25%|██▍       | 247/1000 [00:29<01:00, 12.50it/s]Global optimisation:  25%|██▍       | 249/1000 [00:29<01:00, 12.39it/s]Global optimisation:  25%|██▌       | 251/1000 [00:29<01:00, 12.30it/s]Global optimisation:  25%|██▌       | 253/1000 [00:29<01:00, 12.36it/s]Global optimisation:  26%|██▌       | 255/1000 [00:29<00:59, 12.42it/s]Global optimisation:  26%|██▌       | 257/1000 [00:29<00:59, 12.43it/s]Global optimisation:  26%|██▌       | 259/1000 [00:30<00:59, 12.43it/s]Global optimisation:  26%|██▌       | 261/1000 [00:30<01:00, 12.25it/s]Global optimisation:  26%|██▋       | 263/1000 [00:30<00:59, 12.31it/s]Global optimisation:  26%|██▋       | 265/1000 [00:30<00:59, 12.39it/s]Global optimisation:  27%|██▋       | 267/1000 [00:30<00:58, 12.43it/s]Global optimisation:  27%|██▋       | 269/1000 [00:30<00:58, 12.45it/s]Global optimisation:  27%|██▋       | 271/1000 [00:31<00:58, 12.45it/s]Global optimisation:  27%|██▋       | 273/1000 [00:31<00:58, 12.35it/s]Global optimisation:  28%|██▊       | 275/1000 [00:31<00:58, 12.38it/s]Global optimisation:  28%|██▊       | 277/1000 [00:31<00:58, 12.43it/s]Global optimisation:  28%|██▊       | 279/1000 [00:31<00:57, 12.44it/s]Global optimisation:  28%|██▊       | 281/1000 [00:31<00:57, 12.44it/s]Global optimisation:  28%|██▊       | 283/1000 [00:32<00:57, 12.37it/s]Global optimisation:  28%|██▊       | 285/1000 [00:32<00:57, 12.34it/s]Global optimisation:  29%|██▊       | 287/1000 [00:32<00:57, 12.40it/s]Global optimisation:  29%|██▉       | 289/1000 [00:32<00:57, 12.45it/s]Global optimisation:  29%|██▉       | 291/1000 [00:32<00:56, 12.44it/s]Global optimisation:  29%|██▉       | 293/1000 [00:32<00:56, 12.42it/s]Global optimisation:  30%|██▉       | 295/1000 [00:33<00:57, 12.30it/s]Global optimisation:  30%|██▉       | 297/1000 [00:33<00:57, 12.33it/s]Global optimisation:  30%|██▉       | 299/1000 [00:33<00:56, 12.37it/s]Global optimisation:  30%|███       | 301/1000 [00:33<00:56, 12.39it/s]Global optimisation:  30%|███       | 303/1000 [00:33<00:56, 12.40it/s]Global optimisation:  30%|███       | 305/1000 [00:33<00:56, 12.39it/s]Global optimisation:  31%|███       | 307/1000 [00:33<00:56, 12.27it/s]Global optimisation:  31%|███       | 309/1000 [00:34<00:56, 12.33it/s]Global optimisation:  31%|███       | 311/1000 [00:34<00:55, 12.40it/s]Global optimisation:  31%|███▏      | 313/1000 [00:34<00:55, 12.38it/s]Global optimisation:  32%|███▏      | 315/1000 [00:34<00:55, 12.39it/s]Global optimisation:  32%|███▏      | 317/1000 [00:34<00:55, 12.30it/s]Global optimisation:  32%|███▏      | 319/1000 [00:34<00:55, 12.31it/s]Global optimisation:  32%|███▏      | 321/1000 [00:35<00:54, 12.36it/s]Global optimisation:  32%|███▏      | 323/1000 [00:35<00:54, 12.37it/s]Global optimisation:  32%|███▎      | 325/1000 [00:35<00:54, 12.35it/s]Global optimisation:  33%|███▎      | 327/1000 [00:35<00:54, 12.37it/s]Global optimisation:  33%|███▎      | 329/1000 [00:35<00:54, 12.27it/s]Global optimisation:  33%|███▎      | 331/1000 [00:35<00:54, 12.32it/s]Global optimisation:  33%|███▎      | 333/1000 [00:36<00:53, 12.39it/s]Global optimisation:  34%|███▎      | 335/1000 [00:36<00:53, 12.44it/s]Global optimisation:  34%|███▎      | 337/1000 [00:36<00:53, 12.46it/s]Global optimisation:  34%|███▍      | 339/1000 [00:36<00:53, 12.47it/s]Global optimisation:  34%|███▍      | 341/1000 [00:36<00:53, 12.27it/s]Global optimisation:  34%|███▍      | 343/1000 [00:36<00:53, 12.36it/s]Global optimisation:  34%|███▍      | 345/1000 [00:37<00:52, 12.42it/s]Global optimisation:  35%|███▍      | 347/1000 [00:37<00:52, 12.34it/s]Global optimisation:  35%|███▍      | 349/1000 [00:37<00:52, 12.36it/s]Global optimisation:  35%|███▌      | 351/1000 [00:37<00:52, 12.30it/s]Global optimisation:  35%|███▌      | 353/1000 [00:37<00:52, 12.29it/s]Global optimisation:  36%|███▌      | 355/1000 [00:37<00:52, 12.35it/s]Global optimisation:  36%|███▌      | 357/1000 [00:38<00:51, 12.41it/s]Global optimisation:  36%|███▌      | 359/1000 [00:38<00:51, 12.42it/s]Global optimisation:  36%|███▌      | 361/1000 [00:38<00:51, 12.43it/s]Global optimisation:  36%|███▋      | 363/1000 [00:38<00:51, 12.33it/s]Global optimisation:  36%|███▋      | 365/1000 [00:38<00:51, 12.31it/s]Global optimisation:  37%|███▋      | 367/1000 [00:38<00:51, 12.36it/s]Global optimisation:  37%|███▋      | 369/1000 [00:38<00:51, 12.37it/s]Global optimisation:  37%|███▋      | 371/1000 [00:39<00:50, 12.39it/s]Global optimisation:  37%|███▋      | 373/1000 [00:39<00:50, 12.41it/s]Global optimisation:  38%|███▊      | 375/1000 [00:39<00:50, 12.37it/s]Global optimisation:  38%|███▊      | 377/1000 [00:39<00:50, 12.35it/s]Global optimisation:  38%|███▊      | 379/1000 [00:39<00:50, 12.36it/s]Global optimisation:  38%|███▊      | 381/1000 [00:39<00:50, 12.25it/s]Global optimisation:  38%|███▊      | 383/1000 [00:40<00:50, 12.24it/s]Global optimisation:  38%|███▊      | 385/1000 [00:40<00:49, 12.31it/s]Global optimisation:  39%|███▊      | 387/1000 [00:40<00:49, 12.38it/s]Global optimisation:  39%|███▉      | 389/1000 [00:40<00:49, 12.42it/s]Global optimisation:  39%|███▉      | 391/1000 [00:40<00:49, 12.42it/s]Global optimisation:  39%|███▉      | 393/1000 [00:40<00:49, 12.30it/s]Global optimisation:  40%|███▉      | 395/1000 [00:41<00:49, 12.33it/s]Global optimisation:  40%|███▉      | 397/1000 [00:41<00:48, 12.39it/s]Global optimisation:  40%|███▉      | 399/1000 [00:41<00:48, 12.45it/s]Global optimisation:  40%|████      | 401/1000 [00:41<00:48, 12.44it/s]Global optimisation:  40%|████      | 403/1000 [00:41<00:47, 12.45it/s]Global optimisation:  40%|████      | 405/1000 [00:41<00:48, 12.29it/s]Global optimisation:  41%|████      | 407/1000 [00:42<00:48, 12.32it/s]Global optimisation:  41%|████      | 409/1000 [00:42<00:47, 12.38it/s]Global optimisation:  41%|████      | 411/1000 [00:42<00:47, 12.43it/s]Global optimisation:  41%|████▏     | 413/1000 [00:42<00:47, 12.45it/s]Global optimisation:  42%|████▏     | 415/1000 [00:42<00:47, 12.44it/s]Global optimisation:  42%|████▏     | 417/1000 [00:42<00:46, 12.43it/s]Global optimisation:  42%|████▏     | 419/1000 [00:43<00:46, 12.43it/s]Global optimisation:  42%|████▏     | 421/1000 [00:43<00:46, 12.41it/s]Global optimisation:  42%|████▏     | 423/1000 [00:43<00:46, 12.41it/s]Global optimisation:  42%|████▎     | 425/1000 [00:43<00:46, 12.40it/s]Global optimisation:  43%|████▎     | 427/1000 [00:43<00:46, 12.41it/s]Global optimisation:  43%|████▎     | 429/1000 [00:43<00:46, 12.29it/s]Global optimisation:  43%|████▎     | 431/1000 [00:44<00:46, 12.32it/s]Global optimisation:  43%|████▎     | 433/1000 [00:44<00:45, 12.34it/s]Global optimisation:  44%|████▎     | 435/1000 [00:44<00:45, 12.29it/s]Global optimisation:  44%|████▎     | 437/1000 [00:44<00:46, 12.19it/s]Global optimisation:  44%|████▍     | 439/1000 [00:44<00:45, 12.27it/s]Global optimisation:  44%|████▍     | 441/1000 [00:44<00:45, 12.35it/s]Global optimisation:  44%|████▍     | 443/1000 [00:44<00:44, 12.41it/s]Global optimisation:  44%|████▍     | 445/1000 [00:45<00:44, 12.44it/s]Global optimisation:  45%|████▍     | 447/1000 [00:45<00:44, 12.40it/s]Global optimisation:  45%|████▍     | 449/1000 [00:45<00:44, 12.41it/s]Global optimisation:  45%|████▌     | 451/1000 [00:45<00:44, 12.42it/s]Global optimisation:  45%|████▌     | 453/1000 [00:45<00:44, 12.34it/s]Global optimisation:  46%|████▌     | 455/1000 [00:45<00:44, 12.28it/s]Global optimisation:  46%|████▌     | 457/1000 [00:46<00:44, 12.33it/s]Global optimisation:  46%|████▌     | 459/1000 [00:46<00:43, 12.40it/s]Global optimisation:  46%|████▌     | 461/1000 [00:46<00:43, 12.44it/s]Global optimisation:  46%|████▋     | 463/1000 [00:46<00:43, 12.46it/s]Global optimisation:  46%|████▋     | 465/1000 [00:46<00:43, 12.42it/s]Global optimisation:  47%|████▋     | 467/1000 [00:46<00:43, 12.39it/s]Global optimisation:  47%|████▋     | 469/1000 [00:47<00:42, 12.39it/s]Global optimisation:  47%|████▋     | 471/1000 [00:47<00:42, 12.37it/s]Global optimisation:  47%|████▋     | 473/1000 [00:47<00:43, 12.25it/s]Global optimisation:  48%|████▊     | 475/1000 [00:47<00:42, 12.28it/s]Global optimisation:  48%|████▊     | 477/1000 [00:47<00:42, 12.33it/s]Global optimisation:  48%|████▊     | 479/1000 [00:47<00:42, 12.37it/s]Global optimisation:  48%|████▊     | 481/1000 [00:48<00:41, 12.39it/s]Global optimisation:  48%|████▊     | 483/1000 [00:48<00:41, 12.38it/s]Global optimisation:  48%|████▊     | 485/1000 [00:48<00:41, 12.31it/s]Global optimisation:  49%|████▊     | 487/1000 [00:48<00:41, 12.37it/s]Global optimisation:  49%|████▉     | 489/1000 [00:48<00:41, 12.43it/s]Global optimisation:  49%|████▉     | 491/1000 [00:48<00:40, 12.43it/s]Global optimisation:  49%|████▉     | 493/1000 [00:49<00:40, 12.43it/s]Global optimisation:  50%|████▉     | 495/1000 [00:49<00:40, 12.39it/s]Global optimisation:  50%|████▉     | 497/1000 [00:49<00:40, 12.38it/s]Global optimisation:  50%|████▉     | 499/1000 [00:49<00:40, 12.40it/s]Global optimisation:  50%|█████     | 501/1000 [00:49<00:40, 12.26it/s]Global optimisation:  50%|█████     | 503/1000 [00:49<00:40, 12.28it/s]Global optimisation:  50%|█████     | 505/1000 [00:49<00:40, 12.36it/s]Global optimisation:  51%|█████     | 507/1000 [00:50<00:39, 12.40it/s]Global optimisation:  51%|█████     | 509/1000 [00:50<00:39, 12.41it/s]Global optimisation:  51%|█████     | 511/1000 [00:50<00:39, 12.38it/s]Global optimisation:  51%|█████▏    | 513/1000 [00:50<00:39, 12.27it/s]Global optimisation:  52%|█████▏    | 515/1000 [00:50<00:39, 12.34it/s]Global optimisation:  52%|█████▏    | 517/1000 [00:50<00:38, 12.41it/s]Global optimisation:  52%|█████▏    | 519/1000 [00:51<00:38, 12.42it/s]Global optimisation:  52%|█████▏    | 521/1000 [00:51<00:38, 12.43it/s]Global optimisation:  52%|█████▏    | 523/1000 [00:51<00:38, 12.36it/s]Global optimisation:  52%|█████▎    | 525/1000 [00:51<00:38, 12.35it/s]Global optimisation:  53%|█████▎    | 527/1000 [00:51<00:38, 12.37it/s]Global optimisation:  53%|█████▎    | 529/1000 [00:51<00:38, 12.38it/s]Global optimisation:  53%|█████▎    | 531/1000 [00:52<00:37, 12.40it/s]Global optimisation:  53%|█████▎    | 533/1000 [00:52<00:37, 12.42it/s]Global optimisation:  54%|█████▎    | 535/1000 [00:52<00:37, 12.33it/s]Global optimisation:  54%|█████▎    | 537/1000 [00:52<00:37, 12.35it/s]Global optimisation:  54%|█████▍    | 539/1000 [00:52<00:37, 12.42it/s]Global optimisation:  54%|█████▍    | 541/1000 [00:52<00:36, 12.43it/s]Global optimisation:  54%|█████▍    | 543/1000 [00:53<00:36, 12.43it/s]Global optimisation:  55%|█████▍    | 545/1000 [00:53<00:36, 12.39it/s]Global optimisation:  55%|█████▍    | 547/1000 [00:53<00:36, 12.34it/s]Global optimisation:  55%|█████▍    | 549/1000 [00:53<00:36, 12.34it/s]Global optimisation:  55%|█████▌    | 551/1000 [00:53<00:36, 12.37it/s]Global optimisation:  55%|█████▌    | 553/1000 [00:53<00:36, 12.30it/s]Global optimisation:  56%|█████▌    | 555/1000 [00:54<00:36, 12.33it/s]Global optimisation:  56%|█████▌    | 557/1000 [00:54<00:35, 12.37it/s]Global optimisation:  56%|█████▌    | 559/1000 [00:54<00:35, 12.33it/s]Global optimisation:  56%|█████▌    | 561/1000 [00:54<00:35, 12.36it/s]Global optimisation:  56%|█████▌    | 562/1000 [00:54<00:42, 10.28it/s]
+Global optimisation:   0%|          | 0/1000 [00:00<?, ?it/s]Global optimisation:   0%|          | 1/1000 [00:09<2:38:06,  9.50s/it]Global optimisation:   0%|          | 4/1000 [00:09<30:25,  1.83s/it]  Global optimisation:   1%|          | 7/1000 [00:09<14:28,  1.14it/s]Global optimisation:   1%|          | 10/1000 [00:09<08:32,  1.93it/s]Global optimisation:   1%|▏         | 13/1000 [00:10<05:31,  2.98it/s]Global optimisation:   2%|▏         | 15/1000 [00:10<04:18,  3.81it/s]Global optimisation:   2%|▏         | 17/1000 [00:10<03:21,  4.87it/s]Global optimisation:   2%|▏         | 19/1000 [00:10<02:39,  6.15it/s]Global optimisation:   2%|▏         | 21/1000 [00:10<02:07,  7.65it/s]Global optimisation:   2%|▏         | 24/1000 [00:10<01:35, 10.20it/s]Global optimisation:   3%|▎         | 26/1000 [00:10<01:26, 11.24it/s]Global optimisation:   3%|▎         | 28/1000 [00:10<01:20, 12.06it/s]Global optimisation:   3%|▎         | 30/1000 [00:11<01:11, 13.57it/s]Global optimisation:   3%|▎         | 32/1000 [00:11<01:05, 14.84it/s]Global optimisation:   3%|▎         | 34/1000 [00:11<01:07, 14.41it/s]Global optimisation:   4%|▎         | 36/1000 [00:11<01:03, 15.12it/s]Global optimisation:   4%|▍         | 38/1000 [00:11<01:05, 14.70it/s]Global optimisation:   4%|▍         | 40/1000 [00:11<01:04, 14.97it/s]Global optimisation:   4%|▍         | 42/1000 [00:11<01:03, 14.98it/s]Global optimisation:   4%|▍         | 44/1000 [00:11<01:01, 15.55it/s]Global optimisation:   5%|▍         | 46/1000 [00:12<00:59, 16.17it/s]Global optimisation:   5%|▍         | 48/1000 [00:12<01:02, 15.34it/s]Global optimisation:   5%|▌         | 50/1000 [00:12<01:00, 15.65it/s]Global optimisation:   5%|▌         | 52/1000 [00:12<01:01, 15.33it/s]Global optimisation:   5%|▌         | 54/1000 [00:12<01:02, 15.16it/s]Global optimisation:   6%|▌         | 56/1000 [00:12<01:00, 15.59it/s]Global optimisation:   6%|▌         | 58/1000 [00:12<01:00, 15.49it/s]Global optimisation:   6%|▌         | 60/1000 [00:12<01:02, 15.13it/s]Global optimisation:   6%|▌         | 62/1000 [00:13<01:05, 14.37it/s]Global optimisation:   6%|▋         | 64/1000 [00:13<01:04, 14.54it/s]Global optimisation:   7%|▋         | 66/1000 [00:13<01:05, 14.32it/s]Global optimisation:   7%|▋         | 68/1000 [00:13<01:05, 14.19it/s]Global optimisation:   7%|▋         | 70/1000 [00:13<01:05, 14.30it/s]Global optimisation:   7%|▋         | 72/1000 [00:13<01:03, 14.51it/s]Global optimisation:   7%|▋         | 74/1000 [00:13<01:05, 14.23it/s]Global optimisation:   8%|▊         | 76/1000 [00:14<01:02, 14.85it/s]Global optimisation:   8%|▊         | 78/1000 [00:14<01:01, 14.99it/s]Global optimisation:   8%|▊         | 80/1000 [00:14<01:00, 15.21it/s]Global optimisation:   8%|▊         | 82/1000 [00:14<01:01, 14.91it/s]Global optimisation:   8%|▊         | 84/1000 [00:14<01:00, 15.09it/s]Global optimisation:   9%|▊         | 86/1000 [00:14<01:02, 14.56it/s]Global optimisation:   9%|▉         | 88/1000 [00:14<00:58, 15.52it/s]Global optimisation:   9%|▉         | 90/1000 [00:14<00:57, 15.85it/s]Global optimisation:   9%|▉         | 92/1000 [00:15<00:58, 15.52it/s]Global optimisation:   9%|▉         | 94/1000 [00:15<00:57, 15.65it/s]Global optimisation:  10%|▉         | 96/1000 [00:15<00:59, 15.24it/s]Global optimisation:  10%|▉         | 98/1000 [00:15<00:59, 15.15it/s]Global optimisation:  10%|█         | 100/1000 [00:15<01:00, 14.88it/s]Global optimisation:  10%|█         | 102/1000 [00:15<01:01, 14.60it/s]Global optimisation:  10%|█         | 104/1000 [00:15<01:00, 14.74it/s]Global optimisation:  11%|█         | 106/1000 [00:16<00:59, 14.96it/s]Global optimisation:  11%|█         | 108/1000 [00:16<00:59, 15.01it/s]Global optimisation:  11%|█         | 110/1000 [00:16<00:57, 15.52it/s]Global optimisation:  11%|█         | 112/1000 [00:16<00:54, 16.21it/s]Global optimisation:  11%|█▏        | 114/1000 [00:16<00:55, 15.85it/s]Global optimisation:  12%|█▏        | 116/1000 [00:16<00:55, 16.04it/s]Global optimisation:  12%|█▏        | 118/1000 [00:16<00:57, 15.22it/s]Global optimisation:  12%|█▏        | 120/1000 [00:16<00:59, 14.90it/s]Global optimisation:  12%|█▏        | 122/1000 [00:17<01:00, 14.45it/s]Global optimisation:  12%|█▏        | 124/1000 [00:17<01:02, 14.10it/s]Global optimisation:  13%|█▎        | 126/1000 [00:17<01:02, 14.00it/s]Global optimisation:  13%|█▎        | 128/1000 [00:17<01:04, 13.61it/s]Global optimisation:  13%|█▎        | 130/1000 [00:17<01:04, 13.57it/s]Global optimisation:  13%|█▎        | 132/1000 [00:17<01:04, 13.50it/s]Global optimisation:  13%|█▎        | 134/1000 [00:17<01:04, 13.53it/s]Global optimisation:  14%|█▎        | 136/1000 [00:18<01:04, 13.42it/s]Global optimisation:  14%|█▍        | 138/1000 [00:18<01:04, 13.40it/s]Global optimisation:  14%|█▍        | 140/1000 [00:18<01:03, 13.45it/s]Global optimisation:  14%|█▍        | 142/1000 [00:18<01:02, 13.81it/s]Global optimisation:  14%|█▍        | 144/1000 [00:18<01:02, 13.78it/s]Global optimisation:  15%|█▍        | 146/1000 [00:18<01:01, 13.90it/s]Global optimisation:  15%|█▍        | 148/1000 [00:19<01:01, 13.75it/s]Global optimisation:  15%|█▌        | 150/1000 [00:19<01:01, 13.84it/s]Global optimisation:  15%|█▌        | 152/1000 [00:19<01:01, 13.70it/s]Global optimisation:  15%|█▌        | 154/1000 [00:19<01:01, 13.75it/s]Global optimisation:  16%|█▌        | 156/1000 [00:19<01:01, 13.71it/s]Global optimisation:  16%|█▌        | 158/1000 [00:19<01:01, 13.70it/s]Global optimisation:  16%|█▌        | 160/1000 [00:19<01:00, 14.00it/s]Global optimisation:  16%|█▌        | 162/1000 [00:20<01:01, 13.64it/s]Global optimisation:  16%|█▋        | 164/1000 [00:20<01:01, 13.63it/s]Global optimisation:  17%|█▋        | 166/1000 [00:20<01:01, 13.49it/s]Global optimisation:  17%|█▋        | 168/1000 [00:20<01:02, 13.28it/s]Global optimisation:  17%|█▋        | 170/1000 [00:20<01:03, 13.15it/s]Global optimisation:  17%|█▋        | 172/1000 [00:20<01:02, 13.15it/s]Global optimisation:  17%|█▋        | 174/1000 [00:20<01:03, 13.03it/s]Global optimisation:  18%|█▊        | 176/1000 [00:21<01:03, 12.98it/s]Global optimisation:  18%|█▊        | 178/1000 [00:21<01:03, 12.93it/s]Global optimisation:  18%|█▊        | 180/1000 [00:21<01:03, 12.88it/s]Global optimisation:  18%|█▊        | 182/1000 [00:21<01:03, 12.89it/s]Global optimisation:  18%|█▊        | 184/1000 [00:21<01:03, 12.80it/s]Global optimisation:  19%|█▊        | 186/1000 [00:21<01:03, 12.80it/s]Global optimisation:  19%|█▉        | 188/1000 [00:22<01:03, 12.82it/s]Global optimisation:  19%|█▉        | 190/1000 [00:22<01:03, 12.77it/s]Global optimisation:  19%|█▉        | 192/1000 [00:22<01:03, 12.73it/s]Global optimisation:  19%|█▉        | 194/1000 [00:22<01:03, 12.79it/s]Global optimisation:  20%|█▉        | 196/1000 [00:22<01:03, 12.75it/s]Global optimisation:  20%|█▉        | 198/1000 [00:22<01:03, 12.67it/s]Global optimisation:  20%|██        | 200/1000 [00:22<01:03, 12.66it/s]Global optimisation:  20%|██        | 202/1000 [00:23<01:03, 12.66it/s]Global optimisation:  20%|██        | 204/1000 [00:23<01:02, 12.72it/s]Global optimisation:  21%|██        | 206/1000 [00:23<01:02, 12.72it/s]Global optimisation:  21%|██        | 208/1000 [00:23<01:02, 12.77it/s]Global optimisation:  21%|██        | 210/1000 [00:23<01:01, 12.82it/s]Global optimisation:  21%|██        | 212/1000 [00:23<01:01, 12.81it/s]Global optimisation:  21%|██▏       | 214/1000 [00:24<01:01, 12.83it/s]Global optimisation:  22%|██▏       | 216/1000 [00:24<01:01, 12.79it/s]Global optimisation:  22%|██▏       | 218/1000 [00:24<01:00, 12.86it/s]Global optimisation:  22%|██▏       | 220/1000 [00:24<01:00, 12.87it/s]Global optimisation:  22%|██▏       | 222/1000 [00:24<01:00, 12.86it/s]Global optimisation:  22%|██▏       | 224/1000 [00:24<01:00, 12.81it/s]Global optimisation:  23%|██▎       | 226/1000 [00:25<01:00, 12.75it/s]Global optimisation:  23%|██▎       | 228/1000 [00:25<01:00, 12.75it/s]Global optimisation:  23%|██▎       | 230/1000 [00:25<01:00, 12.77it/s]Global optimisation:  23%|██▎       | 232/1000 [00:25<01:00, 12.77it/s]Global optimisation:  23%|██▎       | 234/1000 [00:25<00:59, 12.78it/s]Global optimisation:  24%|██▎       | 236/1000 [00:25<00:59, 12.82it/s]Global optimisation:  24%|██▍       | 238/1000 [00:25<00:59, 12.79it/s]Global optimisation:  24%|██▍       | 240/1000 [00:26<00:59, 12.83it/s]Global optimisation:  24%|██▍       | 242/1000 [00:26<00:58, 12.91it/s]Global optimisation:  24%|██▍       | 244/1000 [00:26<00:58, 12.88it/s]Global optimisation:  25%|██▍       | 246/1000 [00:26<00:58, 12.88it/s]Global optimisation:  25%|██▍       | 248/1000 [00:26<00:58, 12.82it/s]Global optimisation:  25%|██▌       | 250/1000 [00:26<00:58, 12.75it/s]Global optimisation:  25%|██▌       | 252/1000 [00:27<00:58, 12.71it/s]Global optimisation:  25%|██▌       | 254/1000 [00:27<00:58, 12.70it/s]Global optimisation:  26%|██▌       | 256/1000 [00:27<00:58, 12.78it/s]Global optimisation:  26%|██▌       | 258/1000 [00:27<00:57, 12.81it/s]Global optimisation:  26%|██▌       | 260/1000 [00:27<00:57, 12.95it/s]Global optimisation:  26%|██▌       | 262/1000 [00:27<00:57, 12.94it/s]Global optimisation:  26%|██▋       | 264/1000 [00:27<00:56, 12.92it/s]Global optimisation:  27%|██▋       | 266/1000 [00:28<00:56, 12.88it/s]Global optimisation:  27%|██▋       | 268/1000 [00:28<00:56, 12.89it/s]Global optimisation:  27%|██▋       | 270/1000 [00:28<00:56, 12.83it/s]Global optimisation:  27%|██▋       | 272/1000 [00:28<00:56, 12.78it/s]Global optimisation:  27%|██▋       | 274/1000 [00:28<00:56, 12.77it/s]Global optimisation:  28%|██▊       | 276/1000 [00:28<00:55, 12.94it/s]Global optimisation:  28%|██▊       | 278/1000 [00:29<00:56, 12.83it/s]Global optimisation:  28%|██▊       | 280/1000 [00:29<00:56, 12.83it/s]Global optimisation:  28%|██▊       | 282/1000 [00:29<00:55, 12.90it/s]Global optimisation:  28%|██▊       | 284/1000 [00:29<00:55, 12.90it/s]Global optimisation:  29%|██▊       | 286/1000 [00:29<00:55, 12.86it/s]Global optimisation:  29%|██▉       | 288/1000 [00:29<00:55, 12.79it/s]Global optimisation:  29%|██▉       | 290/1000 [00:30<00:55, 12.80it/s]Global optimisation:  29%|██▉       | 292/1000 [00:30<00:54, 12.96it/s]Global optimisation:  29%|██▉       | 294/1000 [00:30<00:54, 12.91it/s]Global optimisation:  30%|██▉       | 296/1000 [00:30<00:54, 12.86it/s]Global optimisation:  30%|██▉       | 298/1000 [00:30<00:54, 12.92it/s]Global optimisation:  30%|███       | 300/1000 [00:30<00:54, 12.88it/s]Global optimisation:  30%|███       | 302/1000 [00:30<00:54, 12.87it/s]Global optimisation:  30%|███       | 304/1000 [00:31<00:53, 12.90it/s]Global optimisation:  31%|███       | 306/1000 [00:31<00:53, 12.88it/s]Global optimisation:  31%|███       | 308/1000 [00:31<00:53, 12.88it/s]Global optimisation:  31%|███       | 310/1000 [00:31<00:53, 12.87it/s]Global optimisation:  31%|███       | 312/1000 [00:31<00:53, 12.86it/s]Global optimisation:  31%|███▏      | 314/1000 [00:31<00:53, 12.86it/s]Global optimisation:  32%|███▏      | 316/1000 [00:32<00:53, 12.81it/s]Global optimisation:  32%|███▏      | 318/1000 [00:32<00:53, 12.79it/s]Global optimisation:  32%|███▏      | 320/1000 [00:32<00:52, 12.88it/s]Global optimisation:  32%|███▏      | 322/1000 [00:32<00:52, 12.87it/s]Global optimisation:  32%|███▏      | 324/1000 [00:32<00:52, 12.98it/s]Global optimisation:  33%|███▎      | 326/1000 [00:32<00:52, 12.92it/s]Global optimisation:  33%|███▎      | 328/1000 [00:32<00:52, 12.88it/s]Global optimisation:  33%|███▎      | 330/1000 [00:33<00:52, 12.88it/s]Global optimisation:  33%|███▎      | 332/1000 [00:33<00:51, 12.96it/s]Global optimisation:  33%|███▎      | 334/1000 [00:33<00:51, 12.83it/s]Global optimisation:  34%|███▎      | 336/1000 [00:33<00:51, 12.78it/s]Global optimisation:  34%|███▍      | 338/1000 [00:33<00:51, 12.91it/s]Global optimisation:  34%|███▍      | 340/1000 [00:33<00:51, 12.88it/s]Global optimisation:  34%|███▍      | 342/1000 [00:34<00:51, 12.88it/s]Global optimisation:  34%|███▍      | 344/1000 [00:34<00:51, 12.83it/s]Global optimisation:  35%|███▍      | 346/1000 [00:34<00:50, 12.85it/s]Global optimisation:  35%|███▍      | 348/1000 [00:34<00:50, 12.81it/s]Global optimisation:  35%|███▌      | 350/1000 [00:34<00:50, 12.85it/s]Global optimisation:  35%|███▌      | 352/1000 [00:34<00:49, 13.01it/s]Global optimisation:  35%|███▌      | 354/1000 [00:34<00:49, 12.93it/s]Global optimisation:  36%|███▌      | 356/1000 [00:35<00:50, 12.86it/s]Global optimisation:  36%|███▌      | 358/1000 [00:35<00:49, 12.85it/s]Global optimisation:  36%|███▌      | 360/1000 [00:35<00:49, 12.86it/s]Global optimisation:  36%|███▌      | 362/1000 [00:35<00:49, 12.90it/s]Global optimisation:  36%|███▋      | 364/1000 [00:35<00:49, 12.90it/s]Global optimisation:  37%|███▋      | 366/1000 [00:35<00:48, 12.99it/s]Global optimisation:  37%|███▋      | 368/1000 [00:36<00:47, 13.18it/s]Global optimisation:  37%|███▋      | 370/1000 [00:36<00:47, 13.34it/s]Global optimisation:  37%|███▋      | 372/1000 [00:36<00:47, 13.16it/s]Global optimisation:  37%|███▋      | 374/1000 [00:36<00:46, 13.38it/s]Global optimisation:  38%|███▊      | 376/1000 [00:36<00:47, 13.25it/s]Global optimisation:  38%|███▊      | 378/1000 [00:36<00:47, 13.20it/s]Global optimisation:  38%|███▊      | 380/1000 [00:36<00:46, 13.22it/s]Global optimisation:  38%|███▊      | 382/1000 [00:37<00:47, 13.07it/s]Global optimisation:  38%|███▊      | 384/1000 [00:37<00:47, 13.07it/s]Global optimisation:  39%|███▊      | 386/1000 [00:37<00:47, 13.03it/s]Global optimisation:  39%|███▉      | 388/1000 [00:37<00:46, 13.27it/s]Global optimisation:  39%|███▉      | 390/1000 [00:37<00:46, 13.23it/s]Global optimisation:  39%|███▉      | 392/1000 [00:37<00:45, 13.38it/s]Global optimisation:  39%|███▉      | 394/1000 [00:38<00:45, 13.26it/s]Global optimisation:  40%|███▉      | 396/1000 [00:38<00:45, 13.32it/s]Global optimisation:  40%|███▉      | 396/1000 [00:38<00:58, 10.36it/s]
 Covariates updated based on white light curve fit.
-A preview of white light curve fit saved as ../results/HD209458b/results-260515-benchmark-pix-MadhuTP/white_fit.png.
+A preview of white light curve fit saved as ../results/HD209458b/results-260609-jwst-pix-fastchem/white_fit.png.
 Running a quick test of posterior evaluation...
-lnprob = 7.660405e+07
-lnprob = -inf
-lnprob = 4.228582e+07
-lnprob = -inf
+lnprob = 6.838228e+07
+lnprob = 7.873531e+07
+lnprob = 7.449424e+07
 Test complete.
+Suggested n_live_points: 240 (rounded from 240)
+Suggested maxtasksperchild: 164
+0it [00:00, ?it/s]1it [00:35, 35.06s/it, batch: 0 | bound: 0 | nc: 1 | ncall: 1 | eff(%):  0.415 | loglstar:   -inf <   -inf <    inf | logz:   -inf +/-  0.067 | dlogz:    inf >  0.100]56it [00:43,  1.69it/s, batch: 0 | bound: 0 | nc: 2 | ncall: 65 | eff(%): 18.361 | loglstar:   -inf < 61960832.407 <    inf | logz: 61960826.000 +/-  0.164 | dlogz:    inf >  0.100]110it [00:58,  2.43it/s, batch: 0 | bound: 0 | nc: 1 | ncall: 141 | eff(%): 28.871 | loglstar:   -inf < 67409772.411 <    inf | logz: 67409765.779 +/-  0.164 | dlogz:    inf >  0.100]Traceback (most recent call last):
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/site-packages/dynesty/dynesty.py", line 827, in __call__
+    return self.func(np.asarray(x).copy(), *self.args, **self.kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_exec_ns.py", line 82, in loglikelihood
+    return relic.lnlikelihood_ns(pv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_core.py", line 221, in lnlikelihood_ns
+    return self.exoiris._tsa.lnlikelihood_ns(pv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_tslpf.py", line 276, in lnlikelihood_ns
+    return -inf if not isfinite(lnp) else self.lnlikelihood(pv)
+                                         ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_tslpf.py", line 245, in lnlikelihood
+    fmod = self.flux_model(pv, include_baseline=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_tslpf.py", line 154, in flux_model
+    transit_model = self.transit_model(pv)
+                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_tslpf.py", line 181, in transit_model
+    if not all(transpec>0):
+           ^^^^^^^^^^^^^^^
+TypeError: 'bool' object is not iterable
+162it [01:21,  1.99it/s, batch: 0 | bound: 0 | nc: 1 | ncall: 250 | eff(%): 33.061 | loglstar:   -inf < 68854563.540 <    inf | logz: 68854556.692 +/-  0.172 | dlogz:    inf >  0.100]
+Exception while calling loglikelihood function:
+  params: [ 9.71113153e-01  3.52474889e+00  5.07562262e-01  2.45989018e+06
+  6.07767835e+03  4.45344279e+00  5.63654139e-03  3.94874772e+00
+  2.20846554e+00  7.44977997e-01 -4.82381186e+00 -4.78291707e+00
+  8.96965037e-01 -2.81627635e+00  1.66233542e+02  8.87392444e-01
+ -6.54737516e-01 -3.69557875e+00 -6.94172522e-01  2.84458678e+00
+  1.90976731e+00]
+  args: []
+  kwargs: {}
+  exception:
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+                    ^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/multiprocessing/pool.py", line 48, in mapstar
+    return list(map(*args))
+           ^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/site-packages/dynesty/internal_samplers.py", line 430, in sample
+    logl = args.loglikelihood(np.asarray(v))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/site-packages/dynesty/utils.py", line 169, in __call__
+    ret = LoglOutput(self.loglikelihood(x), self.blob)
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/site-packages/dynesty/dynesty.py", line 827, in __call__
+    return self.func(np.asarray(x).copy(), *self.args, **self.kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_exec_ns.py", line 82, in loglikelihood
+    return relic.lnlikelihood_ns(pv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_core.py", line 221, in lnlikelihood_ns
+    return self.exoiris._tsa.lnlikelihood_ns(pv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_tslpf.py", line 276, in lnlikelihood_ns
+    return -inf if not isfinite(lnp) else self.lnlikelihood(pv)
+                                         ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_tslpf.py", line 245, in lnlikelihood
+    fmod = self.flux_model(pv, include_baseline=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_tslpf.py", line 154, in flux_model
+    transit_model = self.transit_model(pv)
+                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_tslpf.py", line 181, in transit_model
+    if not all(transpec>0):
+           ^^^^^^^^^^^^^^^
+TypeError: 'bool' object is not iterable
+"""
 
-Fitting the spectroscopic light curves using Differential Evolution...
-Global optimisation:   0%|          | 0/500 [00:00<?, ?it/s]Global optimisation:   0%|          | 1/500 [00:25<3:36:11, 26.00s/it]Global optimisation:   0%|          | 2/500 [00:27<1:37:29, 11.75s/it]Global optimisation:   1%|          | 3/500 [00:29<59:48,  7.22s/it]  Global optimisation:   1%|          | 4/500 [00:31<41:58,  5.08s/it]Global optimisation:   1%|          | 5/500 [00:33<31:56,  3.87s/it]Global optimisation:   1%|          | 6/500 [00:34<25:43,  3.13s/it]Global optimisation:   1%|▏         | 7/500 [00:36<22:15,  2.71s/it]Global optimisation:   2%|▏         | 8/500 [00:38<19:28,  2.37s/it]Global optimisation:   2%|▏         | 9/500 [00:41<21:26,  2.62s/it]Global optimisation:   2%|▏         | 10/500 [00:43<19:09,  2.35s/it]Global optimisation:   2%|▏         | 11/500 [00:44<17:10,  2.11s/it]Global optimisation:   2%|▏         | 12/500 [00:48<20:30,  2.52s/it]Global optimisation:   3%|▎         | 13/500 [00:51<22:35,  2.78s/it]Global optimisation:   3%|▎         | 14/500 [00:53<19:56,  2.46s/it]Global optimisation:   3%|▎         | 15/500 [00:56<21:51,  2.70s/it]Global optimisation:   3%|▎         | 16/500 [00:58<19:03,  2.36s/it]Global optimisation:   3%|▎         | 17/500 [00:59<17:11,  2.14s/it]Global optimisation:   4%|▎         | 18/500 [01:03<20:32,  2.56s/it]Global optimisation:   4%|▍         | 19/500 [01:05<18:36,  2.32s/it]Global optimisation:   4%|▍         | 20/500 [01:08<21:12,  2.65s/it]Global optimisation:   4%|▍         | 21/500 [01:10<18:58,  2.38s/it]Global optimisation:   4%|▍         | 22/500 [01:15<25:44,  3.23s/it]Global optimisation:   5%|▍         | 23/500 [01:20<30:22,  3.82s/it]Global optimisation:   5%|▍         | 24/500 [01:24<29:23,  3.71s/it]Global optimisation:   5%|▌         | 25/500 [01:25<24:56,  3.15s/it]Global optimisation:   5%|▌         | 26/500 [01:29<25:43,  3.26s/it]Global optimisation:   5%|▌         | 27/500 [01:32<26:03,  3.31s/it]Global optimisation:   6%|▌         | 28/500 [01:36<26:19,  3.35s/it]Global optimisation:   6%|▌         | 29/500 [01:41<30:24,  3.87s/it]Global optimisation:   6%|▌         | 30/500 [01:46<33:08,  4.23s/it]Global optimisation:   6%|▌         | 31/500 [01:49<31:12,  3.99s/it]Global optimisation:   6%|▋         | 32/500 [01:55<33:43,  4.32s/it]Global optimisation:   7%|▋         | 33/500 [01:56<27:53,  3.58s/it]Global optimisation:   7%|▋         | 34/500 [02:02<31:59,  4.12s/it]Global optimisation:   7%|▋         | 35/500 [02:07<34:50,  4.49s/it]Global optimisation:   7%|▋         | 36/500 [02:10<32:02,  4.14s/it]Global optimisation:   7%|▋         | 37/500 [02:14<30:57,  4.01s/it]Global optimisation:   8%|▊         | 38/500 [02:19<33:39,  4.37s/it]Global optimisation:   8%|▊         | 39/500 [02:26<39:12,  5.10s/it]Global optimisation:   8%|▊         | 40/500 [02:30<35:11,  4.59s/it]Global optimisation:   8%|▊         | 41/500 [02:35<35:56,  4.70s/it]Global optimisation:   8%|▊         | 42/500 [02:40<36:36,  4.80s/it]Global optimisation:   9%|▊         | 43/500 [02:43<33:39,  4.42s/it]Global optimisation:   9%|▉         | 44/500 [02:48<34:58,  4.60s/it]Global optimisation:   9%|▉         | 45/500 [02:54<36:51,  4.86s/it]Global optimisation:   9%|▉         | 46/500 [02:59<37:24,  4.94s/it]Global optimisation:   9%|▉         | 47/500 [03:05<41:07,  5.45s/it]Global optimisation:  10%|▉         | 48/500 [03:09<36:26,  4.84s/it]Global optimisation:  10%|▉         | 49/500 [03:14<37:38,  5.01s/it]Global optimisation:  10%|█         | 50/500 [03:18<34:03,  4.54s/it]Global optimisation:  10%|█         | 51/500 [03:21<31:57,  4.27s/it]Global optimisation:  10%|█         | 52/500 [03:26<34:01,  4.56s/it]Global optimisation:  11%|█         | 53/500 [03:30<31:18,  4.20s/it]Global optimisation:  11%|█         | 54/500 [03:35<32:52,  4.42s/it]Global optimisation:  11%|█         | 55/500 [03:40<34:58,  4.72s/it]Global optimisation:  11%|█         | 56/500 [03:47<39:29,  5.34s/it]Global optimisation:  11%|█▏        | 57/500 [03:50<35:07,  4.76s/it]Global optimisation:  12%|█▏        | 58/500 [03:55<35:36,  4.83s/it]Global optimisation:  12%|█▏        | 59/500 [04:02<39:44,  5.41s/it]Global optimisation:  12%|█▏        | 60/500 [04:05<35:07,  4.79s/it]Global optimisation:  12%|█▏        | 61/500 [04:12<39:16,  5.37s/it]Global optimisation:  12%|█▏        | 62/500 [04:16<34:53,  4.78s/it]Global optimisation:  13%|█▎        | 63/500 [04:21<36:28,  5.01s/it]Global optimisation:  13%|█▎        | 64/500 [04:25<32:51,  4.52s/it]Global optimisation:  13%|█▎        | 65/500 [04:29<33:39,  4.64s/it]Global optimisation:  13%|█▎        | 66/500 [04:35<35:37,  4.92s/it]Global optimisation:  13%|█▎        | 67/500 [04:42<39:46,  5.51s/it]Global optimisation:  14%|█▎        | 68/500 [04:47<39:17,  5.46s/it]Global optimisation:  14%|█▍        | 69/500 [04:52<38:37,  5.38s/it]Global optimisation:  14%|█▍        | 70/500 [04:58<38:24,  5.36s/it]Global optimisation:  14%|█▍        | 71/500 [05:01<34:27,  4.82s/it]Global optimisation:  14%|█▍        | 72/500 [05:05<31:27,  4.41s/it]Global optimisation:  15%|█▍        | 73/500 [05:08<29:41,  4.17s/it]Global optimisation:  15%|█▍        | 74/500 [05:14<32:13,  4.54s/it]Global optimisation:  15%|█▌        | 75/500 [05:17<29:26,  4.16s/it]Global optimisation:  15%|█▌        | 76/500 [05:22<31:37,  4.47s/it]Global optimisation:  15%|█▌        | 77/500 [05:27<33:07,  4.70s/it]Global optimisation:  16%|█▌        | 78/500 [05:33<34:15,  4.87s/it]Global optimisation:  16%|█▌        | 79/500 [05:40<38:30,  5.49s/it]Global optimisation:  16%|█▌        | 80/500 [05:43<34:06,  4.87s/it]Global optimisation:  16%|█▌        | 81/500 [05:47<30:57,  4.43s/it]Global optimisation:  16%|█▋        | 82/500 [05:52<32:42,  4.70s/it]Global optimisation:  17%|█▋        | 83/500 [05:55<29:58,  4.31s/it]Global optimisation:  17%|█▋        | 84/500 [05:59<28:04,  4.05s/it]Global optimisation:  17%|█▋        | 85/500 [06:04<29:52,  4.32s/it]Global optimisation:  17%|█▋        | 86/500 [06:09<32:19,  4.68s/it]Global optimisation:  17%|█▋        | 87/500 [06:12<29:22,  4.27s/it]Global optimisation:  18%|█▊        | 88/500 [06:18<31:14,  4.55s/it]Global optimisation:  18%|█▊        | 89/500 [06:23<32:04,  4.68s/it]Global optimisation:  18%|█▊        | 90/500 [06:28<33:00,  4.83s/it]Global optimisation:  18%|█▊        | 91/500 [06:30<26:44,  3.92s/it]Global optimisation:  18%|█▊        | 92/500 [06:35<29:29,  4.34s/it]Global optimisation:  19%|█▊        | 93/500 [06:39<27:53,  4.11s/it]Global optimisation:  19%|█▉        | 94/500 [06:44<30:18,  4.48s/it]Global optimisation:  19%|█▉        | 95/500 [06:49<31:52,  4.72s/it]Global optimisation:  19%|█▉        | 96/500 [06:54<32:29,  4.83s/it]Global optimisation:  19%|█▉        | 97/500 [07:00<33:16,  4.95s/it]Global optimisation:  20%|█▉        | 98/500 [07:03<30:34,  4.56s/it]Global optimisation:  20%|█▉        | 99/500 [07:07<28:13,  4.22s/it]Global optimisation:  20%|██        | 100/500 [07:10<26:46,  4.02s/it]Global optimisation:  20%|██        | 101/500 [07:15<28:30,  4.29s/it]Global optimisation:  20%|██        | 102/500 [07:18<26:41,  4.02s/it]Global optimisation:  21%|██        | 103/500 [07:22<25:45,  3.89s/it]Global optimisation:  21%|██        | 104/500 [07:29<31:28,  4.77s/it]Global optimisation:  21%|██        | 105/500 [07:32<28:46,  4.37s/it]Global optimisation:  21%|██        | 106/500 [07:39<33:32,  5.11s/it]Global optimisation:  21%|██▏       | 107/500 [07:44<33:38,  5.14s/it]Global optimisation:  22%|██▏       | 108/500 [07:49<33:30,  5.13s/it]Global optimisation:  22%|██▏       | 109/500 [07:55<33:28,  5.14s/it]Global optimisation:  22%|██▏       | 110/500 [08:00<33:14,  5.12s/it]Global optimisation:  22%|██▏       | 111/500 [08:05<33:21,  5.14s/it]Global optimisation:  22%|██▏       | 112/500 [08:10<33:54,  5.24s/it]Global optimisation:  23%|██▎       | 113/500 [08:12<27:08,  4.21s/it]Global optimisation:  23%|██▎       | 114/500 [08:16<25:43,  4.00s/it]Global optimisation:  23%|██▎       | 115/500 [08:19<24:20,  3.79s/it]Global optimisation:  23%|██▎       | 116/500 [08:26<29:47,  4.65s/it]Global optimisation:  23%|██▎       | 117/500 [08:29<27:22,  4.29s/it]Global optimisation:  24%|██▎       | 118/500 [08:35<29:32,  4.64s/it]Global optimisation:  24%|██▍       | 119/500 [08:40<30:52,  4.86s/it]Global optimisation:  24%|██▍       | 120/500 [08:42<25:01,  3.95s/it]Global optimisation:  24%|██▍       | 121/500 [08:47<26:49,  4.25s/it]Global optimisation:  24%|██▍       | 122/500 [08:52<28:45,  4.57s/it]Global optimisation:  25%|██▍       | 123/500 [08:57<29:39,  4.72s/it]Global optimisation:  25%|██▍       | 124/500 [08:59<24:02,  3.84s/it]Global optimisation:  25%|██▌       | 125/500 [09:04<26:23,  4.22s/it]Global optimisation:  25%|██▌       | 126/500 [09:11<30:56,  4.96s/it]Global optimisation:  25%|██▌       | 127/500 [09:16<31:36,  5.08s/it]Global optimisation:  26%|██▌       | 128/500 [09:21<31:51,  5.14s/it]Global optimisation:  26%|██▌       | 129/500 [09:27<32:17,  5.22s/it]Global optimisation:  26%|██▌       | 130/500 [09:32<31:53,  5.17s/it]Global optimisation:  26%|██▌       | 131/500 [09:37<32:18,  5.25s/it]Global optimisation:  26%|██▋       | 132/500 [09:42<32:19,  5.27s/it]Global optimisation:  27%|██▋       | 133/500 [09:48<32:26,  5.30s/it]Global optimisation:  27%|██▋       | 134/500 [09:53<32:32,  5.33s/it]Global optimisation:  27%|██▋       | 135/500 [10:00<34:44,  5.71s/it]Global optimisation:  27%|██▋       | 136/500 [10:05<33:17,  5.49s/it]Global optimisation:  27%|██▋       | 137/500 [10:08<29:38,  4.90s/it]Global optimisation:  28%|██▊       | 138/500 [10:13<29:52,  4.95s/it]Global optimisation:  28%|██▊       | 139/500 [10:17<27:18,  4.54s/it]Global optimisation:  28%|██▊       | 140/500 [10:22<28:10,  4.70s/it]Global optimisation:  28%|██▊       | 141/500 [10:24<22:56,  3.83s/it]Global optimisation:  28%|██▊       | 142/500 [10:31<28:01,  4.70s/it]Global optimisation:  29%|██▊       | 143/500 [10:36<29:05,  4.89s/it]Global optimisation:  29%|██▉       | 144/500 [10:41<29:44,  5.01s/it]Global optimisation:  29%|██▉       | 145/500 [10:48<32:45,  5.54s/it]Global optimisation:  29%|██▉       | 146/500 [10:52<29:09,  4.94s/it]Global optimisation:  29%|██▉       | 147/500 [10:59<32:38,  5.55s/it]Global optimisation:  30%|██▉       | 148/500 [11:04<32:12,  5.49s/it]Global optimisation:  30%|██▉       | 149/500 [11:09<31:53,  5.45s/it]Global optimisation:  30%|███       | 150/500 [11:13<27:59,  4.80s/it]Global optimisation:  30%|███       | 151/500 [11:18<28:51,  4.96s/it]Global optimisation:  30%|███       | 152/500 [11:21<26:03,  4.49s/it]Global optimisation:  31%|███       | 153/500 [11:27<27:18,  4.72s/it]Global optimisation:  31%|███       | 154/500 [11:32<28:03,  4.87s/it]Global optimisation:  31%|███       | 155/500 [11:39<31:31,  5.48s/it]Global optimisation:  31%|███       | 156/500 [11:44<31:07,  5.43s/it]Global optimisation:  31%|███▏      | 157/500 [11:51<33:07,  5.79s/it]Global optimisation:  32%|███▏      | 158/500 [11:56<31:46,  5.57s/it]Global optimisation:  32%|███▏      | 159/500 [11:59<28:22,  4.99s/it]Global optimisation:  32%|███▏      | 160/500 [12:05<28:44,  5.07s/it]Global optimisation:  32%|███▏      | 161/500 [12:10<29:23,  5.20s/it]Global optimisation:  32%|███▏      | 162/500 [12:17<31:51,  5.66s/it]Global optimisation:  33%|███▎      | 163/500 [12:24<33:49,  6.02s/it]Global optimisation:  33%|███▎      | 164/500 [12:30<35:03,  6.26s/it]Global optimisation:  33%|███▎      | 165/500 [12:36<33:08,  5.94s/it]Global optimisation:  33%|███▎      | 166/500 [12:38<26:15,  4.72s/it]Global optimisation:  33%|███▎      | 167/500 [12:44<29:43,  5.36s/it]Global optimisation:  34%|███▎      | 168/500 [12:50<29:32,  5.34s/it]Global optimisation:  34%|███▍      | 169/500 [12:56<31:35,  5.73s/it]Global optimisation:  34%|███▍      | 170/500 [13:02<30:51,  5.61s/it]Global optimisation:  34%|███▍      | 171/500 [13:07<29:41,  5.41s/it]Global optimisation:  34%|███▍      | 172/500 [13:12<29:28,  5.39s/it]Global optimisation:  35%|███▍      | 173/500 [13:15<26:19,  4.83s/it]Global optimisation:  35%|███▍      | 174/500 [13:21<27:09,  5.00s/it]Global optimisation:  35%|███▌      | 175/500 [13:26<27:35,  5.09s/it]Global optimisation:  35%|███▌      | 176/500 [13:31<27:38,  5.12s/it]Global optimisation:  35%|███▌      | 177/500 [13:37<27:44,  5.15s/it]Global optimisation:  36%|███▌      | 178/500 [13:42<28:02,  5.23s/it]Global optimisation:  36%|███▌      | 179/500 [13:46<25:22,  4.74s/it]Global optimisation:  36%|███▌      | 180/500 [13:52<28:29,  5.34s/it]Global optimisation:  36%|███▌      | 181/500 [13:57<27:55,  5.25s/it]Global optimisation:  36%|███▋      | 182/500 [14:03<28:53,  5.45s/it]Global optimisation:  37%|███▋      | 183/500 [14:08<27:23,  5.19s/it]Global optimisation:  37%|███▋      | 184/500 [14:12<26:26,  5.02s/it]Global optimisation:  37%|███▋      | 185/500 [14:17<25:29,  4.86s/it]Global optimisation:  37%|███▋      | 186/500 [14:21<24:56,  4.77s/it]Global optimisation:  37%|███▋      | 187/500 [14:26<24:26,  4.69s/it]Global optimisation:  38%|███▊      | 188/500 [14:32<26:29,  5.10s/it]Global optimisation:  38%|███▊      | 189/500 [14:38<27:57,  5.39s/it]Global optimisation:  38%|███▊      | 190/500 [14:44<28:39,  5.55s/it]Global optimisation:  38%|███▊      | 191/500 [14:49<27:07,  5.27s/it]Global optimisation:  38%|███▊      | 192/500 [14:53<25:59,  5.06s/it]Global optimisation:  39%|███▊      | 193/500 [14:59<27:23,  5.35s/it]Global optimisation:  39%|███▉      | 194/500 [15:05<27:58,  5.48s/it]Global optimisation:  39%|███▉      | 195/500 [15:10<26:36,  5.23s/it]Global optimisation:  39%|███▉      | 196/500 [15:14<25:27,  5.03s/it]Global optimisation:  39%|███▉      | 197/500 [15:20<26:49,  5.31s/it]Global optimisation:  40%|███▉      | 198/500 [15:23<23:13,  4.62s/it]Global optimisation:  40%|███▉      | 199/500 [15:29<25:21,  5.06s/it]Global optimisation:  40%|████      | 200/500 [15:32<22:13,  4.44s/it]Global optimisation:  40%|████      | 201/500 [15:38<24:23,  4.89s/it]Global optimisation:  40%|████      | 202/500 [15:44<25:47,  5.19s/it]Global optimisation:  41%|████      | 203/500 [15:50<27:11,  5.49s/it]Global optimisation:  41%|████      | 204/500 [15:56<27:54,  5.66s/it]Global optimisation:  41%|████      | 205/500 [16:01<26:17,  5.35s/it]Global optimisation:  41%|████      | 206/500 [16:06<24:59,  5.10s/it]Global optimisation:  41%|████▏     | 207/500 [16:10<24:11,  4.95s/it]Global optimisation:  42%|████▏     | 208/500 [16:15<23:47,  4.89s/it]Global optimisation:  42%|████▏     | 209/500 [16:21<25:32,  5.27s/it]Global optimisation:  42%|████▏     | 210/500 [16:26<24:27,  5.06s/it]Global optimisation:  42%|████▏     | 211/500 [16:30<23:40,  4.91s/it]Global optimisation:  42%|████▏     | 212/500 [16:35<23:17,  4.85s/it]Global optimisation:  43%|████▎     | 213/500 [16:39<22:28,  4.70s/it]Global optimisation:  43%|████▎     | 214/500 [16:44<22:23,  4.70s/it]Global optimisation:  43%|████▎     | 215/500 [16:46<17:55,  3.77s/it]Global optimisation:  43%|████▎     | 216/500 [16:52<20:57,  4.43s/it]Global optimisation:  43%|████▎     | 217/500 [16:56<20:55,  4.44s/it]Global optimisation:  44%|████▎     | 218/500 [17:02<23:05,  4.91s/it]Global optimisation:  44%|████▍     | 219/500 [17:07<22:28,  4.80s/it]Global optimisation:  44%|████▍     | 220/500 [17:11<22:10,  4.75s/it]Global optimisation:  44%|████▍     | 221/500 [17:16<22:02,  4.74s/it]Global optimisation:  44%|████▍     | 222/500 [17:22<23:52,  5.15s/it]Global optimisation:  45%|████▍     | 223/500 [17:28<24:40,  5.34s/it]Global optimisation:  45%|████▍     | 224/500 [17:34<25:19,  5.51s/it]Global optimisation:  45%|████▌     | 225/500 [17:40<25:59,  5.67s/it]Global optimisation:  45%|████▌     | 226/500 [17:46<26:07,  5.72s/it]Global optimisation:  45%|████▌     | 227/500 [17:50<24:31,  5.39s/it]Global optimisation:  46%|████▌     | 228/500 [17:56<25:19,  5.59s/it]Global optimisation:  46%|████▌     | 229/500 [18:01<24:01,  5.32s/it]Global optimisation:  46%|████▌     | 230/500 [18:05<22:47,  5.07s/it]Global optimisation:  46%|████▌     | 231/500 [18:10<21:58,  4.90s/it]Global optimisation:  46%|████▋     | 232/500 [18:16<23:18,  5.22s/it]Global optimisation:  47%|████▋     | 233/500 [18:20<22:24,  5.04s/it]Global optimisation:  47%|████▋     | 234/500 [18:25<21:53,  4.94s/it]Global optimisation:  47%|████▋     | 235/500 [18:31<23:16,  5.27s/it]Global optimisation:  47%|████▋     | 236/500 [18:37<24:14,  5.51s/it]Global optimisation:  47%|████▋     | 237/500 [18:43<24:50,  5.67s/it]Global optimisation:  48%|████▊     | 238/500 [18:50<25:26,  5.83s/it]Global optimisation:  48%|████▊     | 239/500 [18:54<23:38,  5.44s/it]Global optimisation:  48%|████▊     | 240/500 [18:59<22:34,  5.21s/it]Global optimisation:  48%|████▊     | 241/500 [19:03<21:41,  5.03s/it]Global optimisation:  48%|████▊     | 242/500 [19:08<21:08,  4.91s/it]Global optimisation:  49%|████▊     | 243/500 [19:13<20:42,  4.83s/it]Global optimisation:  49%|████▉     | 244/500 [19:19<22:02,  5.17s/it]Global optimisation:  49%|████▉     | 245/500 [19:23<21:11,  4.99s/it]Global optimisation:  49%|████▉     | 246/500 [19:28<20:32,  4.85s/it]Global optimisation:  49%|████▉     | 247/500 [19:32<20:11,  4.79s/it]Global optimisation:  50%|████▉     | 248/500 [19:37<19:53,  4.74s/it]Global optimisation:  50%|████▉     | 249/500 [19:40<17:45,  4.25s/it]Global optimisation:  50%|█████     | 250/500 [19:45<18:14,  4.38s/it]Global optimisation:  50%|█████     | 251/500 [19:51<20:15,  4.88s/it]Global optimisation:  50%|█████     | 252/500 [19:57<21:29,  5.20s/it]Global optimisation:  51%|█████     | 253/500 [20:00<18:44,  4.55s/it]Global optimisation:  51%|█████     | 254/500 [20:04<18:43,  4.57s/it]Global optimisation:  51%|█████     | 255/500 [20:09<18:49,  4.61s/it]Global optimisation:  51%|█████     | 256/500 [20:13<18:28,  4.54s/it]Global optimisation:  51%|█████▏    | 257/500 [20:18<18:32,  4.58s/it]Global optimisation:  52%|█████▏    | 258/500 [20:24<20:22,  5.05s/it]Global optimisation:  52%|█████▏    | 259/500 [20:30<21:26,  5.34s/it]Global optimisation:  52%|█████▏    | 260/500 [20:36<22:16,  5.57s/it]Global optimisation:  52%|█████▏    | 261/500 [20:41<21:03,  5.29s/it]Global optimisation:  52%|█████▏    | 262/500 [20:47<21:52,  5.51s/it]Global optimisation:  53%|█████▎    | 263/500 [20:53<22:34,  5.71s/it]Global optimisation:  53%|█████▎    | 264/500 [20:58<20:53,  5.31s/it]Global optimisation:  53%|█████▎    | 265/500 [21:02<19:53,  5.08s/it]Global optimisation:  53%|█████▎    | 266/500 [21:07<19:23,  4.97s/it]Global optimisation:  53%|█████▎    | 267/500 [21:11<18:46,  4.83s/it]Global optimisation:  54%|█████▎    | 268/500 [21:17<19:55,  5.15s/it]Global optimisation:  54%|█████▍    | 269/500 [21:22<19:14,  5.00s/it]Global optimisation:  54%|█████▍    | 270/500 [21:28<20:25,  5.33s/it]Global optimisation:  54%|█████▍    | 271/500 [21:34<20:58,  5.50s/it]Global optimisation:  54%|█████▍    | 272/500 [21:40<21:21,  5.62s/it]Global optimisation:  55%|█████▍    | 273/500 [21:45<20:14,  5.35s/it]Global optimisation:  55%|█████▍    | 274/500 [21:49<19:27,  5.16s/it]Global optimisation:  55%|█████▌    | 275/500 [21:55<20:26,  5.45s/it]Global optimisation:  55%|█████▌    | 276/500 [22:00<19:26,  5.21s/it]Global optimisation:  55%|█████▌    | 277/500 [22:05<18:48,  5.06s/it]Global optimisation:  56%|█████▌    | 278/500 [22:09<18:17,  4.94s/it]Global optimisation:  56%|█████▌    | 279/500 [22:14<17:53,  4.86s/it]Global optimisation:  56%|█████▌    | 280/500 [22:20<19:10,  5.23s/it]Global optimisation:  56%|█████▌    | 281/500 [22:25<18:23,  5.04s/it]Global optimisation:  56%|█████▋    | 282/500 [22:29<17:54,  4.93s/it]Global optimisation:  57%|█████▋    | 283/500 [22:34<17:20,  4.79s/it]Global optimisation:  57%|█████▋    | 284/500 [22:39<17:03,  4.74s/it]Global optimisation:  57%|█████▋    | 285/500 [22:45<18:33,  5.18s/it]Global optimisation:  57%|█████▋    | 286/500 [22:51<19:24,  5.44s/it]Global optimisation:  57%|█████▋    | 287/500 [22:55<18:10,  5.12s/it]Global optimisation:  58%|█████▊    | 288/500 [23:00<17:35,  4.98s/it]Global optimisation:  58%|█████▊    | 289/500 [23:06<18:37,  5.30s/it]Global optimisation:  58%|█████▊    | 290/500 [23:10<17:49,  5.09s/it]Global optimisation:  58%|█████▊    | 291/500 [23:15<17:05,  4.91s/it]Global optimisation:  58%|█████▊    | 292/500 [23:20<16:43,  4.83s/it]Global optimisation:  59%|█████▊    | 293/500 [23:26<17:50,  5.17s/it]Global optimisation:  59%|█████▉    | 294/500 [23:29<15:36,  4.55s/it]Global optimisation:  59%|█████▉    | 295/500 [23:33<15:26,  4.52s/it]Global optimisation:  59%|█████▉    | 296/500 [23:39<16:47,  4.94s/it]Global optimisation:  59%|█████▉    | 297/500 [23:43<16:14,  4.80s/it]Global optimisation:  60%|█████▉    | 298/500 [23:49<17:07,  5.08s/it]Global optimisation:  60%|█████▉    | 299/500 [23:54<16:32,  4.94s/it]Global optimisation:  60%|██████    | 300/500 [23:58<16:10,  4.85s/it]Global optimisation:  60%|██████    | 301/500 [24:03<15:53,  4.79s/it]Global optimisation:  60%|██████    | 302/500 [24:09<16:59,  5.15s/it]Global optimisation:  61%|██████    | 303/500 [24:15<17:37,  5.37s/it]Global optimisation:  61%|██████    | 304/500 [24:20<16:47,  5.14s/it]Global optimisation:  61%|██████    | 305/500 [24:26<17:29,  5.38s/it]Global optimisation:  61%|██████    | 306/500 [24:30<16:35,  5.13s/it]Global optimisation:  61%|██████▏   | 307/500 [24:35<16:06,  5.01s/it]Global optimisation:  62%|██████▏   | 308/500 [24:40<15:47,  4.94s/it]Global optimisation:  62%|██████▏   | 309/500 [24:45<16:34,  5.21s/it]Global optimisation:  62%|██████▏   | 310/500 [24:50<15:59,  5.05s/it]Global optimisation:  62%|██████▏   | 311/500 [24:56<16:52,  5.36s/it]Global optimisation:  62%|██████▏   | 312/500 [25:02<17:27,  5.57s/it]Global optimisation:  63%|██████▎   | 313/500 [25:08<17:42,  5.68s/it]Global optimisation:  63%|██████▎   | 314/500 [25:14<17:58,  5.80s/it]Global optimisation:  63%|██████▎   | 315/500 [25:17<15:19,  4.97s/it]Global optimisation:  63%|██████▎   | 316/500 [25:23<16:07,  5.26s/it]Global optimisation:  63%|██████▎   | 317/500 [25:26<14:02,  4.61s/it]Global optimisation:  64%|██████▎   | 318/500 [25:31<13:58,  4.61s/it]Global optimisation:  64%|██████▍   | 319/500 [25:36<13:57,  4.62s/it]Global optimisation:  64%|██████▍   | 320/500 [25:40<13:50,  4.62s/it]Global optimisation:  64%|██████▍   | 321/500 [25:45<13:36,  4.56s/it]Global optimisation:  64%|██████▍   | 322/500 [25:49<13:21,  4.50s/it]Global optimisation:  65%|██████▍   | 323/500 [25:55<14:30,  4.92s/it]Global optimisation:  65%|██████▍   | 324/500 [25:58<12:50,  4.38s/it]Global optimisation:  65%|██████▌   | 325/500 [26:03<13:01,  4.47s/it]Global optimisation:  65%|██████▌   | 326/500 [26:07<13:10,  4.54s/it]Global optimisation:  65%|██████▌   | 327/500 [26:13<14:16,  4.95s/it]Global optimisation:  66%|██████▌   | 328/500 [26:18<13:56,  4.86s/it]Global optimisation:  66%|██████▌   | 329/500 [26:22<13:35,  4.77s/it]Global optimisation:  66%|██████▌   | 330/500 [26:27<13:23,  4.73s/it]Global optimisation:  66%|██████▌   | 331/500 [26:32<13:18,  4.72s/it]Global optimisation:  66%|██████▋   | 332/500 [26:35<11:48,  4.22s/it]Global optimisation:  67%|██████▋   | 333/500 [26:41<13:15,  4.76s/it]Global optimisation:  67%|██████▋   | 334/500 [26:44<11:47,  4.26s/it]Global optimisation:  67%|██████▋   | 335/500 [26:49<11:59,  4.36s/it]Global optimisation:  67%|██████▋   | 336/500 [26:52<10:52,  3.98s/it]Global optimisation:  67%|██████▋   | 337/500 [26:56<11:13,  4.13s/it]Global optimisation:  68%|██████▊   | 338/500 [27:01<11:34,  4.29s/it]Global optimisation:  68%|██████▊   | 339/500 [27:04<10:32,  3.93s/it]Global optimisation:  68%|██████▊   | 340/500 [27:09<11:01,  4.14s/it]Global optimisation:  68%|██████▊   | 341/500 [27:15<12:32,  4.73s/it]Global optimisation:  68%|██████▊   | 342/500 [27:21<13:23,  5.08s/it]Global optimisation:  69%|██████▊   | 343/500 [27:25<12:59,  4.96s/it]Global optimisation:  69%|██████▉   | 344/500 [27:30<12:30,  4.81s/it]Global optimisation:  69%|██████▉   | 345/500 [27:34<12:20,  4.78s/it]Global optimisation:  69%|██████▉   | 346/500 [27:39<12:11,  4.75s/it]Global optimisation:  69%|██████▉   | 347/500 [27:42<10:51,  4.26s/it]Global optimisation:  70%|██████▉   | 348/500 [27:47<11:03,  4.37s/it]Global optimisation:  70%|██████▉   | 349/500 [27:51<11:13,  4.46s/it]Global optimisation:  70%|███████   | 350/500 [27:58<12:23,  4.96s/it]Global optimisation:  70%|███████   | 351/500 [28:02<12:03,  4.86s/it]Global optimisation:  70%|███████   | 352/500 [28:08<12:50,  5.20s/it]Global optimisation:  71%|███████   | 353/500 [28:14<13:12,  5.39s/it]Global optimisation:  71%|███████   | 354/500 [28:19<12:28,  5.13s/it]Global optimisation:  71%|███████   | 355/500 [28:23<11:56,  4.94s/it]Global optimisation:  71%|███████   | 356/500 [28:28<11:40,  4.87s/it]Global optimisation:  71%|███████▏  | 357/500 [28:31<10:20,  4.34s/it]Global optimisation:  72%|███████▏  | 358/500 [28:35<10:25,  4.41s/it]Global optimisation:  72%|███████▏  | 359/500 [28:40<10:31,  4.48s/it]Global optimisation:  72%|███████▏  | 360/500 [28:45<10:35,  4.54s/it]Global optimisation:  72%|███████▏  | 361/500 [28:49<10:34,  4.56s/it]Global optimisation:  72%|███████▏  | 362/500 [28:54<10:21,  4.51s/it]Global optimisation:  73%|███████▎  | 363/500 [28:58<10:24,  4.56s/it]Global optimisation:  73%|███████▎  | 364/500 [29:04<11:17,  4.98s/it]Global optimisation:  73%|███████▎  | 365/500 [29:10<11:57,  5.31s/it]Global optimisation:  73%|███████▎  | 366/500 [29:16<12:13,  5.47s/it]Global optimisation:  73%|███████▎  | 367/500 [29:21<11:28,  5.18s/it]Global optimisation:  74%|███████▎  | 368/500 [29:26<11:07,  5.06s/it]Global optimisation:  74%|███████▍  | 369/500 [29:29<09:46,  4.48s/it]Global optimisation:  74%|███████▍  | 370/500 [29:33<09:47,  4.52s/it]Global optimisation:  74%|███████▍  | 371/500 [29:36<08:47,  4.09s/it]Global optimisation:  74%|███████▍  | 372/500 [29:41<09:06,  4.27s/it]Global optimisation:  75%|███████▍  | 373/500 [29:46<09:15,  4.37s/it]Global optimisation:  75%|███████▍  | 374/500 [29:50<09:19,  4.44s/it]Global optimisation:  75%|███████▌  | 375/500 [29:55<09:24,  4.52s/it]Global optimisation:  75%|███████▌  | 376/500 [30:01<10:12,  4.94s/it]Global optimisation:  75%|███████▌  | 377/500 [30:07<10:48,  5.27s/it]Global optimisation:  76%|███████▌  | 378/500 [30:11<10:10,  5.00s/it]Global optimisation:  76%|███████▌  | 379/500 [30:17<10:33,  5.23s/it]Global optimisation:  76%|███████▌  | 380/500 [30:22<10:01,  5.01s/it]Global optimisation:  76%|███████▌  | 381/500 [30:26<09:31,  4.80s/it]Global optimisation:  76%|███████▋  | 382/500 [30:31<09:22,  4.77s/it]Global optimisation:  77%|███████▋  | 383/500 [30:35<09:16,  4.76s/it]Global optimisation:  77%|███████▋  | 384/500 [30:38<08:13,  4.25s/it]Global optimisation:  77%|███████▋  | 385/500 [30:42<07:31,  3.93s/it]Global optimisation:  77%|███████▋  | 386/500 [30:48<08:37,  4.54s/it]Global optimisation:  77%|███████▋  | 387/500 [30:51<07:42,  4.09s/it]Global optimisation:  78%|███████▊  | 388/500 [30:54<07:05,  3.80s/it]Global optimisation:  78%|███████▊  | 389/500 [31:00<08:19,  4.50s/it]Global optimisation:  78%|███████▊  | 390/500 [31:05<08:21,  4.56s/it]Global optimisation:  78%|███████▊  | 391/500 [31:08<07:25,  4.09s/it]Global optimisation:  78%|███████▊  | 392/500 [31:13<08:20,  4.64s/it]Global optimisation:  79%|███████▊  | 393/500 [31:18<08:17,  4.65s/it]Global optimisation:  79%|███████▉  | 394/500 [31:24<08:52,  5.03s/it]Global optimisation:  79%|███████▉  | 395/500 [31:30<09:21,  5.35s/it]Global optimisation:  79%|███████▉  | 396/500 [31:35<08:54,  5.14s/it]Global optimisation:  79%|███████▉  | 397/500 [31:41<09:21,  5.45s/it]Global optimisation:  80%|███████▉  | 398/500 [31:46<08:52,  5.22s/it]Global optimisation:  80%|███████▉  | 399/500 [31:50<08:27,  5.02s/it]Global optimisation:  80%|████████  | 400/500 [31:56<08:50,  5.30s/it]Global optimisation:  80%|████████  | 401/500 [32:01<08:26,  5.12s/it]Global optimisation:  80%|████████  | 402/500 [32:07<08:50,  5.41s/it]Global optimisation:  81%|████████  | 403/500 [32:12<08:21,  5.17s/it]Global optimisation:  81%|████████  | 404/500 [32:16<08:01,  5.02s/it]Global optimisation:  81%|████████  | 405/500 [32:22<08:27,  5.34s/it]Global optimisation:  81%|████████  | 406/500 [32:28<08:35,  5.49s/it]Global optimisation:  81%|████████▏ | 407/500 [32:31<07:25,  4.79s/it]Global optimisation:  82%|████████▏ | 408/500 [32:36<07:09,  4.67s/it]Global optimisation:  82%|████████▏ | 409/500 [32:42<07:37,  5.03s/it]Global optimisation:  82%|████████▏ | 410/500 [32:46<07:20,  4.89s/it]Global optimisation:  82%|████████▏ | 411/500 [32:52<07:42,  5.20s/it]Global optimisation:  82%|████████▏ | 412/500 [32:57<07:20,  5.00s/it]Global optimisation:  83%|████████▎ | 413/500 [33:01<07:05,  4.89s/it]Global optimisation:  83%|████████▎ | 414/500 [33:06<06:53,  4.80s/it]Global optimisation:  83%|████████▎ | 415/500 [33:10<06:43,  4.75s/it]Global optimisation:  83%|████████▎ | 416/500 [33:17<07:11,  5.14s/it]Global optimisation:  83%|████████▎ | 417/500 [33:22<07:23,  5.34s/it]Global optimisation:  84%|████████▎ | 418/500 [33:27<07:00,  5.12s/it]Global optimisation:  84%|████████▍ | 419/500 [33:33<07:18,  5.41s/it]Global optimisation:  84%|████████▍ | 420/500 [33:39<07:24,  5.55s/it]Global optimisation:  84%|████████▍ | 421/500 [33:44<06:56,  5.28s/it]Global optimisation:  84%|████████▍ | 422/500 [33:49<07:05,  5.46s/it]Global optimisation:  85%|████████▍ | 423/500 [33:54<06:42,  5.22s/it]Global optimisation:  85%|████████▍ | 424/500 [33:59<06:22,  5.04s/it]Global optimisation:  85%|████████▌ | 425/500 [34:03<06:10,  4.94s/it]Global optimisation:  85%|████████▌ | 426/500 [34:08<05:57,  4.83s/it]Global optimisation:  85%|████████▌ | 427/500 [34:13<05:46,  4.75s/it]Global optimisation:  86%|████████▌ | 428/500 [34:17<05:39,  4.71s/it]Global optimisation:  86%|████████▌ | 429/500 [34:22<05:33,  4.69s/it]Global optimisation:  86%|████████▌ | 430/500 [34:28<05:57,  5.10s/it]Global optimisation:  86%|████████▌ | 431/500 [34:31<05:10,  4.49s/it]Global optimisation:  86%|████████▋ | 432/500 [34:37<05:34,  4.92s/it]Global optimisation:  87%|████████▋ | 433/500 [34:42<05:25,  4.86s/it]Global optimisation:  87%|████████▋ | 434/500 [34:48<05:41,  5.17s/it]Global optimisation:  87%|████████▋ | 435/500 [34:52<05:24,  5.00s/it]Global optimisation:  87%|████████▋ | 436/500 [34:57<05:14,  4.91s/it]Global optimisation:  87%|████████▋ | 437/500 [35:03<05:29,  5.23s/it]Global optimisation:  88%|████████▊ | 438/500 [35:09<05:36,  5.43s/it]Global optimisation:  88%|████████▊ | 439/500 [35:13<05:14,  5.15s/it]Global optimisation:  88%|████████▊ | 440/500 [35:19<05:27,  5.46s/it]Global optimisation:  88%|████████▊ | 441/500 [35:24<05:08,  5.23s/it]Global optimisation:  88%|████████▊ | 442/500 [35:29<04:52,  5.04s/it]Global optimisation:  89%|████████▊ | 443/500 [35:33<04:39,  4.91s/it]Global optimisation:  89%|████████▉ | 444/500 [35:39<04:49,  5.17s/it]Global optimisation:  89%|████████▉ | 445/500 [35:45<04:57,  5.40s/it]Global optimisation:  89%|████████▉ | 446/500 [35:51<05:02,  5.61s/it]Global optimisation:  89%|████████▉ | 447/500 [35:56<04:41,  5.31s/it]Global optimisation:  90%|████████▉ | 448/500 [36:00<04:25,  5.10s/it]Global optimisation:  90%|████████▉ | 449/500 [36:06<04:34,  5.39s/it]Global optimisation:  90%|█████████ | 450/500 [36:12<04:38,  5.56s/it]Global optimisation:  90%|█████████ | 451/500 [36:18<04:41,  5.74s/it]Global optimisation:  90%|█████████ | 452/500 [36:24<04:38,  5.79s/it]Global optimisation:  91%|█████████ | 453/500 [36:30<04:35,  5.85s/it]Global optimisation:  91%|█████████ | 454/500 [36:36<04:31,  5.90s/it]Global optimisation:  91%|█████████ | 455/500 [36:41<04:07,  5.51s/it]Global optimisation:  91%|█████████ | 456/500 [36:46<03:50,  5.25s/it]Global optimisation:  91%|█████████▏| 457/500 [36:52<03:55,  5.48s/it]Global optimisation:  92%|█████████▏| 458/500 [36:57<03:54,  5.59s/it]Global optimisation:  92%|█████████▏| 459/500 [37:04<03:56,  5.76s/it]Global optimisation:  92%|█████████▏| 460/500 [37:08<03:36,  5.42s/it]Global optimisation:  92%|█████████▏| 461/500 [37:13<03:21,  5.16s/it]Global optimisation:  92%|█████████▏| 462/500 [37:19<03:23,  5.35s/it]Global optimisation:  93%|█████████▎| 463/500 [37:23<03:11,  5.17s/it]Global optimisation:  93%|█████████▎| 464/500 [37:29<03:15,  5.44s/it]Global optimisation:  93%|█████████▎| 465/500 [37:36<03:17,  5.65s/it]Global optimisation:  93%|█████████▎| 466/500 [37:41<03:14,  5.72s/it]Global optimisation:  93%|█████████▎| 467/500 [37:46<02:57,  5.37s/it]Global optimisation:  94%|█████████▎| 468/500 [37:51<02:45,  5.17s/it]Global optimisation:  94%|█████████▍| 469/500 [37:57<02:46,  5.38s/it]Global optimisation:  94%|█████████▍| 470/500 [38:02<02:45,  5.53s/it]Global optimisation:  94%|█████████▍| 471/500 [38:08<02:44,  5.68s/it]Global optimisation:  94%|█████████▍| 472/500 [38:15<02:42,  5.81s/it]Global optimisation:  95%|█████████▍| 473/500 [38:21<02:38,  5.88s/it]Global optimisation:  95%|█████████▍| 474/500 [38:26<02:32,  5.86s/it]Global optimisation:  95%|█████████▌| 475/500 [38:33<02:28,  5.94s/it]Global optimisation:  95%|█████████▌| 476/500 [38:39<02:22,  5.95s/it]Global optimisation:  95%|█████████▌| 477/500 [38:45<02:18,  6.00s/it]Global optimisation:  96%|█████████▌| 478/500 [38:51<02:13,  6.05s/it]Global optimisation:  96%|█████████▌| 479/500 [38:55<01:57,  5.59s/it]Global optimisation:  96%|█████████▌| 480/500 [39:01<01:55,  5.76s/it]Global optimisation:  96%|█████████▌| 481/500 [39:07<01:50,  5.81s/it]Global optimisation:  96%|█████████▋| 482/500 [39:14<01:46,  5.90s/it]Global optimisation:  97%|█████████▋| 483/500 [39:20<01:41,  5.98s/it]Global optimisation:  97%|█████████▋| 484/500 [39:24<01:29,  5.57s/it]Global optimisation:  97%|█████████▋| 485/500 [39:30<01:24,  5.66s/it]Global optimisation:  97%|█████████▋| 486/500 [39:36<01:21,  5.79s/it]Global optimisation:  97%|█████████▋| 487/500 [39:42<01:16,  5.86s/it]Global optimisation:  98%|█████████▊| 488/500 [39:47<01:05,  5.48s/it]Global optimisation:  98%|█████████▊| 489/500 [39:53<01:02,  5.65s/it]Global optimisation:  98%|█████████▊| 490/500 [39:59<00:57,  5.72s/it]Global optimisation:  98%|█████████▊| 491/500 [40:03<00:48,  5.38s/it]Global optimisation:  98%|█████████▊| 492/500 [40:09<00:44,  5.58s/it]Global optimisation:  99%|█████████▊| 493/500 [40:14<00:37,  5.32s/it]Global optimisation:  99%|█████████▉| 494/500 [40:20<00:33,  5.55s/it]Global optimisation:  99%|█████████▉| 495/500 [40:26<00:28,  5.69s/it]Global optimisation:  99%|█████████▉| 496/500 [40:32<00:23,  5.77s/it]Global optimisation:  99%|█████████▉| 497/500 [40:38<00:17,  5.80s/it]Global optimisation: 100%|█████████▉| 498/500 [40:44<00:11,  5.86s/it]Global optimisation: 100%|█████████▉| 499/500 [40:50<00:05,  5.91s/it]Global optimisation: 100%|██████████| 500/500 [40:55<00:00,  5.55s/it]Global optimisation: 100%|██████████| 500/500 [40:55<00:00,  4.91s/it]
+The above exception was the direct cause of the following exception:
 
-Running MCMC sampling...
-`population` is None. Initializing MCMC population from DE results.
-MCMC sampling:   0%|          | 0/1 [00:00<?, ?it/s]
-Run 1/1:   0%|          | 0/1000 [00:00<?, ?it/s][A
-Run 1/1:   0%|          | 1/1000 [00:12<3:24:45, 12.30s/it][A
-Run 1/1:   0%|          | 2/1000 [00:18<2:22:12,  8.55s/it][A
-Run 1/1:   0%|          | 3/1000 [00:24<2:02:55,  7.40s/it][A
-Run 1/1:   0%|          | 4/1000 [00:30<1:53:06,  6.81s/it][A
-Run 1/1:   0%|          | 5/1000 [00:36<1:47:31,  6.48s/it][A
-Run 1/1:   1%|          | 6/1000 [00:41<1:43:59,  6.28s/it][A
-Run 1/1:   1%|          | 7/1000 [00:47<1:42:12,  6.18s/it][A
-Run 1/1:   1%|          | 8/1000 [00:53<1:40:57,  6.11s/it][A
-Run 1/1:   1%|          | 9/1000 [00:59<1:39:27,  6.02s/it][A
-Run 1/1:   1%|          | 10/1000 [01:04<1:31:57,  5.57s/it][A
-Run 1/1:   1%|          | 11/1000 [01:07<1:19:57,  4.85s/it][A
-Run 1/1:   1%|          | 12/1000 [01:11<1:18:06,  4.74s/it][A
-Run 1/1:   1%|▏         | 13/1000 [01:16<1:16:46,  4.67s/it][A
-Run 1/1:   1%|▏         | 14/1000 [01:22<1:23:17,  5.07s/it][A
-Run 1/1:   2%|▏         | 15/1000 [01:25<1:14:00,  4.51s/it][A
-Run 1/1:   2%|▏         | 16/1000 [01:30<1:14:09,  4.52s/it][A
-Run 1/1:   2%|▏         | 17/1000 [01:36<1:21:00,  4.94s/it][A
-Run 1/1:   2%|▏         | 18/1000 [01:42<1:25:35,  5.23s/it][A
-Run 1/1:   2%|▏         | 19/1000 [01:46<1:22:21,  5.04s/it][A
-Run 1/1:   2%|▏         | 20/1000 [01:52<1:25:58,  5.26s/it][A
-Run 1/1:   2%|▏         | 21/1000 [01:58<1:28:53,  5.45s/it][A
-Run 1/1:   2%|▏         | 22/1000 [02:04<1:30:53,  5.58s/it][A
-Run 1/1:   2%|▏         | 23/1000 [02:08<1:26:17,  5.30s/it][A
-Run 1/1:   2%|▏         | 24/1000 [02:13<1:22:27,  5.07s/it][A
-Run 1/1:   2%|▎         | 25/1000 [02:19<1:26:06,  5.30s/it][A
-Run 1/1:   3%|▎         | 26/1000 [02:22<1:15:32,  4.65s/it][A
-Run 1/1:   3%|▎         | 27/1000 [02:26<1:14:48,  4.61s/it][A
-Run 1/1:   3%|▎         | 28/1000 [02:31<1:14:34,  4.60s/it][A
-Run 1/1:   3%|▎         | 29/1000 [02:34<1:07:30,  4.17s/it][A
-Run 1/1:   3%|▎         | 30/1000 [02:37<1:02:17,  3.85s/it][A
-Run 1/1:   3%|▎         | 31/1000 [02:43<1:12:15,  4.47s/it][A
-Run 1/1:   3%|▎         | 32/1000 [02:48<1:12:32,  4.50s/it][A
-Run 1/1:   3%|▎         | 33/1000 [02:52<1:12:31,  4.50s/it][A
-Run 1/1:   3%|▎         | 34/1000 [02:58<1:19:24,  4.93s/it][A
-Run 1/1:   4%|▎         | 35/1000 [03:03<1:17:50,  4.84s/it][A
-Run 1/1:   4%|▎         | 36/1000 [03:09<1:22:25,  5.13s/it][A
-Run 1/1:   4%|▎         | 37/1000 [03:13<1:19:26,  4.95s/it][A
-Run 1/1:   4%|▍         | 38/1000 [03:19<1:24:11,  5.25s/it][A
-Run 1/1:   4%|▍         | 39/1000 [03:23<1:20:09,  5.01s/it][A
-Run 1/1:   4%|▍         | 40/1000 [03:29<1:24:30,  5.28s/it][A
-Run 1/1:   4%|▍         | 41/1000 [03:35<1:27:14,  5.46s/it][A
-Run 1/1:   4%|▍         | 42/1000 [03:40<1:22:32,  5.17s/it][A
-Run 1/1:   4%|▍         | 43/1000 [03:44<1:19:16,  4.97s/it][A
-Run 1/1:   4%|▍         | 44/1000 [03:49<1:17:18,  4.85s/it][A
-Run 1/1:   4%|▍         | 45/1000 [03:53<1:16:00,  4.77s/it][A
-Run 1/1:   5%|▍         | 46/1000 [03:59<1:21:03,  5.10s/it][A
-Run 1/1:   5%|▍         | 47/1000 [04:04<1:18:18,  4.93s/it][A
-Run 1/1:   5%|▍         | 48/1000 [04:08<1:16:10,  4.80s/it][A
-Run 1/1:   5%|▍         | 49/1000 [04:14<1:21:13,  5.12s/it][A
-Run 1/1:   5%|▌         | 50/1000 [04:17<1:11:59,  4.55s/it][A
-Run 1/1:   5%|▌         | 51/1000 [04:22<1:11:58,  4.55s/it][A
-Run 1/1:   5%|▌         | 52/1000 [04:27<1:11:46,  4.54s/it][A
-Run 1/1:   5%|▌         | 53/1000 [04:32<1:18:18,  4.96s/it][A
-Run 1/1:   5%|▌         | 54/1000 [04:38<1:22:54,  5.26s/it][A
-Run 1/1:   6%|▌         | 55/1000 [04:44<1:25:31,  5.43s/it][A
-Run 1/1:   6%|▌         | 56/1000 [04:47<1:14:30,  4.74s/it][A
-Run 1/1:   6%|▌         | 57/1000 [04:53<1:20:06,  5.10s/it][A
-Run 1/1:   6%|▌         | 58/1000 [04:58<1:17:28,  4.93s/it][A
-Run 1/1:   6%|▌         | 59/1000 [05:04<1:21:55,  5.22s/it][A
-Run 1/1:   6%|▌         | 60/1000 [05:08<1:18:44,  5.03s/it][A
-Run 1/1:   6%|▌         | 61/1000 [05:13<1:16:28,  4.89s/it][A
-Run 1/1:   6%|▌         | 62/1000 [05:19<1:22:11,  5.26s/it][A
-Run 1/1:   6%|▋         | 63/1000 [05:24<1:18:41,  5.04s/it][A
-Run 1/1:   6%|▋         | 64/1000 [05:28<1:16:14,  4.89s/it][A
-Run 1/1:   6%|▋         | 65/1000 [05:33<1:14:53,  4.81s/it][A
-Run 1/1:   7%|▋         | 66/1000 [05:37<1:13:30,  4.72s/it][A
-Run 1/1:   7%|▋         | 67/1000 [05:42<1:12:49,  4.68s/it][A
-Run 1/1:   7%|▋         | 68/1000 [05:48<1:18:26,  5.05s/it][A
-Run 1/1:   7%|▋         | 69/1000 [05:52<1:15:54,  4.89s/it][A
-Run 1/1:   7%|▋         | 70/1000 [05:58<1:20:14,  5.18s/it][A
-Run 1/1:   7%|▋         | 71/1000 [06:04<1:23:17,  5.38s/it][A
-Run 1/1:   7%|▋         | 72/1000 [06:08<1:19:26,  5.14s/it][A
-Run 1/1:   7%|▋         | 73/1000 [06:14<1:22:55,  5.37s/it][A
-Run 1/1:   7%|▋         | 74/1000 [06:19<1:19:03,  5.12s/it][A
-Run 1/1:   8%|▊         | 75/1000 [06:25<1:22:58,  5.38s/it][A
-Run 1/1:   8%|▊         | 76/1000 [06:31<1:25:41,  5.56s/it][A
-Run 1/1:   8%|▊         | 77/1000 [06:36<1:21:03,  5.27s/it][A
-Run 1/1:   8%|▊         | 78/1000 [06:41<1:23:36,  5.44s/it][A
-Run 1/1:   8%|▊         | 79/1000 [06:47<1:25:50,  5.59s/it][A
-Run 1/1:   8%|▊         | 80/1000 [06:53<1:27:13,  5.69s/it][A
-Run 1/1:   8%|▊         | 81/1000 [06:59<1:28:15,  5.76s/it][A
-Run 1/1:   8%|▊         | 82/1000 [07:04<1:22:29,  5.39s/it][A
-Run 1/1:   8%|▊         | 83/1000 [07:10<1:25:03,  5.57s/it][A
-Run 1/1:   8%|▊         | 84/1000 [07:15<1:26:12,  5.65s/it][A
-Run 1/1:   8%|▊         | 85/1000 [07:20<1:21:02,  5.31s/it][A
-Run 1/1:   9%|▊         | 86/1000 [07:26<1:23:29,  5.48s/it][A
-Run 1/1:   9%|▊         | 87/1000 [07:32<1:25:27,  5.62s/it][A
-Run 1/1:   9%|▉         | 88/1000 [07:36<1:20:56,  5.32s/it][A
-Run 1/1:   9%|▉         | 89/1000 [07:42<1:23:19,  5.49s/it][A
-Run 1/1:   9%|▉         | 90/1000 [07:48<1:24:57,  5.60s/it][A
-Run 1/1:   9%|▉         | 91/1000 [07:53<1:19:58,  5.28s/it][A
-Run 1/1:   9%|▉         | 92/1000 [07:56<1:10:39,  4.67s/it][A
-Run 1/1:   9%|▉         | 93/1000 [08:01<1:09:58,  4.63s/it][A
-Run 1/1:   9%|▉         | 94/1000 [08:06<1:15:58,  5.03s/it][A
-Run 1/1:  10%|▉         | 95/1000 [08:11<1:13:35,  4.88s/it][A
-Run 1/1:  10%|▉         | 96/1000 [08:17<1:18:19,  5.20s/it][A
-Run 1/1:  10%|▉         | 97/1000 [08:23<1:21:00,  5.38s/it][A
-Run 1/1:  10%|▉         | 98/1000 [08:29<1:23:25,  5.55s/it][A
-Run 1/1:  10%|▉         | 99/1000 [08:32<1:12:27,  4.82s/it][A
-Run 1/1:  10%|█         | 100/1000 [08:36<1:11:13,  4.75s/it][A
-Run 1/1:  10%|█         | 101/1000 [08:41<1:10:06,  4.68s/it][A
-Run 1/1:  10%|█         | 102/1000 [08:44<1:03:10,  4.22s/it][A
-Run 1/1:  10%|█         | 103/1000 [08:47<58:07,  3.89s/it]  [A
-Run 1/1:  10%|█         | 104/1000 [08:52<1:01:05,  4.09s/it][A
-Run 1/1:  10%|█         | 105/1000 [08:58<1:08:40,  4.60s/it][A
-Run 1/1:  11%|█         | 106/1000 [09:02<1:08:04,  4.57s/it][A
-Run 1/1:  11%|█         | 107/1000 [09:05<1:01:58,  4.16s/it][A
-Run 1/1:  11%|█         | 108/1000 [09:10<1:03:43,  4.29s/it][A
-Run 1/1:  11%|█         | 109/1000 [09:16<1:10:47,  4.77s/it][A
-Run 1/1:  11%|█         | 110/1000 [09:22<1:15:55,  5.12s/it][A
-Run 1/1:  11%|█         | 111/1000 [09:28<1:19:32,  5.37s/it][A
-Run 1/1:  11%|█         | 112/1000 [09:34<1:22:06,  5.55s/it][A
-Run 1/1:  11%|█▏        | 113/1000 [09:38<1:17:39,  5.25s/it][A
-Run 1/1:  11%|█▏        | 114/1000 [09:44<1:20:18,  5.44s/it][A
-Run 1/1:  12%|█▏        | 115/1000 [09:47<1:10:21,  4.77s/it][A
-Run 1/1:  12%|█▏        | 116/1000 [09:50<1:02:46,  4.26s/it][A
-Run 1/1:  12%|█▏        | 117/1000 [09:55<1:03:45,  4.33s/it][A
-Run 1/1:  12%|█▏        | 118/1000 [10:01<1:10:21,  4.79s/it][A
-Run 1/1:  12%|█▏        | 119/1000 [10:05<1:09:06,  4.71s/it][A
-Run 1/1:  12%|█▏        | 120/1000 [10:10<1:08:16,  4.65s/it][A
-Run 1/1:  12%|█▏        | 121/1000 [10:14<1:07:36,  4.62s/it][A
-Run 1/1:  12%|█▏        | 122/1000 [10:20<1:13:15,  5.01s/it][A
-Run 1/1:  12%|█▏        | 123/1000 [10:25<1:10:57,  4.85s/it][A
-Run 1/1:  12%|█▏        | 124/1000 [10:31<1:15:30,  5.17s/it][A
-Run 1/1:  12%|█▎        | 125/1000 [10:36<1:18:14,  5.37s/it][A
-Run 1/1:  13%|█▎        | 126/1000 [10:42<1:20:30,  5.53s/it][A
-Run 1/1:  13%|█▎        | 127/1000 [10:47<1:15:49,  5.21s/it][A
-Run 1/1:  13%|█▎        | 128/1000 [10:50<1:06:51,  4.60s/it][A
-Run 1/1:  13%|█▎        | 129/1000 [10:56<1:12:07,  4.97s/it][A
-Run 1/1:  13%|█▎        | 130/1000 [11:00<1:10:01,  4.83s/it][A
-Run 1/1:  13%|█▎        | 131/1000 [11:05<1:08:44,  4.75s/it][A
-Run 1/1:  13%|█▎        | 132/1000 [11:08<1:02:00,  4.29s/it][A
-Run 1/1:  13%|█▎        | 133/1000 [11:14<1:08:48,  4.76s/it][A
-Run 1/1:  13%|█▎        | 134/1000 [11:18<1:08:04,  4.72s/it][A
-Run 1/1:  14%|█▎        | 135/1000 [11:24<1:13:14,  5.08s/it][A
-Run 1/1:  14%|█▎        | 136/1000 [11:28<1:04:51,  4.50s/it][A
-Run 1/1:  14%|█▎        | 137/1000 [11:32<1:04:46,  4.50s/it][A
-Run 1/1:  14%|█▍        | 138/1000 [11:37<1:05:07,  4.53s/it][A
-Run 1/1:  14%|█▍        | 139/1000 [11:43<1:10:56,  4.94s/it][A
-Run 1/1:  14%|█▍        | 140/1000 [11:47<1:09:36,  4.86s/it][A
-Run 1/1:  14%|█▍        | 141/1000 [11:52<1:07:56,  4.75s/it][A
-Run 1/1:  14%|█▍        | 142/1000 [11:56<1:06:38,  4.66s/it][A
-Run 1/1:  14%|█▍        | 143/1000 [12:02<1:12:06,  5.05s/it][A
-Run 1/1:  14%|█▍        | 144/1000 [12:07<1:10:01,  4.91s/it][A
-Run 1/1:  14%|█▍        | 145/1000 [12:11<1:08:33,  4.81s/it][A
-Run 1/1:  15%|█▍        | 146/1000 [12:17<1:13:19,  5.15s/it][A
-Run 1/1:  15%|█▍        | 147/1000 [12:23<1:16:22,  5.37s/it][A
-Run 1/1:  15%|█▍        | 148/1000 [12:26<1:07:02,  4.72s/it][A
-Run 1/1:  15%|█▍        | 149/1000 [12:30<1:00:32,  4.27s/it][A
-Run 1/1:  15%|█▌        | 150/1000 [12:34<1:01:45,  4.36s/it][A
-Run 1/1:  15%|█▌        | 151/1000 [12:39<1:02:43,  4.43s/it][A
-Run 1/1:  15%|█▌        | 152/1000 [12:42<57:23,  4.06s/it]  [A
-Run 1/1:  15%|█▌        | 153/1000 [12:46<59:23,  4.21s/it][A
-Run 1/1:  15%|█▌        | 154/1000 [12:51<1:01:03,  4.33s/it][A
-Run 1/1:  16%|█▌        | 155/1000 [12:54<55:53,  3.97s/it]  [A
-Run 1/1:  16%|█▌        | 156/1000 [13:00<1:04:08,  4.56s/it][A
-Run 1/1:  16%|█▌        | 157/1000 [13:06<1:09:25,  4.94s/it][A
-Run 1/1:  16%|█▌        | 158/1000 [13:11<1:08:04,  4.85s/it][A
-Run 1/1:  16%|█▌        | 159/1000 [13:14<1:01:01,  4.35s/it][A
-Run 1/1:  16%|█▌        | 160/1000 [13:18<1:01:47,  4.41s/it][A
-Run 1/1:  16%|█▌        | 161/1000 [13:23<1:02:16,  4.45s/it][A
-Run 1/1:  16%|█▌        | 162/1000 [13:27<1:02:27,  4.47s/it][A
-Run 1/1:  16%|█▋        | 163/1000 [13:31<56:51,  4.08s/it]  [A
-Run 1/1:  16%|█▋        | 164/1000 [13:35<58:53,  4.23s/it][A
-Run 1/1:  16%|█▋        | 165/1000 [13:40<1:00:02,  4.31s/it][A
-Run 1/1:  17%|█▋        | 166/1000 [13:43<55:27,  3.99s/it]  [A
-Run 1/1:  17%|█▋        | 167/1000 [13:46<52:14,  3.76s/it][A
-Run 1/1:  17%|█▋        | 168/1000 [13:49<49:54,  3.60s/it][A
-Run 1/1:  17%|█▋        | 169/1000 [13:54<53:43,  3.88s/it][A
-Run 1/1:  17%|█▋        | 170/1000 [13:58<56:20,  4.07s/it][A
-Run 1/1:  17%|█▋        | 171/1000 [14:02<52:47,  3.82s/it][A
-Run 1/1:  17%|█▋        | 172/1000 [14:05<50:13,  3.64s/it][A
-Run 1/1:  17%|█▋        | 173/1000 [14:09<53:33,  3.89s/it][A
-Run 1/1:  17%|█▋        | 174/1000 [14:13<50:39,  3.68s/it][A
-Run 1/1:  18%|█▊        | 175/1000 [14:18<59:49,  4.35s/it][A
-Run 1/1:  18%|█▊        | 176/1000 [14:23<1:00:34,  4.41s/it][A
-Run 1/1:  18%|█▊        | 177/1000 [14:28<1:01:19,  4.47s/it][A
-Run 1/1:  18%|█▊        | 178/1000 [14:33<1:06:45,  4.87s/it][A
-Run 1/1:  18%|█▊        | 179/1000 [14:38<1:05:25,  4.78s/it][A
-Run 1/1:  18%|█▊        | 180/1000 [14:43<1:04:31,  4.72s/it][A
-Run 1/1:  18%|█▊        | 181/1000 [14:47<1:03:26,  4.65s/it][A
-Run 1/1:  18%|█▊        | 182/1000 [14:50<57:32,  4.22s/it]  [A
-Run 1/1:  18%|█▊        | 183/1000 [14:56<1:04:19,  4.72s/it][A
-Run 1/1:  18%|█▊        | 184/1000 [15:02<1:09:00,  5.07s/it][A
-Run 1/1:  18%|█▊        | 185/1000 [15:05<1:00:52,  4.48s/it][A
-Run 1/1:  19%|█▊        | 186/1000 [15:11<1:06:36,  4.91s/it][A
-Run 1/1:  19%|█▊        | 187/1000 [15:16<1:04:48,  4.78s/it][A
-Run 1/1:  19%|█▉        | 188/1000 [15:20<1:03:47,  4.71s/it][A
-Run 1/1:  19%|█▉        | 189/1000 [15:26<1:07:59,  5.03s/it][A
-Run 1/1:  19%|█▉        | 190/1000 [15:29<1:00:16,  4.46s/it][A
-Run 1/1:  19%|█▉        | 191/1000 [15:35<1:05:51,  4.88s/it][A
-Run 1/1:  19%|█▉        | 192/1000 [15:41<1:09:35,  5.17s/it][A
-Run 1/1:  19%|█▉        | 193/1000 [15:45<1:06:45,  4.96s/it][A
-Run 1/1:  19%|█▉        | 194/1000 [15:50<1:05:09,  4.85s/it][A
-Run 1/1:  20%|█▉        | 195/1000 [15:53<58:22,  4.35s/it]  [A
-Run 1/1:  20%|█▉        | 196/1000 [15:56<53:42,  4.01s/it][A
-Run 1/1:  20%|█▉        | 197/1000 [16:01<55:33,  4.15s/it][A
-Run 1/1:  20%|█▉        | 198/1000 [16:04<51:42,  3.87s/it][A
-Run 1/1:  20%|█▉        | 199/1000 [16:07<48:52,  3.66s/it][A
-Run 1/1:  20%|██        | 200/1000 [16:10<46:52,  3.52s/it][A
-Run 1/1:  20%|██        | 201/1000 [16:15<51:01,  3.83s/it][A
-Run 1/1:  20%|██        | 202/1000 [16:19<53:49,  4.05s/it][A
-Run 1/1:  20%|██        | 203/1000 [16:25<1:00:52,  4.58s/it][A
-Run 1/1:  20%|██        | 204/1000 [16:30<1:00:19,  4.55s/it][A
-Run 1/1:  20%|██        | 205/1000 [16:34<1:00:22,  4.56s/it][A
-Run 1/1:  21%|██        | 206/1000 [16:40<1:05:24,  4.94s/it][A
-Run 1/1:  21%|██        | 207/1000 [16:45<1:03:47,  4.83s/it][A
-Run 1/1:  21%|██        | 208/1000 [16:48<57:09,  4.33s/it]  [A
-Run 1/1:  21%|██        | 209/1000 [16:52<57:47,  4.38s/it][A
-Run 1/1:  21%|██        | 210/1000 [16:57<58:25,  4.44s/it][A
-Run 1/1:  21%|██        | 211/1000 [17:03<1:04:13,  4.88s/it][A
-Run 1/1:  21%|██        | 212/1000 [17:07<1:02:39,  4.77s/it][A
-Run 1/1:  21%|██▏       | 213/1000 [17:12<1:01:40,  4.70s/it][A
-Run 1/1:  21%|██▏       | 214/1000 [17:16<1:01:06,  4.67s/it][A
-Run 1/1:  22%|██▏       | 215/1000 [17:21<1:00:33,  4.63s/it][A
-Run 1/1:  22%|██▏       | 216/1000 [17:26<1:00:10,  4.61s/it][A
-Run 1/1:  22%|██▏       | 217/1000 [17:29<54:07,  4.15s/it]  [A
-Run 1/1:  22%|██▏       | 218/1000 [17:33<55:16,  4.24s/it][A
-Run 1/1:  22%|██▏       | 219/1000 [17:38<56:51,  4.37s/it][A
-Run 1/1:  22%|██▏       | 220/1000 [17:42<57:01,  4.39s/it][A
-Run 1/1:  22%|██▏       | 221/1000 [17:45<51:43,  3.98s/it][A
-Run 1/1:  22%|██▏       | 222/1000 [17:50<53:31,  4.13s/it][A
-Run 1/1:  22%|██▏       | 223/1000 [17:55<59:52,  4.62s/it][A
-Run 1/1:  22%|██▏       | 224/1000 [18:00<59:32,  4.60s/it][A
-Run 1/1:  22%|██▎       | 225/1000 [18:05<59:09,  4.58s/it][A
-Run 1/1:  23%|██▎       | 226/1000 [18:09<58:56,  4.57s/it][A
-Run 1/1:  23%|██▎       | 227/1000 [18:15<1:03:57,  4.96s/it][A
-Run 1/1:  23%|██▎       | 228/1000 [18:21<1:07:34,  5.25s/it][A
-Run 1/1:  23%|██▎       | 229/1000 [18:27<1:09:41,  5.42s/it][A
-Run 1/1:  23%|██▎       | 230/1000 [18:31<1:06:18,  5.17s/it][A
-Run 1/1:  23%|██▎       | 231/1000 [18:37<1:08:33,  5.35s/it][A
-Run 1/1:  23%|██▎       | 232/1000 [18:43<1:10:41,  5.52s/it][A
-Run 1/1:  23%|██▎       | 233/1000 [18:49<1:11:44,  5.61s/it][A
-Run 1/1:  23%|██▎       | 234/1000 [18:53<1:07:37,  5.30s/it][A
-Run 1/1:  24%|██▎       | 235/1000 [18:58<1:04:33,  5.06s/it][A
-Run 1/1:  24%|██▎       | 236/1000 [19:02<1:02:32,  4.91s/it][A
-Run 1/1:  24%|██▎       | 237/1000 [19:06<56:02,  4.41s/it]  [A
-Run 1/1:  24%|██▍       | 238/1000 [19:12<1:01:48,  4.87s/it][A
-Run 1/1:  24%|██▍       | 239/1000 [19:16<1:00:21,  4.76s/it][A
-Run 1/1:  24%|██▍       | 240/1000 [19:19<54:21,  4.29s/it]  [A
-Run 1/1:  24%|██▍       | 241/1000 [19:25<1:00:22,  4.77s/it][A
-Run 1/1:  24%|██▍       | 242/1000 [19:30<59:17,  4.69s/it]  [A
-Run 1/1:  24%|██▍       | 243/1000 [19:34<58:31,  4.64s/it][A
-Run 1/1:  24%|██▍       | 244/1000 [19:40<1:03:01,  5.00s/it][A
-Run 1/1:  24%|██▍       | 245/1000 [19:46<1:06:37,  5.30s/it][A
-Run 1/1:  25%|██▍       | 246/1000 [19:49<58:35,  4.66s/it]  [A
-Run 1/1:  25%|██▍       | 247/1000 [19:55<1:02:59,  5.02s/it][A
-Run 1/1:  25%|██▍       | 248/1000 [20:00<1:00:57,  4.86s/it][A
-Run 1/1:  25%|██▍       | 249/1000 [20:05<1:04:50,  5.18s/it][A
-Run 1/1:  25%|██▌       | 250/1000 [20:11<1:07:27,  5.40s/it][A
-Run 1/1:  25%|██▌       | 251/1000 [20:16<1:04:09,  5.14s/it][A
-Run 1/1:  25%|██▌       | 252/1000 [20:22<1:06:54,  5.37s/it][A
-Run 1/1:  25%|██▌       | 253/1000 [20:25<58:24,  4.69s/it]  [A
-Run 1/1:  25%|██▌       | 254/1000 [20:29<57:35,  4.63s/it][A
-Run 1/1:  26%|██▌       | 255/1000 [20:34<57:37,  4.64s/it][A
-Run 1/1:  26%|██▌       | 256/1000 [20:39<57:22,  4.63s/it][A
-Run 1/1:  26%|██▌       | 257/1000 [20:42<51:53,  4.19s/it][A
-Run 1/1:  26%|██▌       | 258/1000 [20:46<52:57,  4.28s/it][A
-Run 1/1:  26%|██▌       | 259/1000 [20:52<58:42,  4.75s/it][A
-Run 1/1:  26%|██▌       | 260/1000 [20:55<52:50,  4.28s/it][A
-Run 1/1:  26%|██▌       | 261/1000 [21:00<53:43,  4.36s/it][A
-Run 1/1:  26%|██▌       | 262/1000 [21:04<54:14,  4.41s/it][A
-Run 1/1:  26%|██▋       | 263/1000 [21:08<49:43,  4.05s/it][A
-Run 1/1:  26%|██▋       | 264/1000 [21:12<51:25,  4.19s/it][A
-Run 1/1:  26%|██▋       | 265/1000 [21:18<57:54,  4.73s/it][A
-Run 1/1:  27%|██▋       | 266/1000 [21:24<1:02:11,  5.08s/it][A
-Run 1/1:  27%|██▋       | 267/1000 [21:30<1:05:22,  5.35s/it][A
-Run 1/1:  27%|██▋       | 268/1000 [21:36<1:07:10,  5.51s/it][A
-Run 1/1:  27%|██▋       | 269/1000 [21:42<1:08:11,  5.60s/it][A
-Run 1/1:  27%|██▋       | 270/1000 [21:46<1:04:02,  5.26s/it][A
-Run 1/1:  27%|██▋       | 271/1000 [21:49<56:23,  4.64s/it]  [A
-Run 1/1:  27%|██▋       | 272/1000 [21:55<1:01:03,  5.03s/it][A
-Run 1/1:  27%|██▋       | 273/1000 [22:00<59:01,  4.87s/it]  [A
-Run 1/1:  27%|██▋       | 274/1000 [22:04<57:49,  4.78s/it][A
-Run 1/1:  28%|██▊       | 275/1000 [22:08<52:03,  4.31s/it][A
-Run 1/1:  28%|██▊       | 276/1000 [22:12<52:41,  4.37s/it][A
-Run 1/1:  28%|██▊       | 277/1000 [22:18<58:11,  4.83s/it][A
-Run 1/1:  28%|██▊       | 278/1000 [22:23<56:54,  4.73s/it][A
-Run 1/1:  28%|██▊       | 279/1000 [22:26<51:14,  4.26s/it][A
-Run 1/1:  28%|██▊       | 280/1000 [22:29<47:02,  3.92s/it][A
-Run 1/1:  28%|██▊       | 281/1000 [22:33<49:29,  4.13s/it][A
-Run 1/1:  28%|██▊       | 282/1000 [22:38<50:48,  4.25s/it][A
-Run 1/1:  28%|██▊       | 283/1000 [22:41<46:56,  3.93s/it][A
-Run 1/1:  28%|██▊       | 284/1000 [22:44<43:55,  3.68s/it][A
-Run 1/1:  28%|██▊       | 285/1000 [22:50<52:06,  4.37s/it][A
-Run 1/1:  29%|██▊       | 286/1000 [22:53<47:31,  3.99s/it][A
-Run 1/1:  29%|██▊       | 287/1000 [22:59<54:09,  4.56s/it][A
-Run 1/1:  29%|██▉       | 288/1000 [23:04<54:10,  4.57s/it][A
-Run 1/1:  29%|██▉       | 289/1000 [23:07<49:06,  4.14s/it][A
-Run 1/1:  29%|██▉       | 290/1000 [23:11<50:12,  4.24s/it][A
-Run 1/1:  29%|██▉       | 291/1000 [23:17<56:20,  4.77s/it][A
-Run 1/1:  29%|██▉       | 292/1000 [23:23<1:00:16,  5.11s/it][A
-Run 1/1:  29%|██▉       | 293/1000 [23:27<53:32,  4.54s/it]  [A
-Run 1/1:  29%|██▉       | 294/1000 [23:31<53:33,  4.55s/it][A
-Run 1/1:  30%|██▉       | 295/1000 [23:37<58:27,  4.98s/it][A
-Run 1/1:  30%|██▉       | 296/1000 [23:43<1:01:20,  5.23s/it][A
-Run 1/1:  30%|██▉       | 297/1000 [23:49<1:03:32,  5.42s/it][A
-Run 1/1:  30%|██▉       | 298/1000 [23:55<1:05:04,  5.56s/it][A
-Run 1/1:  30%|██▉       | 299/1000 [24:01<1:06:13,  5.67s/it][A
-Run 1/1:  30%|███       | 300/1000 [24:05<1:02:02,  5.32s/it][A
-Run 1/1:  30%|███       | 301/1000 [24:10<59:01,  5.07s/it]  [A
-Run 1/1:  30%|███       | 302/1000 [24:15<1:01:47,  5.31s/it][A
-Run 1/1:  30%|███       | 303/1000 [24:20<59:11,  5.09s/it]  [A
-Run 1/1:  30%|███       | 304/1000 [24:24<56:46,  4.89s/it][A
-Run 1/1:  30%|███       | 305/1000 [24:30<1:00:17,  5.21s/it][A
-Run 1/1:  31%|███       | 306/1000 [24:34<53:08,  4.59s/it]  [A
-Run 1/1:  31%|███       | 307/1000 [24:38<52:58,  4.59s/it][A
-Run 1/1:  31%|███       | 308/1000 [24:43<52:38,  4.56s/it][A
-Run 1/1:  31%|███       | 309/1000 [24:47<52:24,  4.55s/it][A
-Run 1/1:  31%|███       | 310/1000 [24:52<52:10,  4.54s/it][A
-Run 1/1:  31%|███       | 311/1000 [24:56<52:16,  4.55s/it][A
-Run 1/1:  31%|███       | 312/1000 [24:59<47:08,  4.11s/it][A
-Run 1/1:  31%|███▏      | 313/1000 [25:03<43:54,  3.84s/it][A
-Run 1/1:  31%|███▏      | 314/1000 [25:07<46:24,  4.06s/it][A
-Run 1/1:  32%|███▏      | 315/1000 [25:13<52:47,  4.62s/it][A
-Run 1/1:  32%|███▏      | 316/1000 [25:19<57:08,  5.01s/it][A
-Run 1/1:  32%|███▏      | 317/1000 [25:23<55:05,  4.84s/it][A
-Run 1/1:  32%|███▏      | 318/1000 [25:29<58:33,  5.15s/it][A
-Run 1/1:  32%|███▏      | 319/1000 [25:35<1:01:04,  5.38s/it][A
-Run 1/1:  32%|███▏      | 320/1000 [25:38<53:33,  4.73s/it]  [A
-Run 1/1:  32%|███▏      | 321/1000 [25:44<57:11,  5.05s/it][A
-Run 1/1:  32%|███▏      | 322/1000 [25:49<55:29,  4.91s/it][A
-Run 1/1:  32%|███▏      | 323/1000 [25:55<59:12,  5.25s/it][A
-Run 1/1:  32%|███▏      | 324/1000 [25:59<56:53,  5.05s/it][A
-Run 1/1:  32%|███▎      | 325/1000 [26:05<59:30,  5.29s/it][A
-Run 1/1:  33%|███▎      | 326/1000 [26:11<1:01:51,  5.51s/it][A
-Run 1/1:  33%|███▎      | 327/1000 [26:16<58:36,  5.22s/it]  [A
-Run 1/1:  33%|███▎      | 328/1000 [26:20<56:27,  5.04s/it][A
-Run 1/1:  33%|███▎      | 329/1000 [26:26<58:53,  5.27s/it][A
-Run 1/1:  33%|███▎      | 330/1000 [26:32<1:01:02,  5.47s/it][A
-Run 1/1:  33%|███▎      | 331/1000 [26:37<57:45,  5.18s/it]  [A
-Run 1/1:  33%|███▎      | 332/1000 [26:41<55:26,  4.98s/it][A
-Run 1/1:  33%|███▎      | 333/1000 [26:47<58:14,  5.24s/it][A
-Run 1/1:  33%|███▎      | 334/1000 [26:52<55:51,  5.03s/it][A
-Run 1/1:  34%|███▎      | 335/1000 [26:58<58:42,  5.30s/it][A
-Run 1/1:  34%|███▎      | 336/1000 [27:02<55:46,  5.04s/it][A
-Run 1/1:  34%|███▎      | 337/1000 [27:07<54:11,  4.90s/it][A
-Run 1/1:  34%|███▍      | 338/1000 [27:11<52:58,  4.80s/it][A
-Run 1/1:  34%|███▍      | 339/1000 [27:17<56:35,  5.14s/it][A
-Run 1/1:  34%|███▍      | 340/1000 [27:23<58:50,  5.35s/it][A
-Run 1/1:  34%|███▍      | 341/1000 [27:26<51:28,  4.69s/it][A
-Run 1/1:  34%|███▍      | 342/1000 [27:31<50:45,  4.63s/it][A
-Run 1/1:  34%|███▍      | 343/1000 [27:34<45:30,  4.16s/it][A
-Run 1/1:  34%|███▍      | 344/1000 [27:38<46:52,  4.29s/it][A
-Run 1/1:  34%|███▍      | 345/1000 [27:43<47:44,  4.37s/it][A
-Run 1/1:  35%|███▍      | 346/1000 [27:49<52:21,  4.80s/it][A
-Run 1/1:  35%|███▍      | 347/1000 [27:53<51:57,  4.77s/it][A
-Run 1/1:  35%|███▍      | 348/1000 [27:58<50:56,  4.69s/it][A
-Run 1/1:  35%|███▍      | 349/1000 [28:04<54:55,  5.06s/it][A
-Run 1/1:  35%|███▌      | 350/1000 [28:10<57:36,  5.32s/it][A
-Run 1/1:  35%|███▌      | 351/1000 [28:14<54:56,  5.08s/it][A
-Run 1/1:  35%|███▌      | 352/1000 [28:17<48:53,  4.53s/it][A
-Run 1/1:  35%|███▌      | 353/1000 [28:23<53:21,  4.95s/it][A
-Run 1/1:  35%|███▌      | 354/1000 [28:26<47:28,  4.41s/it][A
-Run 1/1:  36%|███▌      | 355/1000 [28:31<47:31,  4.42s/it][A
-Run 1/1:  36%|███▌      | 356/1000 [28:37<52:00,  4.84s/it][A
-Run 1/1:  36%|███▌      | 357/1000 [28:41<51:02,  4.76s/it][A
-Run 1/1:  36%|███▌      | 358/1000 [28:47<54:26,  5.09s/it][A
-Run 1/1:  36%|███▌      | 359/1000 [28:50<48:06,  4.50s/it][A
-Run 1/1:  36%|███▌      | 360/1000 [28:55<48:22,  4.54s/it][A
-Run 1/1:  36%|███▌      | 361/1000 [28:59<48:18,  4.54s/it][A
-Run 1/1:  36%|███▌      | 362/1000 [29:05<52:30,  4.94s/it][A
-Run 1/1:  36%|███▋      | 363/1000 [29:10<51:29,  4.85s/it][A
-Run 1/1:  36%|███▋      | 364/1000 [29:16<54:34,  5.15s/it][A
-Run 1/1:  36%|███▋      | 365/1000 [29:20<52:38,  4.97s/it][A
-Run 1/1:  37%|███▋      | 366/1000 [29:25<51:13,  4.85s/it][A
-Run 1/1:  37%|███▋      | 367/1000 [29:29<50:07,  4.75s/it][A
-Run 1/1:  37%|███▋      | 368/1000 [29:34<49:31,  4.70s/it][A
-Run 1/1:  37%|███▋      | 369/1000 [29:40<53:30,  5.09s/it][A
-Run 1/1:  37%|███▋      | 370/1000 [29:46<55:47,  5.31s/it][A
-Run 1/1:  37%|███▋      | 371/1000 [29:52<57:14,  5.46s/it][A
-Run 1/1:  37%|███▋      | 372/1000 [29:56<53:50,  5.14s/it][A
-Run 1/1:  37%|███▋      | 373/1000 [30:02<56:15,  5.38s/it][A
-Run 1/1:  37%|███▋      | 374/1000 [30:08<57:37,  5.52s/it][A
-Run 1/1:  38%|███▊      | 375/1000 [30:14<58:49,  5.65s/it][A
-Run 1/1:  38%|███▊      | 376/1000 [30:18<55:25,  5.33s/it][A
-Run 1/1:  38%|███▊      | 377/1000 [30:24<57:33,  5.54s/it][A
-Run 1/1:  38%|███▊      | 378/1000 [30:30<58:40,  5.66s/it][A
-Run 1/1:  38%|███▊      | 379/1000 [30:36<59:56,  5.79s/it][A
-Run 1/1:  38%|███▊      | 380/1000 [30:41<56:08,  5.43s/it][A
-Run 1/1:  38%|███▊      | 381/1000 [30:46<53:42,  5.21s/it][A
-Run 1/1:  38%|███▊      | 382/1000 [30:52<55:57,  5.43s/it][A
-Run 1/1:  38%|███▊      | 383/1000 [30:58<57:42,  5.61s/it][A
-Run 1/1:  38%|███▊      | 384/1000 [31:01<50:20,  4.90s/it][A
-Run 1/1:  38%|███▊      | 385/1000 [31:07<53:20,  5.20s/it][A
-Run 1/1:  39%|███▊      | 386/1000 [31:11<51:16,  5.01s/it][A
-Run 1/1:  39%|███▊      | 387/1000 [31:17<53:47,  5.26s/it][A
-Run 1/1:  39%|███▉      | 388/1000 [31:23<55:33,  5.45s/it][A
-Run 1/1:  39%|███▉      | 389/1000 [31:29<56:46,  5.58s/it][A
-Run 1/1:  39%|███▉      | 390/1000 [31:35<58:05,  5.71s/it][A
-Run 1/1:  39%|███▉      | 391/1000 [31:40<54:31,  5.37s/it][A
-Run 1/1:  39%|███▉      | 392/1000 [31:44<51:58,  5.13s/it][A
-Run 1/1:  39%|███▉      | 393/1000 [31:49<50:12,  4.96s/it][A
-Run 1/1:  39%|███▉      | 394/1000 [31:53<49:09,  4.87s/it][A
-Run 1/1:  40%|███▉      | 395/1000 [31:59<52:28,  5.20s/it][A
-Run 1/1:  40%|███▉      | 396/1000 [32:04<50:34,  5.02s/it][A
-Run 1/1:  40%|███▉      | 397/1000 [32:10<52:57,  5.27s/it][A
-Run 1/1:  40%|███▉      | 398/1000 [32:16<54:45,  5.46s/it][A
-Run 1/1:  40%|███▉      | 399/1000 [32:22<56:03,  5.60s/it][A
-Run 1/1:  40%|████      | 400/1000 [32:28<57:53,  5.79s/it][A
-Run 1/1:  40%|████      | 401/1000 [32:33<56:14,  5.63s/it][A
-Run 1/1:  40%|████      | 402/1000 [32:38<55:04,  5.53s/it][A
-Run 1/1:  40%|████      | 403/1000 [32:45<59:18,  5.96s/it][A
-Run 1/1:  40%|████      | 404/1000 [32:52<1:01:45,  6.22s/it][A
-Run 1/1:  40%|████      | 405/1000 [32:59<1:03:08,  6.37s/it][A
-Run 1/1:  41%|████      | 406/1000 [33:06<1:04:18,  6.50s/it][A
-Run 1/1:  41%|████      | 407/1000 [33:13<1:05:25,  6.62s/it][A
-Run 1/1:  41%|████      | 408/1000 [33:19<1:05:35,  6.65s/it][A
-Run 1/1:  41%|████      | 409/1000 [33:26<1:06:29,  6.75s/it][A
-Run 1/1:  41%|████      | 410/1000 [33:33<1:06:56,  6.81s/it][A
-Run 1/1:  41%|████      | 411/1000 [33:37<57:48,  5.89s/it]  [A
-Run 1/1:  41%|████      | 412/1000 [33:42<55:44,  5.69s/it][A
-Run 1/1:  41%|████▏     | 413/1000 [33:49<58:27,  5.98s/it][A
-Run 1/1:  41%|████▏     | 414/1000 [33:54<56:19,  5.77s/it][A
-Run 1/1:  42%|████▏     | 415/1000 [34:01<58:57,  6.05s/it][A
-Run 1/1:  42%|████▏     | 416/1000 [34:06<56:09,  5.77s/it][A
-Run 1/1:  42%|████▏     | 417/1000 [34:11<55:04,  5.67s/it][A
-Run 1/1:  42%|████▏     | 418/1000 [34:17<54:08,  5.58s/it][A
-Run 1/1:  42%|████▏     | 419/1000 [34:22<52:59,  5.47s/it][A
-Run 1/1:  42%|████▏     | 420/1000 [34:27<52:44,  5.46s/it][A
-Run 1/1:  42%|████▏     | 421/1000 [34:33<52:20,  5.42s/it][A
-Run 1/1:  42%|████▏     | 422/1000 [34:40<56:04,  5.82s/it][A
-Run 1/1:  42%|████▏     | 423/1000 [34:46<59:02,  6.14s/it][A
-Run 1/1:  42%|████▏     | 424/1000 [34:52<56:49,  5.92s/it][A
-Run 1/1:  42%|████▎     | 425/1000 [34:59<59:38,  6.22s/it][A
-Run 1/1:  43%|████▎     | 426/1000 [35:04<57:07,  5.97s/it][A
-Run 1/1:  43%|████▎     | 427/1000 [35:10<55:16,  5.79s/it][A
-Run 1/1:  43%|████▎     | 428/1000 [35:16<58:03,  6.09s/it][A
-Run 1/1:  43%|████▎     | 429/1000 [35:20<51:39,  5.43s/it][A
-Run 1/1:  43%|████▎     | 430/1000 [35:27<54:51,  5.78s/it][A
-Run 1/1:  43%|████▎     | 431/1000 [35:32<53:33,  5.65s/it][A
-Run 1/1:  43%|████▎     | 432/1000 [35:38<52:53,  5.59s/it][A
-Run 1/1:  43%|████▎     | 433/1000 [35:44<56:23,  5.97s/it][A
-Run 1/1:  43%|████▎     | 434/1000 [35:51<58:29,  6.20s/it][A
-Run 1/1:  44%|████▎     | 435/1000 [35:58<1:00:36,  6.44s/it][A
-Run 1/1:  44%|████▎     | 436/1000 [36:04<57:50,  6.15s/it]  [A
-Run 1/1:  44%|████▎     | 437/1000 [36:09<55:15,  5.89s/it][A
-Run 1/1:  44%|████▍     | 438/1000 [36:16<57:25,  6.13s/it][A
-Run 1/1:  44%|████▍     | 439/1000 [36:23<59:21,  6.35s/it][A
-Run 1/1:  44%|████▍     | 440/1000 [36:30<1:01:05,  6.54s/it][A
-Run 1/1:  44%|████▍     | 441/1000 [36:36<1:01:42,  6.62s/it][A
-Run 1/1:  44%|████▍     | 442/1000 [36:42<58:05,  6.25s/it]  [A
-Run 1/1:  44%|████▍     | 443/1000 [36:49<59:41,  6.43s/it][A
-Run 1/1:  44%|████▍     | 444/1000 [36:55<1:00:34,  6.54s/it][A
-Run 1/1:  44%|████▍     | 445/1000 [37:02<1:01:35,  6.66s/it][A
-Run 1/1:  45%|████▍     | 446/1000 [37:08<57:32,  6.23s/it]  [A
-Run 1/1:  45%|████▍     | 447/1000 [37:13<55:00,  5.97s/it][A
-Run 1/1:  45%|████▍     | 448/1000 [37:17<48:52,  5.31s/it][A
-Run 1/1:  45%|████▍     | 449/1000 [37:22<49:02,  5.34s/it][A
-Run 1/1:  45%|████▌     | 450/1000 [37:29<53:43,  5.86s/it][A
-Run 1/1:  45%|████▌     | 451/1000 [37:35<52:40,  5.76s/it][A
-Run 1/1:  45%|████▌     | 452/1000 [37:42<56:18,  6.17s/it][A
-Run 1/1:  45%|████▌     | 453/1000 [37:47<53:19,  5.85s/it][A
-Run 1/1:  45%|████▌     | 454/1000 [37:53<55:07,  6.06s/it][A
-Run 1/1:  46%|████▌     | 455/1000 [37:59<52:40,  5.80s/it][A
-Run 1/1:  46%|████▌     | 456/1000 [38:06<55:57,  6.17s/it][A
-Run 1/1:  46%|████▌     | 457/1000 [38:11<53:29,  5.91s/it][A
-Run 1/1:  46%|████▌     | 458/1000 [38:15<47:30,  5.26s/it][A
-Run 1/1:  46%|████▌     | 459/1000 [38:21<51:03,  5.66s/it][A
-Run 1/1:  46%|████▌     | 460/1000 [38:27<49:46,  5.53s/it][A
-Run 1/1:  46%|████▌     | 461/1000 [38:32<49:00,  5.46s/it][A
-Run 1/1:  46%|████▌     | 462/1000 [38:36<44:19,  4.94s/it][A
-Run 1/1:  46%|████▋     | 463/1000 [38:41<45:04,  5.04s/it][A
-Run 1/1:  46%|████▋     | 464/1000 [38:46<45:39,  5.11s/it][A
-Run 1/1:  46%|████▋     | 465/1000 [38:50<41:56,  4.70s/it][A
-Run 1/1:  47%|████▋     | 466/1000 [38:55<44:06,  4.96s/it][A
-Run 1/1:  47%|████▋     | 467/1000 [39:01<44:49,  5.05s/it][A
-Run 1/1:  47%|████▋     | 468/1000 [39:06<45:25,  5.12s/it][A
-Run 1/1:  47%|████▋     | 469/1000 [39:11<45:27,  5.14s/it][A
-Run 1/1:  47%|████▋     | 470/1000 [39:16<45:52,  5.19s/it][A
-Run 1/1:  47%|████▋     | 471/1000 [39:23<50:36,  5.74s/it][A
-Run 1/1:  47%|████▋     | 472/1000 [39:29<49:25,  5.62s/it][A
-Run 1/1:  47%|████▋     | 473/1000 [39:34<48:32,  5.53s/it][A
-Run 1/1:  47%|████▋     | 474/1000 [39:39<47:31,  5.42s/it][A
-Run 1/1:  48%|████▊     | 475/1000 [39:46<51:14,  5.86s/it][A
-Run 1/1:  48%|████▊     | 476/1000 [39:51<49:28,  5.67s/it][A
-Run 1/1:  48%|████▊     | 477/1000 [39:57<48:00,  5.51s/it][A
-Run 1/1:  48%|████▊     | 478/1000 [40:02<47:31,  5.46s/it][A
-Run 1/1:  48%|████▊     | 479/1000 [40:09<51:26,  5.92s/it][A
-Run 1/1:  48%|████▊     | 480/1000 [40:14<49:19,  5.69s/it][A
-Run 1/1:  48%|████▊     | 481/1000 [40:19<48:31,  5.61s/it][A
-Run 1/1:  48%|████▊     | 482/1000 [40:26<51:11,  5.93s/it][A
-Run 1/1:  48%|████▊     | 483/1000 [40:32<49:57,  5.80s/it][A
-Run 1/1:  48%|████▊     | 484/1000 [40:37<48:51,  5.68s/it][A
-Run 1/1:  48%|████▊     | 485/1000 [40:42<48:02,  5.60s/it][A
-Run 1/1:  49%|████▊     | 486/1000 [40:47<46:30,  5.43s/it][A
-Run 1/1:  49%|████▊     | 487/1000 [40:51<42:06,  4.93s/it][A
-Run 1/1:  49%|████▉     | 488/1000 [40:57<43:30,  5.10s/it][A
-Run 1/1:  49%|████▉     | 489/1000 [41:00<39:45,  4.67s/it][A
-Run 1/1:  49%|████▉     | 490/1000 [41:06<41:01,  4.83s/it][A
-Run 1/1:  49%|████▉     | 491/1000 [41:11<42:22,  4.99s/it][A
-Run 1/1:  49%|████▉     | 492/1000 [41:16<43:22,  5.12s/it][A
-Run 1/1:  49%|████▉     | 493/1000 [41:22<43:54,  5.20s/it][A
-Run 1/1:  49%|████▉     | 494/1000 [41:25<39:32,  4.69s/it][A
-Run 1/1:  50%|████▉     | 495/1000 [41:31<41:06,  4.88s/it][A
-Run 1/1:  50%|████▉     | 496/1000 [41:37<46:08,  5.49s/it][A
-Run 1/1:  50%|████▉     | 497/1000 [41:41<41:45,  4.98s/it][A
-Run 1/1:  50%|████▉     | 498/1000 [41:46<41:54,  5.01s/it][A
-Run 1/1:  50%|████▉     | 499/1000 [41:50<38:49,  4.65s/it][A
-Run 1/1:  50%|█████     | 500/1000 [41:56<40:32,  4.86s/it][A
-Run 1/1:  50%|█████     | 501/1000 [42:01<41:13,  4.96s/it][A
-Run 1/1:  50%|█████     | 502/1000 [42:08<45:55,  5.53s/it][A
-Run 1/1:  50%|█████     | 503/1000 [42:15<49:31,  5.98s/it][A
-Run 1/1:  50%|█████     | 504/1000 [42:20<47:16,  5.72s/it][A
-Run 1/1:  50%|█████     | 505/1000 [42:27<50:20,  6.10s/it][A
-Run 1/1:  51%|█████     | 506/1000 [42:32<48:12,  5.86s/it][A
-Run 1/1:  51%|█████     | 507/1000 [42:37<46:41,  5.68s/it][A
-Run 1/1:  51%|█████     | 508/1000 [42:44<49:19,  6.01s/it][A
-Run 1/1:  51%|█████     | 509/1000 [42:50<47:49,  5.84s/it][A
-Run 1/1:  51%|█████     | 510/1000 [42:56<49:39,  6.08s/it][A
-Run 1/1:  51%|█████     | 511/1000 [43:00<43:59,  5.40s/it][A
-Run 1/1:  51%|█████     | 512/1000 [43:07<47:32,  5.85s/it][A
-Run 1/1:  51%|█████▏    | 513/1000 [43:12<46:17,  5.70s/it][A
-Run 1/1:  51%|█████▏    | 514/1000 [43:17<44:53,  5.54s/it][A
-Run 1/1:  52%|█████▏    | 515/1000 [43:24<48:02,  5.94s/it][A
-Run 1/1:  52%|█████▏    | 516/1000 [43:31<50:19,  6.24s/it][A
-Run 1/1:  52%|█████▏    | 517/1000 [43:36<47:42,  5.93s/it][A
-Run 1/1:  52%|█████▏    | 518/1000 [43:43<49:50,  6.20s/it][A
-Run 1/1:  52%|█████▏    | 519/1000 [43:50<50:53,  6.35s/it][A
-Run 1/1:  52%|█████▏    | 520/1000 [43:54<44:51,  5.61s/it][A
-Run 1/1:  52%|█████▏    | 521/1000 [43:59<43:53,  5.50s/it][A
-Run 1/1:  52%|█████▏    | 522/1000 [44:04<43:25,  5.45s/it][A
-Run 1/1:  52%|█████▏    | 523/1000 [44:08<39:24,  4.96s/it][A
-Run 1/1:  52%|█████▏    | 524/1000 [44:12<36:51,  4.65s/it][A
-Run 1/1:  52%|█████▎    | 525/1000 [44:17<38:02,  4.81s/it][A
-Run 1/1:  53%|█████▎    | 526/1000 [44:24<43:08,  5.46s/it][A
-Run 1/1:  53%|█████▎    | 527/1000 [44:30<42:46,  5.43s/it][A
-Run 1/1:  53%|█████▎    | 528/1000 [44:35<42:43,  5.43s/it][A
-Run 1/1:  53%|█████▎    | 529/1000 [44:40<42:11,  5.37s/it][A
-Run 1/1:  53%|█████▎    | 530/1000 [44:47<45:07,  5.76s/it][A
-Run 1/1:  53%|█████▎    | 531/1000 [44:52<44:16,  5.66s/it][A
-Run 1/1:  53%|█████▎    | 532/1000 [44:58<43:10,  5.54s/it][A
-Run 1/1:  53%|█████▎    | 533/1000 [45:05<46:12,  5.94s/it][A
-Run 1/1:  53%|█████▎    | 534/1000 [45:10<44:37,  5.75s/it][A
-Run 1/1:  54%|█████▎    | 535/1000 [45:15<43:33,  5.62s/it][A
-Run 1/1:  54%|█████▎    | 536/1000 [45:22<46:04,  5.96s/it][A
-Run 1/1:  54%|█████▎    | 537/1000 [45:27<44:14,  5.73s/it][A
-Run 1/1:  54%|█████▍    | 538/1000 [45:32<43:22,  5.63s/it][A
-Run 1/1:  54%|█████▍    | 539/1000 [45:38<42:35,  5.54s/it][A
-Run 1/1:  54%|█████▍    | 540/1000 [45:43<41:57,  5.47s/it][A
-Run 1/1:  54%|█████▍    | 541/1000 [45:47<37:52,  4.95s/it][A
-Run 1/1:  54%|█████▍    | 542/1000 [45:52<38:55,  5.10s/it][A
-Run 1/1:  54%|█████▍    | 543/1000 [45:58<39:42,  5.21s/it][A
-Run 1/1:  54%|█████▍    | 544/1000 [46:02<36:26,  4.80s/it][A
-Run 1/1:  55%|█████▍    | 545/1000 [46:09<41:14,  5.44s/it][A
-Run 1/1:  55%|█████▍    | 546/1000 [46:15<44:00,  5.82s/it][A
-Run 1/1:  55%|█████▍    | 547/1000 [46:21<42:47,  5.67s/it][A
-Run 1/1:  55%|█████▍    | 548/1000 [46:27<45:19,  6.02s/it][A
-Run 1/1:  55%|█████▍    | 549/1000 [46:33<43:32,  5.79s/it][A
-Run 1/1:  55%|█████▌    | 550/1000 [46:38<42:20,  5.65s/it][A
-Run 1/1:  55%|█████▌    | 551/1000 [46:42<38:10,  5.10s/it][A
-Run 1/1:  55%|█████▌    | 552/1000 [46:49<41:59,  5.62s/it][A
-Run 1/1:  55%|█████▌    | 553/1000 [46:55<44:38,  5.99s/it][A
-Run 1/1:  55%|█████▌    | 554/1000 [47:02<46:36,  6.27s/it][A
-Run 1/1:  56%|█████▌    | 555/1000 [47:06<40:40,  5.49s/it][A
-Run 1/1:  56%|█████▌    | 556/1000 [47:11<40:24,  5.46s/it][A
-Run 1/1:  56%|█████▌    | 557/1000 [47:17<39:51,  5.40s/it][A
-Run 1/1:  56%|█████▌    | 558/1000 [47:23<42:21,  5.75s/it][A
-Run 1/1:  56%|█████▌    | 559/1000 [47:30<44:47,  6.09s/it][A
-Run 1/1:  56%|█████▌    | 560/1000 [47:36<43:33,  5.94s/it][A
-Run 1/1:  56%|█████▌    | 561/1000 [47:41<42:08,  5.76s/it][A
-Run 1/1:  56%|█████▌    | 562/1000 [47:45<37:46,  5.17s/it][A
-Run 1/1:  56%|█████▋    | 563/1000 [47:50<38:04,  5.23s/it][A
-Run 1/1:  56%|█████▋    | 564/1000 [47:57<41:38,  5.73s/it][A
-Run 1/1:  56%|█████▋    | 565/1000 [48:04<43:55,  6.06s/it][A
-Run 1/1:  57%|█████▋    | 566/1000 [48:08<39:13,  5.42s/it][A
-Run 1/1:  57%|█████▋    | 567/1000 [48:12<35:44,  4.95s/it][A
-Run 1/1:  57%|█████▋    | 568/1000 [48:17<36:19,  5.04s/it][A
-Run 1/1:  57%|█████▋    | 569/1000 [48:24<40:00,  5.57s/it][A
-Run 1/1:  57%|█████▋    | 570/1000 [48:31<42:37,  5.95s/it][A
-Run 1/1:  57%|█████▋    | 571/1000 [48:36<41:27,  5.80s/it][A
-Run 1/1:  57%|█████▋    | 572/1000 [48:43<43:22,  6.08s/it][A
-Run 1/1:  57%|█████▋    | 573/1000 [48:50<44:48,  6.30s/it][A
-Run 1/1:  57%|█████▋    | 574/1000 [48:54<39:31,  5.57s/it][A
-Run 1/1:  57%|█████▊    | 575/1000 [48:59<38:58,  5.50s/it][A
-Run 1/1:  58%|█████▊    | 576/1000 [49:03<35:09,  4.98s/it][A
-Run 1/1:  58%|█████▊    | 577/1000 [49:07<32:45,  4.65s/it][A
-Run 1/1:  58%|█████▊    | 578/1000 [49:12<34:07,  4.85s/it][A
-Run 1/1:  58%|█████▊    | 579/1000 [49:17<34:38,  4.94s/it][A
-Run 1/1:  58%|█████▊    | 580/1000 [49:22<35:13,  5.03s/it][A
-Run 1/1:  58%|█████▊    | 581/1000 [49:28<35:59,  5.15s/it][A
-Run 1/1:  58%|█████▊    | 582/1000 [49:33<36:18,  5.21s/it][A
-Run 1/1:  58%|█████▊    | 583/1000 [49:38<36:38,  5.27s/it][A
-Run 1/1:  58%|█████▊    | 584/1000 [49:44<36:55,  5.33s/it][A
-Run 1/1:  58%|█████▊    | 585/1000 [49:51<39:31,  5.71s/it][A
-Run 1/1:  59%|█████▊    | 586/1000 [49:56<38:55,  5.64s/it][A
-Run 1/1:  59%|█████▊    | 587/1000 [50:01<38:04,  5.53s/it][A
-Run 1/1:  59%|█████▉    | 588/1000 [50:05<34:23,  5.01s/it][A
-Run 1/1:  59%|█████▉    | 589/1000 [50:12<37:57,  5.54s/it][A
-Run 1/1:  59%|█████▉    | 590/1000 [50:19<40:37,  5.94s/it][A
-Run 1/1:  59%|█████▉    | 591/1000 [50:23<36:27,  5.35s/it][A
-Run 1/1:  59%|█████▉    | 592/1000 [50:29<39:18,  5.78s/it][A
-Run 1/1:  59%|█████▉    | 593/1000 [50:35<37:57,  5.60s/it][A
-Run 1/1:  59%|█████▉    | 594/1000 [50:40<37:11,  5.50s/it][A
-Run 1/1:  60%|█████▉    | 595/1000 [50:45<36:44,  5.44s/it][A
-Run 1/1:  60%|█████▉    | 596/1000 [50:50<36:20,  5.40s/it][A
-Run 1/1:  60%|█████▉    | 597/1000 [50:57<38:56,  5.80s/it][A
-Run 1/1:  60%|█████▉    | 598/1000 [51:03<38:16,  5.71s/it][A
-Run 1/1:  60%|█████▉    | 599/1000 [51:09<39:58,  5.98s/it][A
-Run 1/1:  60%|██████    | 600/1000 [51:16<41:25,  6.21s/it][A
-Run 1/1:  60%|██████    | 601/1000 [51:23<42:23,  6.37s/it][A
-Run 1/1:  60%|██████    | 602/1000 [51:27<37:06,  5.60s/it][A
-Run 1/1:  60%|██████    | 603/1000 [51:32<35:58,  5.44s/it][A
-Run 1/1:  60%|██████    | 604/1000 [51:39<38:42,  5.87s/it][A
-Run 1/1:  60%|██████    | 605/1000 [51:44<37:22,  5.68s/it][A
-Run 1/1:  61%|██████    | 606/1000 [51:50<39:06,  5.96s/it][A
-Run 1/1:  61%|██████    | 607/1000 [51:54<34:30,  5.27s/it][A
-Run 1/1:  61%|██████    | 608/1000 [52:01<37:13,  5.70s/it][A
-Run 1/1:  61%|██████    | 609/1000 [52:06<36:27,  5.59s/it][A
-Run 1/1:  61%|██████    | 610/1000 [52:13<38:34,  5.93s/it][A
-Run 1/1:  61%|██████    | 611/1000 [52:20<40:24,  6.23s/it][A
-Run 1/1:  61%|██████    | 612/1000 [52:27<41:35,  6.43s/it][A
-Run 1/1:  61%|██████▏   | 613/1000 [52:33<42:13,  6.55s/it][A
-Run 1/1:  61%|██████▏   | 614/1000 [52:39<39:41,  6.17s/it][A
-Run 1/1:  62%|██████▏   | 615/1000 [52:44<37:58,  5.92s/it][A
-Run 1/1:  62%|██████▏   | 616/1000 [52:48<33:35,  5.25s/it][A
-Run 1/1:  62%|██████▏   | 617/1000 [52:54<36:02,  5.65s/it][A
-Run 1/1:  62%|██████▏   | 618/1000 [52:58<31:56,  5.02s/it][A
-Run 1/1:  62%|██████▏   | 619/1000 [53:03<32:06,  5.06s/it][A
-Run 1/1:  62%|██████▏   | 620/1000 [53:10<35:09,  5.55s/it][A
-Run 1/1:  62%|██████▏   | 621/1000 [53:15<34:27,  5.46s/it][A
-Run 1/1:  62%|██████▏   | 622/1000 [53:20<33:38,  5.34s/it][A
-Run 1/1:  62%|██████▏   | 623/1000 [53:24<30:23,  4.84s/it][A
-Run 1/1:  62%|██████▏   | 624/1000 [53:27<28:07,  4.49s/it][A
-Run 1/1:  62%|██████▎   | 625/1000 [53:34<32:11,  5.15s/it][A
-Run 1/1:  63%|██████▎   | 626/1000 [53:39<32:04,  5.15s/it][A
-Run 1/1:  63%|██████▎   | 627/1000 [53:43<29:15,  4.71s/it][A
-Run 1/1:  63%|██████▎   | 628/1000 [53:48<29:59,  4.84s/it][A
-Run 1/1:  63%|██████▎   | 629/1000 [53:55<33:19,  5.39s/it][A
-Run 1/1:  63%|██████▎   | 630/1000 [53:59<30:17,  4.91s/it][A
-Run 1/1:  63%|██████▎   | 631/1000 [54:04<30:36,  4.98s/it][A
-Run 1/1:  63%|██████▎   | 632/1000 [54:10<33:31,  5.47s/it][A
-Run 1/1:  63%|██████▎   | 633/1000 [54:15<32:44,  5.35s/it][A
-Run 1/1:  63%|██████▎   | 634/1000 [54:21<32:35,  5.34s/it][A
-Run 1/1:  64%|██████▎   | 635/1000 [54:26<31:51,  5.24s/it][A
-Run 1/1:  64%|██████▎   | 636/1000 [54:32<34:02,  5.61s/it][A
-Run 1/1:  64%|██████▎   | 637/1000 [54:38<33:33,  5.55s/it][A
-Run 1/1:  64%|██████▍   | 638/1000 [54:44<35:17,  5.85s/it][A
-Run 1/1:  64%|██████▍   | 639/1000 [54:51<36:17,  6.03s/it][A
-Run 1/1:  64%|██████▍   | 640/1000 [54:56<34:51,  5.81s/it][A
-Run 1/1:  64%|██████▍   | 641/1000 [55:01<33:50,  5.66s/it][A
-Run 1/1:  64%|██████▍   | 642/1000 [55:08<35:35,  5.97s/it][A
-Run 1/1:  64%|██████▍   | 643/1000 [55:13<33:50,  5.69s/it][A
-Run 1/1:  64%|██████▍   | 644/1000 [55:18<33:00,  5.56s/it][A
-Run 1/1:  64%|██████▍   | 645/1000 [55:25<34:36,  5.85s/it][A
-Run 1/1:  65%|██████▍   | 646/1000 [55:30<33:23,  5.66s/it][A
-Run 1/1:  65%|██████▍   | 647/1000 [55:35<32:41,  5.56s/it][A
-Run 1/1:  65%|██████▍   | 648/1000 [55:42<34:18,  5.85s/it][A
-Run 1/1:  65%|██████▍   | 649/1000 [55:47<32:56,  5.63s/it][A
-Run 1/1:  65%|██████▌   | 650/1000 [55:52<31:53,  5.47s/it][A
-Run 1/1:  65%|██████▌   | 651/1000 [55:56<28:29,  4.90s/it][A
-Run 1/1:  65%|██████▌   | 652/1000 [55:59<26:01,  4.49s/it][A
-Run 1/1:  65%|██████▌   | 653/1000 [56:04<27:03,  4.68s/it][A
-Run 1/1:  65%|██████▌   | 654/1000 [56:11<30:06,  5.22s/it][A
-Run 1/1:  66%|██████▌   | 655/1000 [56:14<27:19,  4.75s/it][A
-Run 1/1:  66%|██████▌   | 656/1000 [56:18<25:10,  4.39s/it][A
-Run 1/1:  66%|██████▌   | 657/1000 [56:25<28:57,  5.07s/it][A
-Run 1/1:  66%|██████▌   | 658/1000 [56:31<31:37,  5.55s/it][A
-Run 1/1:  66%|██████▌   | 659/1000 [56:36<30:55,  5.44s/it][A
-Run 1/1:  66%|██████▌   | 660/1000 [56:40<27:53,  4.92s/it][A
-Run 1/1:  66%|██████▌   | 661/1000 [56:45<28:07,  4.98s/it][A
-Run 1/1:  66%|██████▌   | 662/1000 [56:49<25:45,  4.57s/it][A
-Run 1/1:  66%|██████▋   | 663/1000 [56:55<29:03,  5.17s/it][A
-Run 1/1:  66%|██████▋   | 664/1000 [57:02<31:33,  5.64s/it][A
-Run 1/1:  66%|██████▋   | 665/1000 [57:07<30:44,  5.51s/it][A
-Run 1/1:  67%|██████▋   | 666/1000 [57:11<27:43,  4.98s/it][A
-Run 1/1:  67%|██████▋   | 667/1000 [57:16<27:58,  5.04s/it][A
-Run 1/1:  67%|██████▋   | 668/1000 [57:20<25:38,  4.63s/it][A
-Run 1/1:  67%|██████▋   | 669/1000 [57:25<26:33,  4.82s/it][A
-Run 1/1:  67%|██████▋   | 670/1000 [57:30<26:49,  4.88s/it][A
-Run 1/1:  67%|██████▋   | 671/1000 [57:37<29:41,  5.41s/it][A
-Run 1/1:  67%|██████▋   | 672/1000 [57:42<29:09,  5.33s/it][A
-Run 1/1:  67%|██████▋   | 673/1000 [57:47<28:51,  5.29s/it][A
-Run 1/1:  67%|██████▋   | 674/1000 [57:51<26:19,  4.85s/it][A
-Run 1/1:  68%|██████▊   | 675/1000 [57:56<26:44,  4.94s/it][A
-Run 1/1:  68%|██████▊   | 676/1000 [58:01<26:51,  4.97s/it][A
-Run 1/1:  68%|██████▊   | 677/1000 [58:08<29:25,  5.47s/it][A
-Run 1/1:  68%|██████▊   | 678/1000 [58:12<26:38,  4.96s/it][A
-Run 1/1:  68%|██████▊   | 679/1000 [58:18<29:07,  5.44s/it][A
-Run 1/1:  68%|██████▊   | 680/1000 [58:25<30:53,  5.79s/it][A
-Run 1/1:  68%|██████▊   | 681/1000 [58:32<32:21,  6.08s/it][A
-Run 1/1:  68%|██████▊   | 682/1000 [58:37<30:42,  5.80s/it][A
-Run 1/1:  68%|██████▊   | 683/1000 [58:42<29:45,  5.63s/it][A
-Run 1/1:  68%|██████▊   | 684/1000 [58:47<28:46,  5.47s/it][A
-Run 1/1:  68%|██████▊   | 685/1000 [58:54<30:22,  5.79s/it][A
-Run 1/1:  69%|██████▊   | 686/1000 [58:59<29:11,  5.58s/it][A
-Run 1/1:  69%|██████▊   | 687/1000 [59:04<28:14,  5.41s/it][A
-Run 1/1:  69%|██████▉   | 688/1000 [59:10<30:14,  5.82s/it][A
-Run 1/1:  69%|██████▉   | 689/1000 [59:17<31:27,  6.07s/it][A
-Run 1/1:  69%|██████▉   | 690/1000 [59:24<32:04,  6.21s/it][A
-Run 1/1:  69%|██████▉   | 691/1000 [59:29<30:24,  5.90s/it][A
-Run 1/1:  69%|██████▉   | 692/1000 [59:35<31:27,  6.13s/it][A
-Run 1/1:  69%|██████▉   | 693/1000 [59:41<29:49,  5.83s/it][A
-Run 1/1:  69%|██████▉   | 694/1000 [59:46<28:44,  5.64s/it][A
-Run 1/1:  70%|██████▉   | 695/1000 [59:51<27:56,  5.50s/it][A
-Run 1/1:  70%|██████▉   | 696/1000 [59:58<29:39,  5.85s/it][A
-Run 1/1:  70%|██████▉   | 697/1000 [1:00:03<28:29,  5.64s/it][A
-Run 1/1:  70%|██████▉   | 698/1000 [1:00:06<25:19,  5.03s/it][A
-Run 1/1:  70%|██████▉   | 699/1000 [1:00:12<25:23,  5.06s/it][A
-Run 1/1:  70%|███████   | 700/1000 [1:00:18<27:50,  5.57s/it][A
-Run 1/1:  70%|███████   | 701/1000 [1:00:24<27:27,  5.51s/it][A
-Run 1/1:  70%|███████   | 702/1000 [1:00:29<26:43,  5.38s/it][A
-Run 1/1:  70%|███████   | 703/1000 [1:00:35<28:22,  5.73s/it][A
-Run 1/1:  70%|███████   | 704/1000 [1:00:42<29:28,  5.98s/it][A
-Run 1/1:  70%|███████   | 705/1000 [1:00:47<28:10,  5.73s/it][A
-Run 1/1:  71%|███████   | 706/1000 [1:00:53<29:02,  5.93s/it][A
-Run 1/1:  71%|███████   | 707/1000 [1:00:57<25:28,  5.22s/it][A
-Run 1/1:  71%|███████   | 708/1000 [1:01:02<25:24,  5.22s/it][A
-Run 1/1:  71%|███████   | 709/1000 [1:01:09<27:27,  5.66s/it][A
-Run 1/1:  71%|███████   | 710/1000 [1:01:14<26:41,  5.52s/it][A
-Run 1/1:  71%|███████   | 711/1000 [1:01:18<23:46,  4.94s/it][A
-Run 1/1:  71%|███████   | 712/1000 [1:01:23<23:57,  4.99s/it][A
-Run 1/1:  71%|███████▏  | 713/1000 [1:01:28<24:03,  5.03s/it][A
-Run 1/1:  71%|███████▏  | 714/1000 [1:01:35<26:20,  5.52s/it][A
-Run 1/1:  72%|███████▏  | 715/1000 [1:01:41<27:45,  5.84s/it][A
-Run 1/1:  72%|███████▏  | 716/1000 [1:01:45<24:35,  5.20s/it][A
-Run 1/1:  72%|███████▏  | 717/1000 [1:01:48<22:20,  4.74s/it][A
-Run 1/1:  72%|███████▏  | 718/1000 [1:01:54<23:10,  4.93s/it][A
-Run 1/1:  72%|███████▏  | 719/1000 [1:02:01<25:45,  5.50s/it][A
-Run 1/1:  72%|███████▏  | 720/1000 [1:02:05<23:28,  5.03s/it][A
-Run 1/1:  72%|███████▏  | 721/1000 [1:02:08<21:32,  4.63s/it][A
-Run 1/1:  72%|███████▏  | 722/1000 [1:02:15<24:01,  5.18s/it][A
-Run 1/1:  72%|███████▏  | 723/1000 [1:02:22<26:04,  5.65s/it][A
-Run 1/1:  72%|███████▏  | 724/1000 [1:02:28<27:22,  5.95s/it][A
-Run 1/1:  72%|███████▎  | 725/1000 [1:02:35<28:06,  6.13s/it][A
-Run 1/1:  73%|███████▎  | 726/1000 [1:02:40<26:41,  5.85s/it][A
-Run 1/1:  73%|███████▎  | 727/1000 [1:02:45<25:33,  5.62s/it][A
-Run 1/1:  73%|███████▎  | 728/1000 [1:02:52<26:44,  5.90s/it][A
-Run 1/1:  73%|███████▎  | 729/1000 [1:02:58<27:51,  6.17s/it][A
-Run 1/1:  73%|███████▎  | 730/1000 [1:03:05<28:20,  6.30s/it][A
-Run 1/1:  73%|███████▎  | 731/1000 [1:03:12<28:35,  6.38s/it][A
-Run 1/1:  73%|███████▎  | 732/1000 [1:03:18<28:33,  6.39s/it][A
-Run 1/1:  73%|███████▎  | 733/1000 [1:03:23<26:43,  6.00s/it][A
-Run 1/1:  73%|███████▎  | 734/1000 [1:03:30<27:36,  6.23s/it][A
-Run 1/1:  74%|███████▎  | 735/1000 [1:03:35<25:57,  5.88s/it][A
-Run 1/1:  74%|███████▎  | 736/1000 [1:03:42<26:56,  6.12s/it][A
-Run 1/1:  74%|███████▎  | 737/1000 [1:03:48<27:45,  6.33s/it][A
-Run 1/1:  74%|███████▍  | 738/1000 [1:03:53<26:00,  5.96s/it][A
-Run 1/1:  74%|███████▍  | 739/1000 [1:04:00<27:02,  6.22s/it][A
-Run 1/1:  74%|███████▍  | 740/1000 [1:04:07<27:38,  6.38s/it][A
-Run 1/1:  74%|███████▍  | 741/1000 [1:04:12<25:47,  5.97s/it][A
-Run 1/1:  74%|███████▍  | 742/1000 [1:04:17<24:28,  5.69s/it][A
-Run 1/1:  74%|███████▍  | 743/1000 [1:04:24<25:21,  5.92s/it][A
-Run 1/1:  74%|███████▍  | 744/1000 [1:04:30<26:01,  6.10s/it][A
-Run 1/1:  74%|███████▍  | 745/1000 [1:04:35<24:42,  5.81s/it][A
-Run 1/1:  75%|███████▍  | 746/1000 [1:04:42<25:40,  6.06s/it][A
-Run 1/1:  75%|███████▍  | 747/1000 [1:04:47<24:08,  5.73s/it][A
-Run 1/1:  75%|███████▍  | 748/1000 [1:04:52<23:16,  5.54s/it][A
-Run 1/1:  75%|███████▍  | 749/1000 [1:04:58<24:25,  5.84s/it][A
-Run 1/1:  75%|███████▌  | 750/1000 [1:05:02<21:38,  5.19s/it][A
-Run 1/1:  75%|███████▌  | 751/1000 [1:05:09<23:11,  5.59s/it][A
-Run 1/1:  75%|███████▌  | 752/1000 [1:05:14<22:29,  5.44s/it][A
-Run 1/1:  75%|███████▌  | 753/1000 [1:05:17<20:04,  4.88s/it][A
-Run 1/1:  75%|███████▌  | 754/1000 [1:05:21<18:27,  4.50s/it][A
-Run 1/1:  76%|███████▌  | 755/1000 [1:05:26<19:22,  4.75s/it][A
-Run 1/1:  76%|███████▌  | 756/1000 [1:05:32<19:57,  4.91s/it][A
-Run 1/1:  76%|███████▌  | 757/1000 [1:05:38<21:58,  5.43s/it][A
-Run 1/1:  76%|███████▌  | 758/1000 [1:05:45<23:20,  5.79s/it][A
-Run 1/1:  76%|███████▌  | 759/1000 [1:05:50<22:36,  5.63s/it][A
-Run 1/1:  76%|███████▌  | 760/1000 [1:05:55<21:54,  5.48s/it][A
-Run 1/1:  76%|███████▌  | 761/1000 [1:06:02<23:26,  5.89s/it][A
-Run 1/1:  76%|███████▌  | 762/1000 [1:06:06<20:43,  5.22s/it][A
-Run 1/1:  76%|███████▋  | 763/1000 [1:06:12<22:29,  5.69s/it][A
-Run 1/1:  76%|███████▋  | 764/1000 [1:06:18<21:54,  5.57s/it][A
-Run 1/1:  76%|███████▋  | 765/1000 [1:06:23<21:18,  5.44s/it][A
-Run 1/1:  77%|███████▋  | 766/1000 [1:06:27<19:17,  4.95s/it][A
-Run 1/1:  77%|███████▋  | 767/1000 [1:06:33<21:03,  5.42s/it][A
-Run 1/1:  77%|███████▋  | 768/1000 [1:06:40<22:27,  5.81s/it][A
-Run 1/1:  77%|███████▋  | 769/1000 [1:06:45<21:34,  5.60s/it][A
-Run 1/1:  77%|███████▋  | 770/1000 [1:06:52<22:36,  5.90s/it][A
-Run 1/1:  77%|███████▋  | 771/1000 [1:06:55<19:55,  5.22s/it][A
-Run 1/1:  77%|███████▋  | 772/1000 [1:07:01<20:04,  5.28s/it][A
-Run 1/1:  77%|███████▋  | 773/1000 [1:07:08<21:47,  5.76s/it][A
-Run 1/1:  77%|███████▋  | 774/1000 [1:07:14<22:32,  5.98s/it][A
-Run 1/1:  78%|███████▊  | 775/1000 [1:07:21<23:03,  6.15s/it][A
-Run 1/1:  78%|███████▊  | 776/1000 [1:07:24<20:11,  5.41s/it][A
-Run 1/1:  78%|███████▊  | 777/1000 [1:07:30<19:52,  5.35s/it][A
-Run 1/1:  78%|███████▊  | 778/1000 [1:07:35<19:28,  5.26s/it][A
-Run 1/1:  78%|███████▊  | 779/1000 [1:07:41<21:09,  5.74s/it][A
-Run 1/1:  78%|███████▊  | 780/1000 [1:07:48<22:00,  6.00s/it][A
-Run 1/1:  78%|███████▊  | 781/1000 [1:07:53<21:01,  5.76s/it][A
-Run 1/1:  78%|███████▊  | 782/1000 [1:08:00<22:04,  6.07s/it][A
-Run 1/1:  78%|███████▊  | 783/1000 [1:08:06<21:19,  5.90s/it][A
-Run 1/1:  78%|███████▊  | 784/1000 [1:08:12<21:51,  6.07s/it][A
-Run 1/1:  78%|███████▊  | 785/1000 [1:08:17<20:46,  5.80s/it][A
-Run 1/1:  79%|███████▊  | 786/1000 [1:08:22<19:52,  5.57s/it][A
-Run 1/1:  79%|███████▊  | 787/1000 [1:08:29<20:52,  5.88s/it][A
-Run 1/1:  79%|███████▉  | 788/1000 [1:08:34<19:57,  5.65s/it][A
-Run 1/1:  79%|███████▉  | 789/1000 [1:08:41<20:52,  5.93s/it][A
-Run 1/1:  79%|███████▉  | 790/1000 [1:08:47<21:39,  6.19s/it][A
-Run 1/1:  79%|███████▉  | 791/1000 [1:08:54<21:59,  6.31s/it][A
-Run 1/1:  79%|███████▉  | 792/1000 [1:09:01<22:28,  6.48s/it][A
-Run 1/1:  79%|███████▉  | 793/1000 [1:09:06<21:03,  6.11s/it][A
-Run 1/1:  79%|███████▉  | 794/1000 [1:09:13<21:27,  6.25s/it][A
-Run 1/1:  80%|███████▉  | 795/1000 [1:09:19<21:52,  6.40s/it][A
-Run 1/1:  80%|███████▉  | 796/1000 [1:09:26<21:55,  6.45s/it][A
-Run 1/1:  80%|███████▉  | 797/1000 [1:09:32<21:57,  6.49s/it][A
-Run 1/1:  80%|███████▉  | 798/1000 [1:09:36<19:02,  5.65s/it][A
-Run 1/1:  80%|███████▉  | 799/1000 [1:09:43<19:55,  5.95s/it][A
-Run 1/1:  80%|████████  | 800/1000 [1:09:49<20:30,  6.15s/it][A
-Run 1/1:  80%|████████  | 801/1000 [1:09:53<18:00,  5.43s/it][A
-Run 1/1:  80%|████████  | 802/1000 [1:10:00<19:09,  5.81s/it][A
-Run 1/1:  80%|████████  | 803/1000 [1:10:05<18:08,  5.52s/it][A
-Run 1/1:  80%|████████  | 804/1000 [1:10:10<17:37,  5.40s/it][A
-Run 1/1:  80%|████████  | 805/1000 [1:10:16<18:36,  5.73s/it][A
-Run 1/1:  81%|████████  | 806/1000 [1:10:23<19:23,  6.00s/it][A
-Run 1/1:  81%|████████  | 807/1000 [1:10:30<19:59,  6.21s/it][A
-Run 1/1:  81%|████████  | 808/1000 [1:10:36<20:04,  6.27s/it][A
-Run 1/1:  81%|████████  | 809/1000 [1:10:41<18:54,  5.94s/it][A
-Run 1/1:  81%|████████  | 810/1000 [1:10:46<18:01,  5.69s/it][A
-Run 1/1:  81%|████████  | 811/1000 [1:10:50<16:08,  5.12s/it][A
-Run 1/1:  81%|████████  | 812/1000 [1:10:55<16:03,  5.13s/it][A
-Run 1/1:  81%|████████▏ | 813/1000 [1:11:02<17:24,  5.59s/it][A
-Run 1/1:  81%|████████▏ | 814/1000 [1:11:09<18:31,  5.98s/it][A
-Run 1/1:  82%|████████▏ | 815/1000 [1:11:15<18:49,  6.10s/it][A
-Run 1/1:  82%|████████▏ | 816/1000 [1:11:22<19:00,  6.20s/it][A
-Run 1/1:  82%|████████▏ | 817/1000 [1:11:28<19:17,  6.32s/it][A
-Run 1/1:  82%|████████▏ | 818/1000 [1:11:33<18:00,  5.94s/it][A
-Run 1/1:  82%|████████▏ | 819/1000 [1:11:39<17:14,  5.71s/it][A
-Run 1/1:  82%|████████▏ | 820/1000 [1:11:42<15:19,  5.11s/it][A
-Run 1/1:  82%|████████▏ | 821/1000 [1:11:49<16:27,  5.52s/it][A
-Run 1/1:  82%|████████▏ | 822/1000 [1:11:54<16:11,  5.46s/it][A
-Run 1/1:  82%|████████▏ | 823/1000 [1:11:59<15:41,  5.32s/it][A
-Run 1/1:  82%|████████▏ | 824/1000 [1:12:04<15:33,  5.30s/it][A
-Run 1/1:  82%|████████▎ | 825/1000 [1:12:10<15:24,  5.28s/it][A
-Run 1/1:  83%|████████▎ | 826/1000 [1:12:15<15:12,  5.25s/it][A
-Run 1/1:  83%|████████▎ | 827/1000 [1:12:18<13:44,  4.77s/it][A
-Run 1/1:  83%|████████▎ | 828/1000 [1:12:25<15:22,  5.36s/it][A
-Run 1/1:  83%|████████▎ | 829/1000 [1:12:30<15:00,  5.27s/it][A
-Run 1/1:  83%|████████▎ | 830/1000 [1:12:37<16:08,  5.70s/it][A
-Run 1/1:  83%|████████▎ | 831/1000 [1:12:42<15:33,  5.52s/it][A
-Run 1/1:  83%|████████▎ | 832/1000 [1:12:48<16:12,  5.79s/it][A
-Run 1/1:  83%|████████▎ | 833/1000 [1:12:54<15:35,  5.60s/it][A
-Run 1/1:  83%|████████▎ | 834/1000 [1:12:59<15:00,  5.42s/it][A
-Run 1/1:  84%|████████▎ | 835/1000 [1:13:02<13:21,  4.86s/it][A
-Run 1/1:  84%|████████▎ | 836/1000 [1:13:06<12:18,  4.50s/it][A
-Run 1/1:  84%|████████▎ | 837/1000 [1:13:12<13:48,  5.08s/it][A
-Run 1/1:  84%|████████▍ | 838/1000 [1:13:19<15:01,  5.56s/it][A
-Run 1/1:  84%|████████▍ | 839/1000 [1:13:26<15:49,  5.90s/it][A
-Run 1/1:  84%|████████▍ | 840/1000 [1:13:31<15:07,  5.67s/it][A
-Run 1/1:  84%|████████▍ | 841/1000 [1:13:36<14:38,  5.52s/it][A
-Run 1/1:  84%|████████▍ | 842/1000 [1:13:43<15:31,  5.90s/it][A
-Run 1/1:  84%|████████▍ | 843/1000 [1:13:48<14:53,  5.69s/it][A
-Run 1/1:  84%|████████▍ | 844/1000 [1:13:53<14:35,  5.61s/it][A
-Run 1/1:  84%|████████▍ | 845/1000 [1:14:00<15:15,  5.91s/it][A
-Run 1/1:  85%|████████▍ | 846/1000 [1:14:05<14:33,  5.67s/it][A
-Run 1/1:  85%|████████▍ | 847/1000 [1:14:10<14:07,  5.54s/it][A
-Run 1/1:  85%|████████▍ | 848/1000 [1:14:14<12:38,  4.99s/it][A
-Run 1/1:  85%|████████▍ | 849/1000 [1:14:19<12:40,  5.04s/it][A
-Run 1/1:  85%|████████▌ | 850/1000 [1:14:26<13:51,  5.54s/it][A
-Run 1/1:  85%|████████▌ | 851/1000 [1:14:31<13:29,  5.43s/it][A
-Run 1/1:  85%|████████▌ | 852/1000 [1:14:38<14:27,  5.86s/it][A
-Run 1/1:  85%|████████▌ | 853/1000 [1:14:43<13:55,  5.69s/it][A
-Run 1/1:  85%|████████▌ | 854/1000 [1:14:49<14:20,  5.90s/it][A
-Run 1/1:  86%|████████▌ | 855/1000 [1:14:56<14:55,  6.17s/it][A
-Run 1/1:  86%|████████▌ | 856/1000 [1:15:03<15:08,  6.31s/it][A
-Run 1/1:  86%|████████▌ | 857/1000 [1:15:10<15:14,  6.39s/it][A
-Run 1/1:  86%|████████▌ | 858/1000 [1:15:15<14:12,  6.00s/it][A
-Run 1/1:  86%|████████▌ | 859/1000 [1:15:21<14:37,  6.22s/it][A
-Run 1/1:  86%|████████▌ | 860/1000 [1:15:27<13:50,  5.93s/it][A
-Run 1/1:  86%|████████▌ | 861/1000 [1:15:33<14:20,  6.19s/it][A
-Run 1/1:  86%|████████▌ | 862/1000 [1:15:39<13:29,  5.87s/it][A
-Run 1/1:  86%|████████▋ | 863/1000 [1:15:44<12:50,  5.62s/it][A
-Run 1/1:  86%|████████▋ | 864/1000 [1:15:49<12:18,  5.43s/it][A
-Run 1/1:  86%|████████▋ | 865/1000 [1:15:55<12:57,  5.76s/it][A
-Run 1/1:  87%|████████▋ | 866/1000 [1:16:02<13:32,  6.07s/it][A
-Run 1/1:  87%|████████▋ | 867/1000 [1:16:07<12:43,  5.74s/it][A
-Run 1/1:  87%|████████▋ | 868/1000 [1:16:12<12:12,  5.55s/it][A
-Run 1/1:  87%|████████▋ | 869/1000 [1:16:17<11:53,  5.44s/it][A
-Run 1/1:  87%|████████▋ | 870/1000 [1:16:22<11:39,  5.38s/it][A
-Run 1/1:  87%|████████▋ | 871/1000 [1:16:27<11:21,  5.28s/it][A
-Run 1/1:  87%|████████▋ | 872/1000 [1:16:34<12:11,  5.71s/it][A
-Run 1/1:  87%|████████▋ | 873/1000 [1:16:39<11:45,  5.55s/it][A
-Run 1/1:  87%|████████▋ | 874/1000 [1:16:45<11:33,  5.50s/it][A
-Run 1/1:  88%|████████▊ | 875/1000 [1:16:51<12:13,  5.87s/it][A
-Run 1/1:  88%|████████▊ | 876/1000 [1:16:58<12:41,  6.14s/it][A
-Run 1/1:  88%|████████▊ | 877/1000 [1:17:03<11:57,  5.83s/it][A
-Run 1/1:  88%|████████▊ | 878/1000 [1:17:09<11:30,  5.66s/it][A
-Run 1/1:  88%|████████▊ | 879/1000 [1:17:14<11:05,  5.50s/it][A
-Run 1/1:  88%|████████▊ | 880/1000 [1:17:21<11:50,  5.92s/it][A
-Run 1/1:  88%|████████▊ | 881/1000 [1:17:26<11:17,  5.70s/it][A
-Run 1/1:  88%|████████▊ | 882/1000 [1:17:31<10:56,  5.56s/it][A
-Run 1/1:  88%|████████▊ | 883/1000 [1:17:36<10:34,  5.42s/it][A
-Run 1/1:  88%|████████▊ | 884/1000 [1:17:43<11:10,  5.78s/it][A
-Run 1/1:  88%|████████▊ | 885/1000 [1:17:48<10:42,  5.59s/it][A
-Run 1/1:  89%|████████▊ | 886/1000 [1:17:53<10:22,  5.46s/it][A
-Run 1/1:  89%|████████▊ | 887/1000 [1:18:00<10:57,  5.82s/it][A
-Run 1/1:  89%|████████▉ | 888/1000 [1:18:05<10:33,  5.65s/it][A
-Run 1/1:  89%|████████▉ | 889/1000 [1:18:08<09:16,  5.01s/it][A
-Run 1/1:  89%|████████▉ | 890/1000 [1:18:15<10:02,  5.48s/it][A
-Run 1/1:  89%|████████▉ | 891/1000 [1:18:19<08:55,  4.92s/it][A
-Run 1/1:  89%|████████▉ | 892/1000 [1:18:24<08:58,  4.99s/it][A
-Run 1/1:  89%|████████▉ | 893/1000 [1:18:28<08:13,  4.61s/it][A
-Run 1/1:  89%|████████▉ | 894/1000 [1:18:33<08:30,  4.82s/it][A
-Run 1/1:  90%|████████▉ | 895/1000 [1:18:38<08:35,  4.91s/it][A
-Run 1/1:  90%|████████▉ | 896/1000 [1:18:42<07:51,  4.53s/it][A
-Run 1/1:  90%|████████▉ | 897/1000 [1:18:45<07:17,  4.25s/it][A
-Run 1/1:  90%|████████▉ | 898/1000 [1:18:52<08:25,  4.96s/it][A
-Run 1/1:  90%|████████▉ | 899/1000 [1:18:59<09:14,  5.49s/it][A
-Run 1/1:  90%|█████████ | 900/1000 [1:19:05<09:40,  5.80s/it][A
-Run 1/1:  90%|█████████ | 901/1000 [1:19:12<10:03,  6.10s/it][A
-Run 1/1:  90%|█████████ | 902/1000 [1:19:17<09:32,  5.84s/it][A
-Run 1/1:  90%|█████████ | 903/1000 [1:19:24<09:51,  6.09s/it][A
-Run 1/1:  90%|█████████ | 904/1000 [1:19:29<09:21,  5.85s/it][A
-Run 1/1:  90%|█████████ | 905/1000 [1:19:36<09:35,  6.06s/it][A
-Run 1/1:  91%|█████████ | 906/1000 [1:19:42<09:44,  6.22s/it][A
-Run 1/1:  91%|█████████ | 907/1000 [1:19:48<09:15,  5.97s/it][A
-Run 1/1:  91%|█████████ | 908/1000 [1:19:53<08:47,  5.73s/it][A
-Run 1/1:  91%|█████████ | 909/1000 [1:19:58<08:25,  5.56s/it][A
-Run 1/1:  91%|█████████ | 910/1000 [1:20:05<08:51,  5.91s/it][A
-Run 1/1:  91%|█████████ | 911/1000 [1:20:11<09:07,  6.15s/it][A
-Run 1/1:  91%|█████████ | 912/1000 [1:20:17<08:37,  5.88s/it][A
-Run 1/1:  91%|█████████▏| 913/1000 [1:20:22<08:13,  5.67s/it][A
-Run 1/1:  91%|█████████▏| 914/1000 [1:20:27<08:00,  5.59s/it][A
-Run 1/1:  92%|█████████▏| 915/1000 [1:20:34<08:24,  5.94s/it][A
-Run 1/1:  92%|█████████▏| 916/1000 [1:20:41<08:37,  6.16s/it][A
-Run 1/1:  92%|█████████▏| 917/1000 [1:20:46<08:03,  5.82s/it][A
-Run 1/1:  92%|█████████▏| 918/1000 [1:20:52<08:21,  6.12s/it][A
-Run 1/1:  92%|█████████▏| 919/1000 [1:20:59<08:27,  6.27s/it][A
-Run 1/1:  92%|█████████▏| 920/1000 [1:21:04<07:54,  5.93s/it][A
-Run 1/1:  92%|█████████▏| 921/1000 [1:21:11<08:01,  6.10s/it][A
-Run 1/1:  92%|█████████▏| 922/1000 [1:21:16<07:32,  5.80s/it][A
-Run 1/1:  92%|█████████▏| 923/1000 [1:21:21<07:08,  5.56s/it][A
-Run 1/1:  92%|█████████▏| 924/1000 [1:21:28<07:30,  5.93s/it][A
-Run 1/1:  92%|█████████▎| 925/1000 [1:21:33<07:05,  5.68s/it][A
-Run 1/1:  93%|█████████▎| 926/1000 [1:21:38<06:51,  5.56s/it][A
-Run 1/1:  93%|█████████▎| 927/1000 [1:21:43<06:34,  5.40s/it][A
-Run 1/1:  93%|█████████▎| 928/1000 [1:21:50<06:58,  5.81s/it][A
-Run 1/1:  93%|█████████▎| 929/1000 [1:21:55<06:37,  5.60s/it][A
-Run 1/1:  93%|█████████▎| 930/1000 [1:22:00<06:24,  5.49s/it][A
-Run 1/1:  93%|█████████▎| 931/1000 [1:22:07<06:47,  5.90s/it][A
-Run 1/1:  93%|█████████▎| 932/1000 [1:22:14<06:55,  6.10s/it][A
-Run 1/1:  93%|█████████▎| 933/1000 [1:22:17<06:01,  5.39s/it][A
-Run 1/1:  93%|█████████▎| 934/1000 [1:22:22<05:51,  5.32s/it][A
-Run 1/1:  94%|█████████▎| 935/1000 [1:22:26<05:13,  4.82s/it][A
-Run 1/1:  94%|█████████▎| 936/1000 [1:22:31<05:14,  4.92s/it][A
-Run 1/1:  94%|█████████▎| 937/1000 [1:22:38<05:46,  5.50s/it][A
-Run 1/1:  94%|█████████▍| 938/1000 [1:22:45<06:02,  5.85s/it][A
-Run 1/1:  94%|█████████▍| 939/1000 [1:22:50<05:42,  5.61s/it][A
-Run 1/1:  94%|█████████▍| 940/1000 [1:22:53<05:01,  5.02s/it][A
-Run 1/1:  94%|█████████▍| 941/1000 [1:23:00<05:25,  5.52s/it][A
-Run 1/1:  94%|█████████▍| 942/1000 [1:23:04<04:45,  4.93s/it][A
-Run 1/1:  94%|█████████▍| 943/1000 [1:23:09<04:44,  4.99s/it][A
-Run 1/1:  94%|█████████▍| 944/1000 [1:23:15<05:03,  5.41s/it][A
-Run 1/1:  94%|█████████▍| 945/1000 [1:23:20<04:52,  5.31s/it][A
-Run 1/1:  95%|█████████▍| 946/1000 [1:23:26<04:46,  5.30s/it][A
-Run 1/1:  95%|█████████▍| 947/1000 [1:23:29<04:17,  4.85s/it][A
-Run 1/1:  95%|█████████▍| 948/1000 [1:23:33<03:54,  4.51s/it][A
-Run 1/1:  95%|█████████▍| 949/1000 [1:23:38<04:00,  4.73s/it][A
-Run 1/1:  95%|█████████▌| 950/1000 [1:23:44<04:03,  4.87s/it][A
-Run 1/1:  95%|█████████▌| 951/1000 [1:23:49<04:00,  4.92s/it][A
-Run 1/1:  95%|█████████▌| 952/1000 [1:23:54<03:59,  4.98s/it][A
-Run 1/1:  95%|█████████▌| 953/1000 [1:24:00<04:14,  5.42s/it][A
-Run 1/1:  95%|█████████▌| 954/1000 [1:24:05<04:06,  5.35s/it][A
-Run 1/1:  96%|█████████▌| 955/1000 [1:24:12<04:18,  5.75s/it][A
-Run 1/1:  96%|█████████▌| 956/1000 [1:24:17<04:04,  5.57s/it][A
-Run 1/1:  96%|█████████▌| 957/1000 [1:24:24<04:13,  5.89s/it][A
-Run 1/1:  96%|█████████▌| 958/1000 [1:24:29<03:56,  5.63s/it][A
-Run 1/1:  96%|█████████▌| 959/1000 [1:24:36<04:05,  5.99s/it][A
-Run 1/1:  96%|█████████▌| 960/1000 [1:24:41<03:48,  5.72s/it][A
-Run 1/1:  96%|█████████▌| 961/1000 [1:24:44<03:18,  5.10s/it][A
-Run 1/1:  96%|█████████▌| 962/1000 [1:24:50<03:15,  5.14s/it][A
-Run 1/1:  96%|█████████▋| 963/1000 [1:24:55<03:10,  5.16s/it][A
-Run 1/1:  96%|█████████▋| 964/1000 [1:24:58<02:48,  4.69s/it][A
-Run 1/1:  96%|█████████▋| 965/1000 [1:25:05<03:03,  5.24s/it][A
-Run 1/1:  97%|█████████▋| 966/1000 [1:25:10<02:57,  5.23s/it][A
-Run 1/1:  97%|█████████▋| 967/1000 [1:25:15<02:51,  5.19s/it][A
-Run 1/1:  97%|█████████▋| 968/1000 [1:25:20<02:44,  5.15s/it][A
-Run 1/1:  97%|█████████▋| 969/1000 [1:25:24<02:25,  4.69s/it][A
-Run 1/1:  97%|█████████▋| 970/1000 [1:25:30<02:37,  5.24s/it][A
-Run 1/1:  97%|█████████▋| 971/1000 [1:25:36<02:31,  5.22s/it][A
-Run 1/1:  97%|█████████▋| 972/1000 [1:25:41<02:26,  5.22s/it][A
-Run 1/1:  97%|█████████▋| 973/1000 [1:25:46<02:20,  5.21s/it][A
-Run 1/1:  97%|█████████▋| 974/1000 [1:25:51<02:15,  5.20s/it][A
-Run 1/1:  98%|█████████▊| 975/1000 [1:25:55<01:57,  4.72s/it][A
-Run 1/1:  98%|█████████▊| 976/1000 [1:26:00<01:54,  4.78s/it][A
-Run 1/1:  98%|█████████▊| 977/1000 [1:26:03<01:41,  4.42s/it][A
-Run 1/1:  98%|█████████▊| 978/1000 [1:26:07<01:32,  4.19s/it][A
-Run 1/1:  98%|█████████▊| 979/1000 [1:26:13<01:42,  4.88s/it][A
-Run 1/1:  98%|█████████▊| 980/1000 [1:26:19<01:40,  5.00s/it][A
-Run 1/1:  98%|█████████▊| 981/1000 [1:26:25<01:43,  5.46s/it][A
-Run 1/1:  98%|█████████▊| 982/1000 [1:26:30<01:36,  5.33s/it][A
-Run 1/1:  98%|█████████▊| 983/1000 [1:26:36<01:30,  5.30s/it][A
-Run 1/1:  98%|█████████▊| 984/1000 [1:26:41<01:23,  5.23s/it][A
-Run 1/1:  98%|█████████▊| 985/1000 [1:26:44<01:11,  4.78s/it][A
-Run 1/1:  99%|█████████▊| 986/1000 [1:26:49<01:07,  4.81s/it][A
-Run 1/1:  99%|█████████▊| 987/1000 [1:26:56<01:09,  5.36s/it][A
-Run 1/1:  99%|█████████▉| 988/1000 [1:26:59<00:57,  4.82s/it][A
-Run 1/1:  99%|█████████▉| 989/1000 [1:27:04<00:53,  4.90s/it][A
-Run 1/1:  99%|█████████▉| 990/1000 [1:27:10<00:49,  4.99s/it][A
-Run 1/1:  99%|█████████▉| 991/1000 [1:27:15<00:45,  5.07s/it][A
-Run 1/1:  99%|█████████▉| 992/1000 [1:27:20<00:40,  5.08s/it][A
-Run 1/1:  99%|█████████▉| 993/1000 [1:27:25<00:35,  5.14s/it][A
-Run 1/1:  99%|█████████▉| 994/1000 [1:27:32<00:33,  5.57s/it][A
-Run 1/1: 100%|█████████▉| 995/1000 [1:27:36<00:25,  5.02s/it][A
-Run 1/1: 100%|█████████▉| 996/1000 [1:27:39<00:18,  4.63s/it][A
-Run 1/1: 100%|█████████▉| 997/1000 [1:27:44<00:14,  4.77s/it][A
-Run 1/1: 100%|█████████▉| 998/1000 [1:27:51<00:10,  5.31s/it][A
-Run 1/1: 100%|█████████▉| 999/1000 [1:27:56<00:05,  5.29s/it][A
-Run 1/1: 100%|██████████| 1000/1000 [1:28:01<00:00,  5.22s/it][A
-                                                              [AMCMC sampling: 100%|██████████| 1/1 [1:28:01<00:00, 5281.83s/it]MCMC sampling: 100%|██████████| 1/1 [1:28:01<00:00, 5281.83s/it]
-Configuration file copied to ../results/HD209458b/results-260515-benchmark-pix-MadhuTP/HD209458b_benchmark-pix.toml.
-Evolution of posterior probabilities saved as ../results/HD209458b/results-260515-benchmark-pix-MadhuTP/lnprob.txt.
-Evolution of posterior probability saved as ../results/HD209458b/results-260515-benchmark-pix-MadhuTP/lnprob.png.
-A preview of 2D fluxes is saved as ../results/HD209458b/results-260515-benchmark-pix-MadhuTP/fluxes_d0.png.
-A preview of 2D fluxes is saved as ../results/HD209458b/results-260515-benchmark-pix-MadhuTP/fluxes_d1.png.
-A preview of LD profiles is saved as ../results/HD209458b/results-260515-benchmark-pix-MadhuTP/ldprofiles.png.
-A preview of posterior distributions is saved as ../results/HD209458b/results-260515-benchmark-pix-MadhuTP/corners.pdf.
-A preview of residuals is saved as ../results/HD209458b/results-260515-benchmark-pix-MadhuTP/residuals_d0.png.
-A preview of residuals is saved as ../results/HD209458b/results-260515-benchmark-pix-MadhuTP/residuals_d1.png.
-Done!
+Traceback (most recent call last):
+  File "/home/ubuntu/work/relic/source/relic_exec_ns.py", line 90, in <module>
+    results = relic.run_dynesty(
+              ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/work/relic/source/relic_core.py", line 321, in run_dynesty
+    sampler.run_nested(
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/site-packages/dynesty/dynamicsampler.py", line 1836, in run_nested
+    for results in self.sample_initial(nlive=nlive_init,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/site-packages/dynesty/dynamicsampler.py", line 1112, in sample_initial
+    for it, results in enumerate(
+                       ^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/site-packages/dynesty/sampler.py", line 1142, in sample
+    u, v, logl, nc, proposal_stats = self._new_point(loglstar_new)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/site-packages/dynesty/sampler.py", line 744, in _new_point
+    ret = self._get_point_value(loglstar)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/site-packages/dynesty/sampler.py", line 725, in _get_point_value
+    self._fill_queue(loglstar)
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/site-packages/dynesty/sampler.py", line 718, in _fill_queue
+    self.queue = list(mapper(self.internal_sampler.sample, args))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/multiprocessing/pool.py", line 367, in map
+    return self._map_async(func, iterable, mapstar, chunksize).get()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/lcretrieval/lib/python3.12/multiprocessing/pool.py", line 774, in get
+    raise self._value
+TypeError: 'bool' object is not iterable
