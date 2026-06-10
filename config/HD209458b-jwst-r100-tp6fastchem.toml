@@ -77,7 +77,7 @@ lga2        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a2", ""]
 lgp1        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p1", "log10bar"]
 lgp2        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p2", "log10bar"] 
 m2h         = ["UP", -3, 3, -inf, inf, "atmospheric metallicity", "log10"]
-c2o         = ["UP", 0.1, 2, -inf, inf, "C/O ratio", " "]
+c2o         = ["UP", 1e-3, 2, -inf, inf, "C/O ratio", " "]
 
 [SAMPLER]
 method      = "dynesty" 
