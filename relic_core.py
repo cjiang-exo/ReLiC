@@ -200,7 +200,8 @@ class ReLic:
             newt = self.exoiris.data[i].time
             if "JWST" in self.exoiris.data[i].name:
                 sl = self.exoiris._wa.lcslices[i]
-                white_systematics = ffit[sl] - fmod[sl]
+                white_systematics = self.exoiris._wa.ofluxa[sl] - fmod[sl]
+                # white_systematics = ffit[sl] - fmod[sl]
                 white_systematics -= np.mean(white_systematics)
                 white_systematics /= np.std(white_systematics) 
                 self.exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
@@ -307,16 +308,23 @@ class ReLic:
         else:
             checkpoint_file = None
 
-        sampler = DynamicNestedSampler( 
-            loglikelihood,
-            prior_transform,
-            len(self.exoiris._tsa.ps), 
-            pool=pool,
-            nlive=nlivepoints, 
-            bound=bound,
-            sample=sample,
-            queue_size=queue_size, 
-        ) 
+        resume = self.cfg["SAMPLER"].get("resume", False)
+        if resume:
+            if checkpoint_file is not None:
+                sampler = DynamicNestedSampler.restore(checkpoint_file, pool=pool)
+            else:
+                raise ValueError("`resume` is True but no `checkpoint_file` specified in config.")
+        else:
+            sampler = DynamicNestedSampler( 
+                loglikelihood,
+                prior_transform,
+                len(self.exoiris._tsa.ps), 
+                pool=pool,
+                nlive=nlivepoints, 
+                bound=bound,
+                sample=sample,
+                queue_size=queue_size, 
+            ) 
 
         sampler.run_nested(
             dlogz_init=self.cfg["SAMPLER"].get("dlogz_init", 0.1),
@@ -324,7 +332,7 @@ class ReLic:
             maxiter_init=self.cfg["SAMPLER"].get("maxiter_init", None),
             maxiter_batch=self.cfg["SAMPLER"].get("maxiter_batch", None),
             maxbatch=self.cfg["SAMPLER"].get("maxbatch", None),
-            # resume=self.cfg["SAMPLER"].get("resume", False),
+            resume=self.cfg["SAMPLER"].get("resume", False),
             checkpoint_file=checkpoint_file,
             checkpoint_every=300,
         )

@@ -13,13 +13,13 @@ import tomllib
 import shutil
 
 from relic_core import ReLic
-from relic_atmosphere import TP6EqChem, TP6FreeChem, TP6FastChem
+from relic_atmosphere import *
 from relic_plots import *
 from relic_utils import generate_covariates, optimize_parallelization
 
 from multiprocessing import Pool
 
-DEFAULT_CFG = 'config/HD209458b-jwst-r100-tp6fastchem.toml'
+DEFAULT_CFG = 'config/WASP39b-PCA-r100-tp6fastchem.toml'
 
 if 'get_ipython' in globals():
     class Args:

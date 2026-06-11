@@ -440,6 +440,47 @@ class TP6FastChem(BaseAtmosphere):
             self._mass_frac_dict[n][:] = self._gas_mass_frac[:, i] + 1e-99
         
         return self._mass_frac_dict
+
+class TP6FastChem_SO2(TP6FastChem):
+    def __call__(self, pv: ndarray, return_contribution: bool = False):
+
+        atm_params      = pv[self._sl_atm]
+        ref_gravity     = atm_params[0] * self._cgravity # cgs
+        ref_pressure    = 10**atm_params[1] # bar
+        cloudtop_pbar   = 10**atm_params[2] # bar
+        cloud_fraction  = atm_params[3] 
+        haze_factor     = 10**atm_params[4] 
+
+        temperatures = tp6madhu(self.pressures_bar, *atm_params[5:10]) # ascending
+        temperatures = temperatures.clip(100, 3400)  
+ 
+        metallicity = 10**atm_params[10]
+        co_ratios = atm_params[11] 
+        x_so2 = 10**atm_params[12]
+ 
+        mass_fractions = self.get_mass_fractions(metallicity, co_ratios, temperatures)
+        if mass_fractions == -1:
+            return zeros_like(self.wavelengths) # capture and return null values
+ 
+        mass_fractions['SO2'][:] = x_so2
+ 
+        _, transit_radius_cm, _add = self.radtrans.calculate_transit_radii(
+            temperatures                = temperatures,
+            mass_fractions              = mass_fractions,
+            mean_molar_masses           = self.mmw,
+            reference_gravity           = ref_gravity,
+            planet_radius               = self.planet_radius_cm,
+            reference_pressure          = ref_pressure,
+            opaque_cloud_top_pressure   = cloudtop_pbar,
+            haze_factor                 = haze_factor,
+            cloud_fraction              = cloud_fraction,
+            return_contribution         = return_contribution,
+        ) 
+        transit_depths = (transit_radius_cm / self.star_radius_cm)**2 
+
+        if not return_contribution:
+            return transit_depths
+        return transit_depths, _add
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

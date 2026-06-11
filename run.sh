@@ -7,8 +7,9 @@ set -e
 # python relic_benchmark.py -c "config/HD209458b_benchmark-r100.toml"
 # python relic_benchmark.py -c "config/HD209458b_benchmark-pix.toml"
 
-nohup python relic_exec_ns.py -c "config/HD209458b-jwst-r100-tp6fastchem.toml" > output-r100.log 2>&1 &
-nohup python relic_exec_ns.py -c "config/HD209458b-jwst-pix-tp6fastchem.toml" > output-pix.log 2>&1 &
+nohup python relic_exec_ns.py -c "config/WASP39b-woPCA-r100-tp6fastchem.toml" > output-woPCA.log 2>&1 &
+nohup python relic_exec_ns.py -c "config/WASP39b-PCA-r100-tp6fastchem.toml" > output-PCA.log 2>&1 &
+nohup python relic_exec_ns.py -c "config/WASP39b-PCA-r100-tp6fastchem+SO2.toml" > output-PCA+SO2.log 2>&1 &
 
 # python relic_exec_ns.py -c "config/HD209458b-jwst-r100-gp-tp6eqc.toml"
 

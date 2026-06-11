@@ -1,0 +1,67 @@
+nohup: ignoring input
+Configuration file loaded: config/WASP39b-PCA-r100-tp6fastchem+SO2.toml
+Loading Radtrans opacities...
+ Loading line opacities of species 'H2O' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/H2O/1H2-16O/1H2-16O__POKAZATEL.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Loading line opacities of species 'CO' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/CO/12C-16O/12C-16O__Li2015.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Loading line opacities of species 'CO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/CO2/12C-16O2/12C-16O2__UCL-4000.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Loading line opacities of species 'CH4' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/CH4/12C-1H4/12C-1H4__MM.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Loading line opacities of species 'NH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/NH3/14N-1H3/14N-1H3__CoYuTe.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Loading line opacities of species 'C2H2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/C2H2/12C2-1H2/12C2-1H2__aCeTY.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Loading line opacities of species 'HCN' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/HCN/1H-12C-14N/1H-12C-14N__Harris.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Loading line opacities of species 'SiO' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/SiO/28Si-16O/28Si-16O__SiOUVenIR.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Loading line opacities of species 'H2S' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/H2S/1H2-32S/1H2-32S__AYT2.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Loading line opacities of species 'PH3' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/PH3/31P-1H3/31P-1H3__SAlTY.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Loading line opacities of species 'SO2' from file '/home/ubuntu/petitRADTRANS/input_data/opacities/lines/line_by_line/SO2/32S-16O2/32S-16O2__ExoAmes.R15000_0.3-50mu.xsec.TauREx.h5'... Done.
+ Successfully loaded all line opacities
+ Loading CIA opacities for H2--H2 from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--H2/H2--H2-NatAbund/H2--H2-NatAbund__BoRi.R831_0.6-250mu.ciatable.petitRADTRANS.h5'... Done.
+ Loading CIA opacities for H2--He from file '/home/ubuntu/petitRADTRANS/input_data/opacities/continuum/collision_induced_absorptions/H2--He/H2--He-NatAbund/H2--He-NatAbund__BoRi.DeltaWavenumber2_0.5-500mu.ciatable.petitRADTRANS.h5'... Done.
+ Successfully loaded all CIA opacities
+Successfully loaded all opacities
+
+Loading data: 
+  /home/ubuntu/work/relic/data/WASP39b/WASP39b_NIRSpec_NRS1_PCA1.h5
+  /home/ubuntu/work/relic/data/WASP39b/WASP39b_NIRSpec_NRS2_PCA1.h5
+Loaded dataset #0 with nwl=1442, nt=464.
+  Rebinned to resolution R=100. New nwl=31.
+Loaded dataset #1 with nwl=1995, nt=464.
+  Rebinned to resolution R=100. New nwl=30.
+
+Initializing LDTk model... It takes 1 -- 30 minutes. Be patient!
+
+Initializing ExoIris model...
+Updating parameters and priors...
+  0 |G| rho            N(μ = 1.555, σ = 0.08)                   [    0.00 ..      inf]
+  1 |G| p              N(μ = 4.0552941, σ = 3.4e-06)            [    0.00 ..      inf]
+  2 |G| b              N(μ = 0.5, σ = 0.1)                      [    0.00 ..      inf]
+  3 |G| tc_00          U(a = 2455342.9, b = 2455343.0)          [    -inf ..      inf]
+  4 |G| teff           N(μ = 5485.0, σ = 76.0)                  [ 5200.00 ..  5800.00]
+  5 |G| logg           N(μ = 4.453, σ = 0.14)                   [    4.00 ..     5.00]
+  6 |G| metal          N(μ = 0.01, σ = 0.09)                    [   -1.00 ..     0.50]
+  7 |G| sigma_m_00     U(a = 0.2, b = 5)                        [    0.00 ..      inf]
+  8 |G| sigma_m_01     U(a = 0.2, b = 5)                        [    0.00 ..      inf]
+  9 |G| mp             N(μ = 0.281, σ = 0.032)                  [    0.12 ..     0.44]
+ 10 |G| ref_p          U(a = -8, b = 2)                         [    -inf ..      inf]
+ 11 |G| cloud_p        U(a = -8, b = 2)                         [    -inf ..      inf]
+ 12 |G| cloud_f        U(a = 0.0, b = 1.0)                      [    0.00 ..     1.00]
+ 13 |G| haze_f         U(a = -3, b = 3)                         [    -inf ..      inf]
+ 14 |G| temp0          U(a = 100, b = 3000)                     [    -inf ..      inf]
+ 15 |G| lga1           U(a = -1, b = 1)                         [    -inf ..      inf]
+ 16 |G| lga2           U(a = -1, b = 1)                         [    -inf ..      inf]
+ 17 |G| lgp1           U(a = -8, b = 0)                         [    -inf ..      inf]
+ 18 |G| lgp2           U(a = -8, b = 0)                         [    -inf ..      inf]
+ 19 |G| m2h            U(a = -3, b = 3)                         [    -inf ..      inf]
+ 20 |G| c2o            U(a = 0.001, b = 2)                      [    -inf ..      inf]
+ 21 |G| x_so2          U(a = -12, b = -1)                       [    -inf ..      inf]
+Initialization complete.
+Fitting white light curves to validate covariates...
+Global optimisation:   0%|          | 0/1000 [00:00<?, ?it/s]Global optimisation:   0%|          | 1/1000 [00:09<2:41:29,  9.70s/it]Global optimisation:   2%|▏         | 23/1000 [00:09<04:56,  3.29it/s] Global optimisation:   4%|▍         | 41/1000 [00:09<02:19,  6.87it/s]Global optimisation:   6%|▌         | 59/1000 [00:10<01:20, 11.73it/s]Global optimisation:   8%|▊         | 78/1000 [00:10<00:49, 18.57it/s]Global optimisation:  10%|▉         | 97/1000 [00:10<00:32, 27.48it/s]Global optimisation:  12%|█▏        | 115/1000 [00:10<00:23, 38.00it/s]Global optimisation:  13%|█▎        | 134/1000 [00:10<00:16, 51.51it/s]Global optimisation:  15%|█▌        | 152/1000 [00:10<00:12, 66.09it/s]Global optimisation:  17%|█▋        | 171/1000 [00:10<00:09, 83.04it/s]Global optimisation:  19%|█▉        | 190/1000 [00:10<00:08, 100.12it/s]Global optimisation:  21%|██        | 209/1000 [00:10<00:06, 115.52it/s]Global optimisation:  23%|██▎       | 227/1000 [00:10<00:06, 127.28it/s]Global optimisation:  24%|██▍       | 245/1000 [00:11<00:05, 136.65it/s]Global optimisation:  26%|██▋       | 263/1000 [00:11<00:05, 143.42it/s]Global optimisation:  28%|██▊       | 280/1000 [00:11<00:04, 148.85it/s]Global optimisation:  30%|██▉       | 297/1000 [00:11<00:04, 151.86it/s]Global optimisation:  31%|███▏      | 314/1000 [00:11<00:04, 152.46it/s]Global optimisation:  33%|███▎      | 331/1000 [00:11<00:04, 152.86it/s]Global optimisation:  35%|███▍      | 347/1000 [00:11<00:04, 153.11it/s]Global optimisation:  36%|███▋      | 363/1000 [00:11<00:04, 153.08it/s]Global optimisation:  38%|███▊      | 379/1000 [00:11<00:04, 152.68it/s]Global optimisation:  40%|███▉      | 395/1000 [00:12<00:03, 153.39it/s]Global optimisation:  41%|████      | 411/1000 [00:12<00:03, 152.94it/s]Global optimisation:  43%|████▎     | 427/1000 [00:12<00:03, 152.11it/s]Global optimisation:  44%|████▍     | 443/1000 [00:12<00:03, 152.23it/s]Global optimisation:  46%|████▌     | 459/1000 [00:12<00:03, 150.38it/s]Global optimisation:  48%|████▊     | 475/1000 [00:12<00:03, 151.33it/s]Global optimisation:  49%|████▉     | 491/1000 [00:12<00:03, 152.16it/s]Global optimisation:  51%|█████     | 507/1000 [00:12<00:03, 152.15it/s]Global optimisation:  51%|█████     | 511/1000 [00:12<00:12, 39.95it/s] 
+Covariates updated based on white light curve fit.
+A preview of white light curve fit saved as /home/ubuntu/work/relic/results/WASP39b/results-260611-PCA-r100-fastchem+SO2/white_fit.png.
+Running a quick test of posterior evaluation...
+lnprob = 1.431957e+05
+lnprob = -1.316639e+06
+lnprob = 1.317261e+05
+Test complete.
+Suggested n_live_points: 240 (rounded from 240)
+Suggested maxtasksperchild: 164
+0it [00:00, ?it/s]1it [00:16, 16.63s/it, batch: 0 | bound: 0 | nc: 1 | ncall: 1 | eff(%):  0.415 | loglstar:   -inf <   -inf <    inf | logz:   -inf +/-    nan | dlogz:    inf >  0.100]53it [00:24,  2.77it/s, batch: 0 | bound: 0 | nc: 2 | ncall: 61 | eff(%): 17.608 | loglstar:   -inf <   -inf <    inf | logz:   -inf +/-  2.674 | dlogz:    inf >  0.100]110it [05:49,  3.61s/it, batch: 0 | bound: 0 | nc: 3 | ncall: 141 | eff(%): 28.871 | loglstar:   -inf <   -inf <    inf | logz:   -inf +/-  2.674 | dlogz:    inf >  0.100]166it [06:03,  2.07s/it, batch: 0 | bound: 0 | nc: 2 | ncall: 233 | eff(%): 35.095 | loglstar:   -inf < -544696.568 <    inf | logz: -544703.432 +/-  2.675 | dlogz: 691215.285 >  0.100]219it [06:13,  1.34s/it, batch: 0 | bound: 0 | nc: 4 | ncall: 340 | eff(%): 37.759 | loglstar:   -inf < -333011.452 <    inf | logz: -333018.536 +/-  2.675 | dlogz: 476645.567 >  0.100]
