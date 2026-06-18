@@ -9,7 +9,7 @@ description = "ReLic: atmospheric Retrievals using spectral Light Curves"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "ReLic Developers"},
+    {name = "Chengzi Jiang"},
 ]
 keywords = ["exoplanets", "atmospheric-retrieval", "spectroscopy"]
 classifiers = [
@@ -35,7 +35,7 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/your-org/relic"
+Repository = "https://github.com/czjiang1125/ReLic"
 
 [tool.setuptools.packages.find]
 include = ["relic*"]
