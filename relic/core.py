@@ -10,9 +10,9 @@ from functools import reduce
 from numpy import array, squeeze, ndarray, asarray, isfinite, zeros, empty_like 
 from pytransit.param import UniformPrior as UP, NormalPrior as NP, GParameter   
 from typing import Callable, Literal, Tuple, Optional, Union
-from relic_atmosphere import BaseAtmosphere
-from relic_exoiris import ReLicExoIris 
-from relic_white import NewWhiteLPF
+from .atmosphere import BaseAtmosphere
+from .exoiris import ReLicExoIris 
+from .white import NewWhiteLPF
 from multiprocessing.pool import Pool
 from scipy.stats import norm, truncnorm
 from dynesty import DynamicNestedSampler

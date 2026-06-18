@@ -2,8 +2,8 @@ import corner
 import numpy as np
 import matplotlib.pyplot as pl
 import os 
-from relic_core import ReLic
-from relic_atmosphere import BaseAtmosphere
+from .core import ReLic
+from .atmosphere import BaseAtmosphere
 from numpy import ndarray, savetxt, where, diff, median, sqrt
 from astropy.visualization import ZScaleInterval
 from petitRADTRANS.physics import rebin_spectrum_bin, rebin_spectrum

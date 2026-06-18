@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=64.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "relic"
+version = "0.1.0"
+description = "ReLic: atmospheric Retrievals using spectral Light Curves"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "ReLic Developers"},
+]
+keywords = ["exoplanets", "atmospheric-retrieval", "spectroscopy"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+
+dependencies = [
+    "numpy",
+    "scipy",
+    "astropy",
+    "matplotlib",
+    "h5py",
+    "corner",
+    "pytransit",
+    "exoiris",
+    "petitRADTRANS",
+    "dynesty",
+    "celerite2",
+    "numba",
+    "mpi4py",
+    "pyfastchem",
+]
+
+[project.urls]
+Repository = "https://github.com/your-org/relic"
+
+[tool.setuptools.packages.find]
+include = ["relic*"]
+
+[tool.setuptools.package-data]
+relic = ["py.typed"]

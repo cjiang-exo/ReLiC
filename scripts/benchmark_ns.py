@@ -13,10 +13,10 @@ import numpy as np
 import tomllib     
 import shutil
 
-from relic_core import ReLic
-from relic_atmosphere import TP6EqChem as AtmosModel
-from relic_plots import *
-from relic_utils import generate_covariates, get_maxlike_estimates, print_elapsed_time, optimize_parallelization
+from relic.core import ReLic
+from relic.atmosphere import TP6EqChem as AtmosModel
+from relic.plots import *
+from relic.utils import generate_covariates, get_maxlike_estimates, print_elapsed_time, optimize_parallelization
  
 from multiprocessing import Pool
  

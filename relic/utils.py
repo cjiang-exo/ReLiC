@@ -7,7 +7,7 @@ from numpy import (any, array, asarray, concatenate, exp, float64, hstack,
 from numpy.polynomial import Chebyshev
 
 from petitRADTRANS.physics import rebin_spectrum_bin
-from relic_core import ReLic
+from .core import ReLic
 
 class SpectrumDownsampler:
     def __init__(self, wl_model: ndarray, wl_data: ndarray, wl_binwidths: ndarray, resolving_powers: ndarray, n_sigma=3):

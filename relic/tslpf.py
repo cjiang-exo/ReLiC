@@ -10,7 +10,7 @@ from pytransit.orbits import as_from_rhop, i_from_ba
 from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter   
 from typing import Literal, Tuple, Optional, Union
 
-from relic_atmosphere import BaseAtmosphere
+from .atmosphere import BaseAtmosphere
  
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1

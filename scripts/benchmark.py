@@ -11,11 +11,11 @@ os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'
 import argparse
 import numpy as np
 import tomllib    
-from relic_core import ReLic 
-from relic_atmosphere import TP6EqChem as AtmosModel
-from relic_plots import *
+from relic.core import ReLic 
+from relic.atmosphere import TP6EqChem as AtmosModel
+from relic.plots import *
 
-from relic_utils import generate_covariates, get_maxlike_estimates
+from relic.utils import generate_covariates, get_maxlike_estimates
 from multiprocessing import Pool   
 from numpy import inf
 

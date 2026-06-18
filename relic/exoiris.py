@@ -2,9 +2,9 @@ from multiprocessing import Pool
 from exoiris import ExoIris, TSData, TSDataGroup
 from numpy import array, floor, isfinite, unique, ndarray, squeeze
 from typing import Callable, Literal, Tuple, Optional, Union 
-from relic_tslpf import NewTSLPF
-from relic_white import NewWhiteLPF 
-from relic_atmosphere import BaseAtmosphere
+from .tslpf import NewTSLPF
+from .white import NewWhiteLPF 
+from .atmosphere import BaseAtmosphere
 
 class ReLicExoIris(ExoIris):
     def __init__(self, name: str, ldmodel, data: TSDataGroup | TSData,
