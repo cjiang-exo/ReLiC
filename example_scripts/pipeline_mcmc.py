@@ -13,7 +13,7 @@ import numpy as np
 import tomllib    
 from relic.core import ReLic 
 from relic.atmosphere import TP6EqChem as AtmosModel
-from relic.plots import *
+from relic.plots import PlotFigure
 
 from relic.utils import generate_covariates, get_maxlike_estimates
 from multiprocessing import Pool   
@@ -21,106 +21,87 @@ from numpy import inf
 
 DEFAULT_CFG = 'config/HD209458b_benchmark-r100.toml'
 
-if 'get_ipython' in globals():
-    class Args:
-        config = DEFAULT_CFG
-    py_args = Args()
-else:
+if 'get_ipython' in globals(): 
+    config = DEFAULT_CFG # use DEFAULT_CFG if running in Jupyter Notebook
+else: # for command line execution 
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', 
                         default=DEFAULT_CFG,
                         help="the input configuration file")
-    py_args = parser.parse_args()
-
-cfg = tomllib.load(open(py_args.config, 'rb'))
-os.makedirs(cfg["PATH"]["output_dir"], exist_ok=True)
-print(f"Configuration file loaded: {py_args.config}")
+    config = parser.parse_args().config
 
 #%% Initialization #############################################################
 
-atmos_model = AtmosModel(cfg) # user-defined
-
-relic = ReLic(atmos_model)
-
-print("Initialization complete.") 
+relic = ReLic(config)
+pfig  = PlotFigure(relic)
 
 #%% fit white light curves to validate the covariates ##########################
  
 jitters = []
 for i, rd in enumerate(relic.raw_data):
-    if "STIS" in relic.exoiris.data[i].name: # use the first two PCs
-        jitters.append(rd["detrend_vectors"][:, :2]) 
+    if "STIS" in relic.exoiris.data[i].name:
+        _jit = rd["pca_jitters"][:, :2]
+    elif "WFC3" in relic.exoiris.data[i].name:
+        _jit = rd["pca_jitters"][:, :2]
     else:
-        jitters.append(None) 
+        _jit = None
+    jitters.append(_jit)
+white_covariates = relic.generate_covariates(jitters)
+ 
+npools = relic.cfg["SAMPLER"]["npools"]
+with Pool(npools) as pool:
+    relic.fit_white(covariates=white_covariates, update_covariates=False, pool=pool)
 
-covariates = generate_covariates(relic, jitters)
-
-with Pool(cfg["SAMPLER"]["npools"]) as pool:
-    relic.fit_white(covariates=covariates, pool=pool)
-
-relic.update_covariates()
-
-plot_white(relic)
-
+pfig.plot_white()
 
 #%% test likelihood evaluation #################################################
 
-print("Running a quick test of posterior evaluation...")
-
-initial_population = relic.sample_from_prior(1)
-pp = relic.lnposterior(initial_population)
-print(f"lnprob = {pp:.6e}")
-
-initial_population = relic.sample_from_prior(3)
-pp = [relic.lnposterior(_p) for _p in initial_population]
-[print(f"lnprob = {_v:.6e}") for _v in pp]
-
-print("Test complete.")
-
+relic.run_test(3)
 
 #%% run DE optimization ########################################################
 
 def lnpostf(pv):
     ''' DON'T USE LAMBDA FUNCTION FOR THIS, 
     OTHERWISE IT CAUSES PICKLE ISSUES WITH MULTIPROCESSING '''
-    return relic.lnposterior(pv) 
+    return relic.lnposterior_mcmc(pv) 
 
-with Pool(cfg["SAMPLER"]["npools"]) as pool:
+with Pool(npools) as pool:
     relic.run_de(
-        niter  = cfg["SAMPLER"]["niter_de"], 
-        npop   = cfg["SAMPLER"]["nwalkers"],
+        niter  = relic.cfg["SAMPLER"]["niter_de"], 
+        npop   = relic.cfg["SAMPLER"]["nwalkers"],
         lnpost = lnpostf,  
         pool   = pool,  
     )   
 
 #%% run MCMC sampling ##########################################################
 
-with Pool(cfg["SAMPLER"]["npools"]) as pool:
+with Pool(npools) as pool:
     relic.run_mcmc(
-        niter   = cfg["SAMPLER"]["niter_mcmc"], 
+        niter   = relic.cfg["SAMPLER"]["niter_mcmc"], 
         lnpost  = lnpostf, 
         pool    = pool, 
     )
 
 
 #%% Post analysis and plotting #################################################
-relic.save_mcmc(overwrite=True, config_file=py_args.config)
+
+relic.save_mcmc(overwrite=True, config_file=config)
 
 """ Plot likelihood evolutions """
-plot_lnprob_evolution(relic, figname='lnprob.png', dpi=100, save=True)
+pfig.plot_mcmc_lnprob(figname='lnprob.png')
 
 """ Plot 2D fluxes and errors """
-plot_2dfluxes(relic, figname='fluxes.png', dpi=100, save=True)
+pfig.plot_2dfluxes(figname='fluxes.png')
 
 """ Plot limb darkening profiles """
-plot_ldprofiles(relic, figname='ldprofiles.png', dpi=100, save=True)
+pfig.plot_ldprofiles(figname='ldprofiles.png')
 
 """ Plot posterior distributions """
 maxlike_params = get_maxlike_estimates(relic)
-plot_corners(relic, truths=maxlike_params, figname='corners.pdf', save=True)
+pfig.plot_corners(truths=maxlike_params, figname='corners.pdf')
 
 """ Plot best-fit residuals """
-plot_residuals(relic, maxlike_params, figname='residuals.png', dpi=100, save=True)
+pfig.plot_residuals(maxlike_params, figname='residuals.png')
 
 print("Done!")
 # %%

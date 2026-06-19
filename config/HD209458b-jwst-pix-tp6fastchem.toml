@@ -1,9 +1,13 @@
 [PATH]
-input_file = [
-  "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
-  "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
+lightcurve_files = [
+  "/work/relic/data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
+  "/work/relic/data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260609-jwst-pix-fastchem/"
+spec_resolving_power_files = [  
+  "/work/relic/data/resolving_power/NIRCam.dat",
+  "/work/relic/data/resolving_power/NIRCam.dat",
+]
+output_dir = "/work/relic/results/HD209458b/results-260619-jwst-pix-fastchem/"
 
 [STAR]
 reference   = "2017AJ....153..136S"
@@ -78,7 +82,6 @@ lgp1        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p1", "log1
 lgp2        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p2", "log10bar"] 
 m2h         = ["UP", -3, 3, -inf, inf, "atmospheric metallicity", "log10"]
 c2o         = ["UP", 0.1, 2, -inf, inf, "C/O ratio", " "]
-
 
 [SAMPLER]
 method      = "dynesty" 

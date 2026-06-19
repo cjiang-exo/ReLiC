@@ -183,8 +183,7 @@ class NewTSLPF(TSLPF):
         if not all(transpec>0):
             return [] # capture and reject
         
-        k = [ rebin_spectrum_bin(self.wl_model, transpec, data_wl,
-            bin_widths=self.bin_widths[i])**0.5
+        k = [ self.downsampler(transpec)**0.5
             for i, data_wl in enumerate(self.wavelengths)
         ]
 

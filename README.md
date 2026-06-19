@@ -7,19 +7,18 @@ A Python package for exoplanet atmospheric retrieval using spectral light curves
 ```
 relic/                           # Python package (source code)
 ├── __init__.py                  # Package exports
-├── core.py                      # Main ReLic retrieval class
+├── core.py                      # Main ReLic retrieval class + ExoIris integration (ReLicExoIris)
 ├── atmosphere.py                # Atmospheric models (BaseAtmosphere, TP6EqChem, etc.)
-├── exoiris.py                   # ExoIris integration (ReLicExoIris)
 ├── tslpf.py                     # Time-series LPF (NewTSLPF)
 ├── white.py                     # White light curve fitting (NewWhiteLPF)
 ├── utils.py                     # Utilities (SpectrumDownsampler, covariates, etc.)
 ├── physics.py                   # Physics helpers (calc_teq)
 └── plots.py                     # Plotting functions
-scripts/                         # Executable entry-point scripts
-├── exec.py                      # MCMC retrieval runner
-├── exec_ns.py                   # Nested-sampling retrieval runner
-├── benchmark.py                 # Benchmark script (MCMC)
+example_scripts/                 # Executable entry-point scripts
+├── benchmark_mcmc.py            # Benchmark script (MCMC)
 ├── benchmark_ns.py              # Benchmark script (nested sampling)
+├── pipeline_mcmc.py             # Pipeline script (MCMC)
+├── pipeline_ns.py               # Pipeline script (nested sampling)
 └── run.sh                       # Launch script for batch runs
 config/                          # Configuration files (TOML/JSON)
 tests/                           # Test directory
@@ -40,10 +39,10 @@ Run a retrieval from the project root:
 
 ```bash
 # MCMC retrieval
-python scripts/exec.py -c config/HD209458b-benchmark-r100.toml
+python example_scripts/benchmark_mcmc.py -c config/HD209458b-benchmark-r100.toml
 
 # Nested-sampling retrieval
-python scripts/exec_ns.py -c config/WASP39b-PCA-r100-tp6fastchem.toml
+python example_scripts/benchmark_ns.py -c config/WASP39b-PCA-r100-tp6fastchem.toml
 
 # Batch launch
 bash scripts/run.sh

@@ -1,6 +1,8 @@
 """ReLic: atmospheric Retrievals using spectral Light Curves."""
 
-from .core import ReLic
+from .core import ReLic, ReLicExoIris
+from .tslpf import NewTSLPF
+from .white import NewWhiteLPF
 from .atmosphere import (
     BaseAtmosphere,
     IsothermalEqChem,
@@ -12,9 +14,6 @@ from .atmosphere import (
     GuillotEQChem,
     tp6madhu,
 )
-from .exoiris import ReLicExoIris
-from .tslpf import NewTSLPF
-from .white import NewWhiteLPF
 from .utils import (
     generate_covariates,
     get_maxlike_estimates,
@@ -25,18 +24,13 @@ from .utils import (
     SpectrumDownsampler,
 )
 from .physics import calc_teq
-from .plots import (
-    plot_white,
-    plot_2dfluxes,
-    plot_residuals,
-    plot_corners,
-    plot_ldprofiles,
-    plot_lnprob_evolution,
-    plot_transmission_spectra,
-)
+from .plots import PlotFigure
 
 __all__ = [
     "ReLic",
+    "ReLicExoIris",
+    "NewTSLPF",
+    "NewWhiteLPF",
     "BaseAtmosphere",
     "IsothermalEqChem",
     "IsothermalFreeChem",
@@ -46,9 +40,6 @@ __all__ = [
     "TP6FastChem_SO2",
     "GuillotEQChem",
     "tp6madhu",
-    "ReLicExoIris",
-    "NewTSLPF",
-    "NewWhiteLPF",
     "generate_covariates",
     "get_maxlike_estimates",
     "print_elapsed_time",
@@ -57,11 +48,5 @@ __all__ = [
     "replace_outliers",
     "SpectrumDownsampler",
     "calc_teq",
-    "plot_white",
-    "plot_2dfluxes",
-    "plot_residuals",
-    "plot_corners",
-    "plot_ldprofiles",
-    "plot_lnprob_evolution",
-    "plot_transmission_spectra",
+    "PlotFigure",
 ]

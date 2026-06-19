@@ -1,13 +1,10 @@
 import numba
 from astropy.stats import sigma_clip
-from mpi4py import MPI
 from numpy import (any, array, asarray, concatenate, exp, float64, hstack,
                    int64, interp, log, log2, ndarray, round, searchsorted,
                    sqrt, sum as np_sum, zeros, zeros_like)
 from numpy.polynomial import Chebyshev
-
-from petitRADTRANS.physics import rebin_spectrum_bin
-from .core import ReLic 
+from petitRADTRANS.physics import rebin_spectrum_bin 
 
 class SpectrumDownsampler:
     def __init__(self, wl_model: ndarray, wl_data: ndarray, wl_binwidths: ndarray, resolving_powers: ndarray | None = None, n_sigma=3):
@@ -32,20 +29,21 @@ class SpectrumDownsampler:
         self.convolved_flux = zeros_like(wl_model)
         self.rebinned_flux = zeros_like(wl_data)
 
-        if resolving_powers is None: # no convolution, just rebinning
-            self.__call__ = self.rebin
-        else: # precompute convolution kernels
+        if resolving_powers is None:  # no convolution, just rebinning
+            self._convolve = False
+        else:  # precompute convolution kernels
+            self._convolve = True
             self.rp_data = asarray(resolving_powers)
             self.rp_model = interp(wl_model, wl_data, resolving_powers)
 
             sigmas = wl_model / self.rp_model / (2 * sqrt(2 * log(2)))
             half_widths = n_sigma * sigmas
-    
+
             n_wl = len(wl_model)
             self.slice_starts = zeros(n_wl, dtype=int64)
             self.slice_ends = zeros(n_wl, dtype=int64)
             kernel_list = []
-            self.kernel_offsets = zeros(n_wl + 1, dtype=int64) 
+            self.kernel_offsets = zeros(n_wl + 1, dtype=int64)
 
             for i, (wl, hw, sigma) in enumerate(zip(wl_model, half_widths, sigmas)):
                 lo, hi = wl - hw, wl + hw
@@ -60,28 +58,32 @@ class SpectrumDownsampler:
                 self.kernel_offsets[i + 1] = self.kernel_offsets[i] + len(kernel)
 
             self.kernels_flat = concatenate(kernel_list).astype(float64)
-            self.__call__ = self.convolve_and_rebin
 
-    def convolve(self, model_flux: ndarray):
-        _convolve_numba(
-            asarray(model_flux, dtype=float64),
-            self.slice_starts, self.slice_ends,
-            self.kernels_flat, self.kernel_offsets,
-            self.convolved_flux,
-        )
-        return self.convolved_flux
+    def convolve(self, model_flux: ndarray): 
+        if self._convolve:
+            _convolve_numba(
+                model_flux,
+                self.slice_starts, self.slice_ends,
+                self.kernels_flat, self.kernel_offsets,
+                self.convolved_flux,
+            ) 
+            return self.convolved_flux
+        return model_flux
 
     def rebin(self, model_flux: ndarray):
         self.rebinned_flux[:] = rebin_spectrum_bin(self.wl_model, model_flux, self.wl_data, self.wl_binwidths)
         return self.rebinned_flux
 
     def convolve_and_rebin(self, model_flux: ndarray):
-        _convolve_numba(
-            asarray(model_flux, dtype=float64),
-            self.slice_starts, self.slice_ends,
-            self.kernels_flat, self.kernel_offsets,
-            self.convolved_flux,
-        )
+        if self._convolve:
+            _convolve_numba(
+                model_flux,
+                self.slice_starts, self.slice_ends,
+                self.kernels_flat, self.kernel_offsets,
+                self.convolved_flux,
+            )
+        else:
+            self.convolved_flux[:] = model_flux
         self.rebinned_flux[:] = rebin_spectrum_bin(self.wl_model, self.convolved_flux, self.wl_data, self.wl_binwidths)
         return self.rebinned_flux
 
@@ -128,29 +130,36 @@ def replace_outliers(time, flux, ferr, sigma=8):
             ferr[i] = interp(time, x, ye) 
     return flux, ferr
 
-def generate_covariates(relic: ReLic, jitters: list) -> list[ndarray]:
+def generate_covariates(relic, jitters: list) -> list[ndarray]:
     period_hst = 95.42 / 1440.0
     _standardize = lambda x: 2 * (x - x.min()) / (x.max() - x.min()) - 1 # to [-1, 1]
 
     covariates = []
     for i, d in enumerate(relic.exoiris._tsa.data):
+        n_baseline = relic.exoiris.data[i].n_baseline
         if ("HST" in d.name) or ("STIS" in d.name) or ("WFC3" in d.name): 
             phases = (d.time - d.time[0]) % period_hst # folded phases
             phases[phases >= 0.75*period_hst] -= period_hst
             x = _standardize(phases)
-            _covs = array([Chebyshev.basis(deg)(x) for deg in range(5)]).T
-            if "STIS" in d.name:
-                _covs = hstack((_covs, jitters[i])) 
-        else:
+            _covs = array([Chebyshev.basis(deg)(x) for deg in range(n_baseline+1)]).T
+            if jitters[i] is not None:
+                _covs = hstack([_covs, _standardize(jitters[i])]) 
+        else: # JWST
             x = _standardize(d.time)
-            n_baseline = relic.exoiris.data[i].n_baseline
-            _covs = array([x**j for j in range(n_baseline+1)]).T 
+            _covs = array([Chebyshev.basis(deg)(x) for deg in range(n_baseline+1)]).T 
         covariates.append(_covs)
     return covariates
 
-def print_info(comm: MPI.Comm, string: str):
+def print_info(comm, string: str):
     """
     Print something when using mpiexec
+
+    Parameters
+    ----------
+    comm : mpi4py.MPI.Comm
+        MPI communicator.
+    string : str
+        String to print.
     """
     if comm.Get_rank() == 0:
         print(string, flush=True)
@@ -178,7 +187,7 @@ def print_elapsed_time(elapsed_time:float):
     print("Time elapsed: " + output_str)
     return output_str
 
-def get_maxlike_estimates(relic: ReLic):
+def get_maxlike_estimates(relic):
     try:
         lnp = relic.exoiris.sampler.get_log_prob() 
         postsamples = relic.exoiris._tsa.sampler.flatchain 
