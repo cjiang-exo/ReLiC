@@ -181,7 +181,7 @@ def plot_lnprob_evolution(relic: ReLic, figname: str = "lnprob.png", dpi:int=100
 def plot_transmission_spectra(relic: ReLic, maxlike_param: ndarray, samples: ndarray=None, samplesize:int=100, fiducial_resolution:int=100, logscalex:bool=False, figname:str="ts_preview.png", dpi:int=100, save:bool=True):
     tsa = relic.exoiris._tsa
     trans_spec = 100 * relic.atmos_model(maxlike_param)
-    ts_rebin_best = [ rebin_spectrum_bin(tsa.model_wl, trans_spec, data_wl,
+    ts_rebin_best = [ rebin_spectrum_bin(tsa.wl_model, trans_spec, data_wl,
             bin_widths=tsa.bin_widths[i]) for i, data_wl in enumerate(tsa.wavelengths)
         ]
     
@@ -190,7 +190,7 @@ def plot_transmission_spectra(relic: ReLic, maxlike_param: ndarray, samples: nda
     len_wl = np.log(wl_max / wl_min) * fiducial_resolution
     len_wl = int(np.round(len_wl))
     wl_fiducial = np.logspace(np.log10(wl_min), np.log10(wl_max), len_wl)
-    ts_rebin_fiducial = rebin_spectrum(tsa.model_wl, trans_spec, wl_fiducial)
+    ts_rebin_fiducial = rebin_spectrum(tsa.wl_model, trans_spec, wl_fiducial)
 
     fig, ax = pl.subplots(1,1,figsize=(6,4))
 
@@ -199,7 +199,7 @@ def plot_transmission_spectra(relic: ReLic, maxlike_param: ndarray, samples: nda
     if samples is not None:
         for _isample in range(samplesize):
             trans_spec_sample = 100 * relic.atmos_model(samples[_isample])
-            ts_rebin_sample = [ rebin_spectrum_bin(tsa.model_wl, trans_spec_sample, data_wl,
+            ts_rebin_sample = [ rebin_spectrum_bin(tsa.wl_model, trans_spec_sample, data_wl,
                     bin_widths=tsa.bin_widths[i]) for i, data_wl in enumerate(tsa.wavelengths)
                 ]
             for i, data_wl in enumerate(tsa.wavelengths):

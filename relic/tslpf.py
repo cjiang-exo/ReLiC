@@ -11,6 +11,7 @@ from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP,
 from typing import Literal, Tuple, Optional, Union
 
 from .atmosphere import BaseAtmosphere
+from .utils import SpectrumDownsampler
  
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -21,7 +22,7 @@ NOISE_MODELS = dict(white=NM_WHITE_PROFILED, white_profiled=NM_WHITE_PROFILED, w
 class NewTSLPF(TSLPF):
 
     def __init__(self, runner, name: str, ldmodel, data: TSDataGroup, 
-        atmos_model: BaseAtmosphere, tmpars = None, circular_orbit: bool = True, 
+        atmos_model: BaseAtmosphere, resolving_powers: ndarray = None, tmpars = None, circular_orbit: bool = True, 
         noise_model: Literal["white_profiled", "white_marginalized", 
         "fixed_gp", "free_gp"] = 'white_profiled'):
 
@@ -29,8 +30,9 @@ class NewTSLPF(TSLPF):
         super().__init__(runner, name, ldmodel, data, tmpars=tmpars, noise_model=noise_model)
  
         self.atmos_model    = atmos_model
-        self.model_wl       = atmos_model.wavelengths
+        self.wl_model       = atmos_model.wavelengths
         self.bin_widths     = self._get_binwidths(data) 
+        self.downsampler    = SpectrumDownsampler(self.wl_model, data.wavelengths, self.bin_widths, resolving_powers)
 
     def _get_binwidths(self, data: TSDataGroup) -> list[ndarray]:       
         bin_widths = [d._wl_r_edges - d._wl_l_edges for d in data]
@@ -181,7 +183,7 @@ class NewTSLPF(TSLPF):
         if not all(transpec>0):
             return [] # capture and reject
         
-        k = [ rebin_spectrum_bin(self.model_wl, transpec, data_wl,
+        k = [ rebin_spectrum_bin(self.wl_model, transpec, data_wl,
             bin_widths=self.bin_widths[i])**0.5
             for i, data_wl in enumerate(self.wavelengths)
         ]

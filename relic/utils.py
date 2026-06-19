@@ -7,10 +7,10 @@ from numpy import (any, array, asarray, concatenate, exp, float64, hstack,
 from numpy.polynomial import Chebyshev
 
 from petitRADTRANS.physics import rebin_spectrum_bin
-from .core import ReLic
+from .core import ReLic 
 
 class SpectrumDownsampler:
-    def __init__(self, wl_model: ndarray, wl_data: ndarray, wl_binwidths: ndarray, resolving_powers: ndarray, n_sigma=3):
+    def __init__(self, wl_model: ndarray, wl_data: ndarray, wl_binwidths: ndarray, resolving_powers: ndarray | None = None, n_sigma=3):
         """ 
         Parameters
         ----------
@@ -28,36 +28,41 @@ class SpectrumDownsampler:
         self.wl_model = asarray(wl_model)
         self.wl_data = asarray(wl_data)
         self.wl_binwidths = asarray(wl_binwidths)
-        self.rp_data = asarray(resolving_powers)
-        self.rp_model = interp(wl_model, wl_data, resolving_powers)
-
-        sigmas = wl_model / self.rp_model / (2 * sqrt(2 * log(2)))
-        half_widths = n_sigma * sigmas
- 
-        n_wl = len(wl_model)
-        self.slice_starts = zeros(n_wl, dtype=int64)
-        self.slice_ends = zeros(n_wl, dtype=int64)
-        kernel_list = []
-        self.kernel_offsets = zeros(n_wl + 1, dtype=int64) 
-
-        for i, (wl, hw, sigma) in enumerate(zip(wl_model, half_widths, sigmas)):
-            lo, hi = wl - hw, wl + hw
-            start = searchsorted(wl_model, lo, side='left')
-            end = searchsorted(wl_model, hi, side='right')
-            self.slice_starts[i] = start
-            self.slice_ends[i] = end
-            sub_wl = wl_model[start:end] - wl
-            kernel = exp(-0.5 * (sub_wl / sigma) ** 2)
-            kernel /= kernel.sum()
-            kernel_list.append(kernel)
-            self.kernel_offsets[i + 1] = self.kernel_offsets[i] + len(kernel)
-
-        self.kernels_flat = concatenate(kernel_list).astype(float64)
 
         self.convolved_flux = zeros_like(wl_model)
         self.rebinned_flux = zeros_like(wl_data)
 
-    def convolve(self, model_flux):
+        if resolving_powers is None: # no convolution, just rebinning
+            self.__call__ = self.rebin
+        else: # precompute convolution kernels
+            self.rp_data = asarray(resolving_powers)
+            self.rp_model = interp(wl_model, wl_data, resolving_powers)
+
+            sigmas = wl_model / self.rp_model / (2 * sqrt(2 * log(2)))
+            half_widths = n_sigma * sigmas
+    
+            n_wl = len(wl_model)
+            self.slice_starts = zeros(n_wl, dtype=int64)
+            self.slice_ends = zeros(n_wl, dtype=int64)
+            kernel_list = []
+            self.kernel_offsets = zeros(n_wl + 1, dtype=int64) 
+
+            for i, (wl, hw, sigma) in enumerate(zip(wl_model, half_widths, sigmas)):
+                lo, hi = wl - hw, wl + hw
+                start = searchsorted(wl_model, lo, side='left')
+                end = searchsorted(wl_model, hi, side='right')
+                self.slice_starts[i] = start
+                self.slice_ends[i] = end
+                sub_wl = wl_model[start:end] - wl
+                kernel = exp(-0.5 * (sub_wl / sigma) ** 2)
+                kernel /= kernel.sum()
+                kernel_list.append(kernel)
+                self.kernel_offsets[i + 1] = self.kernel_offsets[i] + len(kernel)
+
+            self.kernels_flat = concatenate(kernel_list).astype(float64)
+            self.__call__ = self.convolve_and_rebin
+
+    def convolve(self, model_flux: ndarray):
         _convolve_numba(
             asarray(model_flux, dtype=float64),
             self.slice_starts, self.slice_ends,
@@ -66,11 +71,11 @@ class SpectrumDownsampler:
         )
         return self.convolved_flux
 
-    def rebin(self, model_flux):
+    def rebin(self, model_flux: ndarray):
         self.rebinned_flux[:] = rebin_spectrum_bin(self.wl_model, model_flux, self.wl_data, self.wl_binwidths)
         return self.rebinned_flux
 
-    def convolve_and_rebin(self, model_flux):
+    def convolve_and_rebin(self, model_flux: ndarray):
         _convolve_numba(
             asarray(model_flux, dtype=float64),
             self.slice_starts, self.slice_ends,
@@ -86,15 +91,15 @@ def _convolve_numba(model_flux, slice_starts, slice_ends, kernels_flat, kernel_o
     
     Parameters
     ----------
-    model_flux : np.ndarray (1D, float64)
+    model_flux : ndarray (1D, float64)
         High-resolution model flux.
-    slice_starts, slice_ends : np.ndarray (1D, int64)
+    slice_starts, slice_ends : ndarray (1D, int64)
         Start (inclusive) and end (exclusive) slice indices for each kernel window.
-    kernels_flat : np.ndarray (1D, float64)
+    kernels_flat : ndarray (1D, float64)
         All kernels concatenated into a single flat array.
-    kernel_offsets : np.ndarray (1D, int64)
+    kernel_offsets : ndarray (1D, int64)
         Offset into kernels_flat for each kernel; length = n_kernels + 1.
-    convolved_flux : np.ndarray (1D, float64)
+    convolved_flux : ndarray (1D, float64)
         Pre-allocated output array.
     """
     n = len(slice_starts)

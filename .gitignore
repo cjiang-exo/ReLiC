@@ -20,6 +20,10 @@ venv/
 *.png
 *.h5
 output*/
+plots/
+tests/
+results/
+data/
 
 # OS
 .DS_Store
