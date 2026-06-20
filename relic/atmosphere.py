@@ -2,10 +2,12 @@
 This is where users define their own atmospheric models.
 """
 
-from astropy import constants as const 
-from numpy import array, copy, ones, ones_like, full_like, logspace, ndarray, where, ndarray, log, empty_like, convolve, pad, zeros_like, sort, zeros, isnan
+import os
+
+from astropy import constants as const
+from numpy import array, ones, full_like, logspace, ndarray, where, log, empty_like, convolve, pad, zeros_like, zeros
 from petitRADTRANS.physical_constants import m_jup, r_jup_mean, r_sun, G as g_const
-from petitRADTRANS.radtrans import Radtrans 
+from petitRADTRANS.radtrans import Radtrans
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
 from petitRADTRANS.chemistry.utils import compute_mean_molar_masses
 from petitRADTRANS.physics import temperature_profile_function_guillot_global as get_tprofile  
@@ -328,12 +330,15 @@ class TP6FastChem(BaseAtmosphere):
         self.star_radius_cm   = cfg["STAR"]["radius_rsun"][0] * r_sun 
         self._cgravity        = g_const * m_jup / self.planet_radius_cm**2   
         
-        self.fastchem = fc.FastChem(
-            cfg["FASTCHEM"]["element_abundances"],
-            cfg["FASTCHEM"]["logk"],
-            cfg["FASTCHEM"].get("logk_condensates", "none"),
-            0
-        )
+        if os.path.exists(cfg["FASTCHEM"]["logk"]) and os.path.exists(cfg["FASTCHEM"]["element_abundances"]):
+            self.fastchem = fc.FastChem(
+                cfg["FASTCHEM"]["element_abundances"],
+                cfg["FASTCHEM"]["logk"],
+                cfg["FASTCHEM"].get("logk_condensates", "none"),
+                0
+            )
+        else:
+            raise FileNotFoundError("FASTCHEM input files not found. Please check the paths in the configuration file.")
         self.fastchem_output = fc.FastChemOutput() 
         self.fastchem_input = fc.FastChemInput()
         self.fastchem_input.pressure = sorted(self.pressures_bar)[::-1] # descending 

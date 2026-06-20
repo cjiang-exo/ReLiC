@@ -11,11 +11,11 @@ os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'
 import argparse
 import numpy as np
 import tomllib    
-from relic_core import ReLic 
-from relic_atmosphere import TP6EqChem as AtmosModel
-from relic_plots import *
+from relic.core import ReLic 
+from relic.atmosphere import TP6EqChem as AtmosModel
+from relic.plots import PlotFigure
 
-from relic_utils import generate_covariates, get_maxlike_estimates
+from relic.utils import generate_covariates, get_maxlike_estimates
 from multiprocessing import Pool   
 from numpy import inf
 
@@ -80,7 +80,7 @@ with Pool(cfg["SAMPLER"]["npools"]) as pool:
 
 relic.update_covariates()
 
-plot_white(relic)
+PlotFigure(relic).plot_white()
 
 
 #%% test likelihood evaluation #################################################
@@ -88,11 +88,11 @@ plot_white(relic)
 print("Running a quick test of posterior evaluation...")
 
 initial_population = relic.sample_from_prior(1)
-pp = relic.lnposterior(initial_population)
+pp = relic.lnposterior_mcmc(initial_population)
 print(f"lnprob = {pp:.6e}")
 
 initial_population = relic.sample_from_prior(3)
-pp = [relic.lnposterior(_p) for _p in initial_population]
+pp = [relic.lnposterior_mcmc(_p) for _p in initial_population]
 [print(f"lnprob = {_v:.6e}") for _v in pp]
 
 print("Test complete.")
@@ -112,7 +112,7 @@ print("Test complete.")
 def lnpostf(pv):
     ''' DON'T USE LAMBDA FUNCTION FOR THIS, 
     OTHERWISE IT CAUSES PICKLE ISSUES WITH MULTIPROCESSING '''
-    return relic.lnposterior(pv) 
+    return relic.lnposterior_mcmc(pv) 
 
 with Pool(cfg["SAMPLER"]["npools"]) as pool:
     relic.run_de(
@@ -136,20 +136,20 @@ with Pool(cfg["SAMPLER"]["npools"]) as pool:
 relic.save_mcmc(overwrite=True, config_file=py_args.config)
 
 """ Plot likelihood evolutions """
-plot_lnprob_evolution(relic, figname='lnprob.png', dpi=100, save=True)
+PlotFigure(relic).plot_lnprob_evolution(figname='lnprob.png')
 
 """ Plot 2D fluxes and errors """
-plot_2dfluxes(relic, figname='fluxes.png', dpi=100, save=True)
+PlotFigure(relic).plot_2dfluxes(figname='fluxes.png')
 
 """ Plot limb darkening profiles """
-plot_ldprofiles(relic, figname='ldprofiles.png', dpi=100, save=True)
+PlotFigure(relic).plot_ldprofiles(figname='ldprofiles.png')
 
 """ Plot posterior distributions """
 maxlike_params = get_maxlike_estimates(relic)
-plot_corners(relic, truths=truth_pv, figname='corners.pdf', save=True)
+PlotFigure(relic).plot_corners(truths=truth_pv, figname='corners.pdf')
 
 """ Plot best-fit residuals """
-plot_residuals(relic, maxlike_params, figname='residuals.png', dpi=100, save=True)
+PlotFigure(relic).plot_residuals(maxlike_params, figname='residuals.png')
 
 print("Done!")
 # %%

@@ -1,16 +1,19 @@
-from exoiris.tslpf import TSLPF, lnlike_normal, nlstsq
-from exoiris import TSDataGroup 
-from exoiris.lmlikelihood import marginalized_loglike_mbl2d
-from numpy import isfinite, nan, ndarray, inf, arctan2, dstack, zeros_like, ones_like, empty, newaxis, tile, arange
-from celerite2 import GaussianProcess as GP
-from celerite2.terms import Term, Matern32Term, SHOTerm
-from numpy.linalg import LinAlgError 
-from petitRADTRANS.physics import rebin_spectrum_bin
-from pytransit.orbits import as_from_rhop, i_from_ba
-from pytransit.param import ParameterSet, UniformPrior as UP, NormalPrior as NP, GParameter   
-from typing import Literal, Tuple, Optional, Union
+from typing import Literal
 
-from relic_atmosphere import BaseAtmosphere
+from celerite2 import GaussianProcess as GP
+from celerite2.terms import Matern32Term, Term
+from exoiris import TSDataGroup
+from exoiris.lmlikelihood import marginalized_loglike_mbl2d
+from exoiris.tslpf import TSLPF, lnlike_normal, nlstsq
+from numpy import (
+    arange, arctan2, dstack, empty, inf, isfinite, nan, ndarray, newaxis, tile,
+)
+from numpy.linalg import LinAlgError
+from pytransit.orbits import as_from_rhop, i_from_ba
+from pytransit.param import GParameter, NormalPrior as NP, ParameterSet, UniformPrior as UP
+
+from .atmosphere import BaseAtmosphere
+from .utils import SpectrumDownsampler
  
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -21,16 +24,25 @@ NOISE_MODELS = dict(white=NM_WHITE_PROFILED, white_profiled=NM_WHITE_PROFILED, w
 class NewTSLPF(TSLPF):
 
     def __init__(self, runner, name: str, ldmodel, data: TSDataGroup, 
-        atmos_model: BaseAtmosphere, tmpars = None, circular_orbit: bool = True, 
+        atmos_model: BaseAtmosphere, spec_resolving_power_files: list[str] = None, tmpars = None, circular_orbit: bool = True, 
         noise_model: Literal["white_profiled", "white_marginalized", 
         "fixed_gp", "free_gp"] = 'white_profiled'):
 
         self.circular_orbit = circular_orbit
-        super().__init__(runner, name, ldmodel, data, tmpars=tmpars, noise_model=noise_model)
+        super().__init__(runner, name, ldmodel, data, 
+            tmpars=tmpars, noise_model=noise_model)
  
-        self.atmos_model    = atmos_model
-        self.model_wl       = atmos_model.wavelengths
-        self.bin_widths     = self._get_binwidths(data) 
+        self.atmos_model  = atmos_model
+        self.wl_model     = atmos_model.wavelengths
+        self.bin_widths   = self._get_binwidths(data)  
+        self.downsamplers = [
+            SpectrumDownsampler(self.wl_model, wl, bw, rpf) \
+                for wl, bw, rpf in zip(
+                    self.wavelengths, 
+                    self.bin_widths, 
+                    spec_resolving_power_files
+                )
+        ]
 
     def _get_binwidths(self, data: TSDataGroup) -> list[ndarray]:       
         bin_widths = [d._wl_r_edges - d._wl_l_edges for d in data]
@@ -181,10 +193,7 @@ class NewTSLPF(TSLPF):
         if not all(transpec>0):
             return [] # capture and reject
         
-        k = [ rebin_spectrum_bin(self.model_wl, transpec, data_wl,
-            bin_widths=self.bin_widths[i])**0.5
-            for i, data_wl in enumerate(self.wavelengths)
-        ]
+        k = [ds.convolve_and_rebin(transpec)**0.5 for ds in self.downsamplers]
 
         if self.circular_orbit:
             p, b = pv[self._sl_orbit]

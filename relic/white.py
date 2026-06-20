@@ -12,7 +12,7 @@ from pytransit.orbits import as_from_rhop, i_from_ba, fold, i_from_baew, d_from_
 from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP, PParameter
 from pytransit.lpf.lpf import map_ldc
 
-from relic_tslpf import NewTSLPF
+from .tslpf import NewTSLPF
 
 class NewWhiteLPF(BaseLPF):
     def __init__(self, tsa: NewTSLPF, covariates: list[ndarray] = [None, ...]):

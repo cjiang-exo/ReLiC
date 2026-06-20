@@ -1,23 +1,27 @@
-import shutil
-import h5py
-import numpy as np 
 import os
 import pickle
-from exoiris.ldtkld import LDTkLD
-from exoiris import TSData, TSDataGroup
+import shutil
+import tomllib
 from functools import reduce
-
-from numpy import array, squeeze, ndarray, asarray, isfinite, zeros, empty_like 
-from pytransit.param import UniformPrior as UP, NormalPrior as NP, GParameter   
-from typing import Callable, Literal, Tuple, Optional, Union
-from relic_atmosphere import BaseAtmosphere
-from relic_exoiris import ReLicExoIris 
-from relic_white import NewWhiteLPF
 from multiprocessing.pool import Pool
-from scipy.stats import norm, truncnorm
+from typing import Callable, Literal, Optional
+
+import h5py
+import numpy as np
 from dynesty import DynamicNestedSampler
 from dynesty import plotting as dyplot
 from dynesty.utils import get_neff_from_logwt
+from exoiris import ExoIris, TSData, TSDataGroup
+from exoiris.ldtkld import LDTkLD
+from numpy import array, asarray, empty_like, floor, hstack, isfinite, ndarray, squeeze, unique
+from numpy.polynomial import Chebyshev
+from numpy.random import default_rng
+from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP
+from scipy.stats import norm, truncnorm
+
+from .atmosphere import *
+from .tslpf import NewTSLPF
+from .white import NewWhiteLPF
 
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -26,26 +30,61 @@ NM_WHITE_PROFILED = 3
 
 """ pv should be scalar input, no more vectorization """
 
-class ReLic:
-    def __init__(self, atmos_model: BaseAtmosphere):
-        if (not isinstance(atmos_model, BaseAtmosphere)) or (type(atmos_model) is BaseAtmosphere):
-            raise TypeError(f"Expected the subclass of BaseAtmosphere, got {type(atmos_model).__name__}")
-        if atmos_model.__class__.__call__ is BaseAtmosphere.__call__:
-            raise NotImplementedError("The __call__ method must be implemented to compute a spectrum.")
-        if atmos_model.wavelengths is None: 
-            raise ValueError("The atmosphere model must have defined wavelengths.")
+class ReLic: 
 
-        self.cfg         = atmos_model.cfg
-        self.atmos_model = atmos_model
+    def __init__(self, configuration_file: str):
+
+        self.cfg = self._load_config(configuration_file)
+
+        self.atmos_model = eval(self.cfg['ATMOSPHERE']['model_class'])(self.cfg)
+        if self.atmos_model.__class__.__call__ is BaseAtmosphere.__call__:
+            raise NotImplementedError("The __call__ method must be implemented to compute a spectrum.")
+        if self.atmos_model.wavelengths is None: 
+            raise ValueError("The atmosphere model must have initialized wavelength grid.") 
+
         self.raw_data    = self._load_raw_data()
         self.tsdata      = self._init_TSData()
         self.ldmodel     = self._init_LDModel()
         self.exoiris     = self._init_ExoIris() 
 
-        self._update_parameters() 
+        self._update_exoiris_parameters() 
+
+        if self.cfg['SAMPLER']['method'] in 'dynesty' :
+            self.prior_transform = Priors(self.exoiris.ps)
+        elif self.cfg['SAMPLER']['method'] == 'emcee':
+            pass
+        else:
+            raise ValueError(f"Sampling method should be either 'dynesty' or 'emcee', got: {self.cfg['SAMPLER']['method']}")
+        
+        print("Initialization complete.") 
+
+    def _load_config(self, configuration_file: str):
+
+        cfg = tomllib.load(open(configuration_file, 'rb'))
+        
+        # Verify that the configuration file contains all required sections and keys
+        required_sections = [
+            "PATH", "STAR", "PLANET", "ATMOSPHERE", "EXOIRIS", "PRIORS", "SAMPLER"
+        ]
+        for s in required_sections:
+            if s not in cfg:
+                raise ValueError(f"Missing required section '{s}' in configuration file.")
+
+        # Verify that the input files exist
+        lightcurve_files = cfg["PATH"].get("lightcurve_files", [])
+        for f in lightcurve_files:
+            if not os.path.isfile(f):
+                raise FileNotFoundError(f"Input file '{f}' does not exist.")
+
+        os.makedirs(cfg["PATH"]["output_dir"], exist_ok=True)
+        shutil.copy(configuration_file, os.path.join(
+            cfg["PATH"]["output_dir"], os.path.basename(configuration_file)
+        ))
+        print(f"Configuration file loaded: {configuration_file}")
+        return cfg
         
     def _load_raw_data(self) -> list[h5py.File]:
-        filelist = self.cfg["PATH"]["input_file"]
+        filelist = self.cfg["PATH"]["lightcurve_files"]
         print("\nLoading data: ")
         [print(f"  {f}") for f in filelist]
         return [h5py.File(f, 'r') for f in filelist]
@@ -126,11 +165,12 @@ class ReLic:
             ldmodel        = self.ldmodel, 
             data           = self.tsdata, 
             atmos_model    = self.atmos_model,  
+            spec_resolving_power_files = self.cfg["PATH"]["spec_resolving_power_files"],
             circular_orbit = self.cfg["PLANET"]["circular_orbit"],
             noise_model    = self.cfg["EXOIRIS"]["noise_model"],  
         )
     
-    def _update_parameters(self, ):
+    def _update_exoiris_parameters(self, ):
 
         print("Updating parameters and priors...")
         self.exoiris.ps.thaw()
@@ -169,10 +209,10 @@ class ReLic:
         self.exoiris.ps.freeze()
         self.exoiris.print_parameters()
 
-    def init_prior_transform(self,):
-        self.prior_transform = Priors(self.exoiris.ps)
+    # def init_prior_transform(self,):
+    #     self.prior_transform = Priors(self.exoiris.ps)
 
-    def fit_white(self, covariates: list[np.ndarray], pool:Optional[Pool]=None):
+    def fit_white(self, covariates: list[np.ndarray], update_covariates:bool=False, pool:Optional[Pool]=None, ):
         print("Fitting white light curves to validate covariates...")
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa, covariates=covariates)
 
@@ -191,11 +231,34 @@ class ReLic:
         self.exoiris.zero_epoch = self.exoiris._wa.transit_center
         self.exoiris.transit_duration = self.exoiris._wa.transit_duration
         self.exoiris.data.mask_transit(self.exoiris.zero_epoch, 
-            self.exoiris.period, self.exoiris.transit_duration)
+            self.exoiris.period, self.exoiris.transit_duration
+        )
+
+        if update_covariates:
+            self.update_covariates()
+        
+    def generate_covariates(self, jitters: list) -> list[ndarray]:
+        period_hst = 95.42 / 60.0 / 24.0 # in days
+        _standardize = lambda x: 2 * (x - x.min()) / (x.max() - x.min()) - 1 # to [-1, 1]
+
+        covariates = []
+        for i, d in enumerate(self.exoiris._tsa.data):
+            n = self.exoiris.data[i].n_baseline
+            if ("HST" in d.name) or ("STIS" in d.name) or ("WFC3" in d.name): 
+                phases = (d.time - d.time[0]) % period_hst # phase-folded 
+                phases[phases >= 0.75*period_hst] -= period_hst
+                x = _standardize(phases) 
+            else: # JWST
+                x = _standardize(d.time) 
+            _covs = array([Chebyshev.basis(deg)(x) for deg in range(n+1)]).T 
+            if jitters[i] is not None:
+                _covs = hstack([_covs, _standardize(jitters[i])]) 
+            covariates.append(_covs)
+        return covariates
         
     def update_covariates(self,):
         fmod = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=False))
-        ffit = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=True))
+        # ffit = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=True))
         for i, (_t, _cov) in enumerate(zip(self.exoiris._wa.times, self.exoiris._wa.covariates)):
             newt = self.exoiris.data[i].time
             if "JWST" in self.exoiris.data[i].name:
@@ -213,7 +276,7 @@ class ReLic:
     def sample_from_prior(self, size: int) -> ndarray:
         return squeeze(self.exoiris.ps.sample_from_prior(size))
  
-    def lnposterior(self, pv: ndarray) -> float:
+    def lnposterior_mcmc(self, pv: ndarray) -> float:
         """  Evaluate the log posterior for a given parameter vector pv. """
         return self.exoiris._tsa.lnposterior(pv)
     
@@ -355,8 +418,73 @@ class ReLic:
             print(f"Error generating dynesty runplot: {e}")
 
         return results
+    
+    def run_test(self, nsamples:int=3, seed:int=None):
+        print("Running a quick test of posterior evaluation...")
 
+        ndim = len(self.exoiris._tsa.ps)
+        
+        if self.cfg['SAMPLER']['method'] == 'dynesty':
+            rng = default_rng(seed)
+            unit_cubes = rng.uniform(size=(nsamples, ndim))
+            prior_params = [self.prior_transform(c) for c in unit_cubes]
+            pp = [self.lnlikelihood_ns(p) for p in prior_params]
+            [print(f"lnprob = {_v:.6e}") for _v in pp]
 
+        elif self.cfg['SAMPLER']['method'] == 'emcee':
+            prior_params = self.sample_from_prior(nsamples)
+            pp = [self.lnposterior_mcmc(_p) for _p in prior_params]
+            [print(f"lnprob = {_v:.6e}") for _v in pp]
+
+        print("Test complete.") 
+        return prior_params, pp
+
+class ReLicExoIris(ExoIris):
+    def __init__(self, name: str, ldmodel, data: TSDataGroup | TSData,
+            atmos_model: BaseAtmosphere, spec_resolving_power_files: list[str] = None,  
+            tmpars: dict | None = None,
+            circular_orbit: bool = True, noise_model: Literal["white_profiled", 
+            "white_marginalized", "fixed_gp", "free_gp"] = 'white_profiled',  
+        ):
+        
+        data = TSDataGroup([data]) if isinstance(data, TSData) else data
+
+        for d in data:
+            if any(~isfinite(d.fluxes[d.mask])):
+                raise ValueError(f"The {d.name} data set flux array contains unmasked nonfinite values.")
+
+            if any(~isfinite(d.errors[d.mask])):
+                raise ValueError(f"The {d.name} data set error array contains unmasked nonfinite values.")
+
+        ngs = array(data.noise_groups)
+        if not ((ngs.min() == 0) and (ngs.max() + 1 == unique(ngs).size)):
+            raise ValueError("The noise groups must start from 0 and be consecutive.")
+
+        ogs = array(data.offset_groups)
+        if not ((ogs.min() == 0) and (ogs.max() + 1 == unique(ogs).size)):
+            raise ValueError("The offset groups must start from 0 and be consecutive.")
+
+        egs = array(data.epoch_groups)
+        if not ((egs.min() == 0) and (egs.max() + 1 == unique(egs).size)):
+            raise ValueError("The epoch groups must start from 0 and be consecutive.")
+ 
+        self._tsa = NewTSLPF(self, name, ldmodel, data, atmos_model=atmos_model, 
+            spec_resolving_power_files=spec_resolving_power_files, tmpars=tmpars, noise_model=noise_model, circular_orbit=circular_orbit)
+        self._wa: None | NewWhiteLPF = None
+
+        self.nthreads: int = 1
+
+        self.period: float | None = None
+        self.zero_epoch: float | None = None
+        self.transit_duration: float | None= None
+        self._tref = floor(self.data.tmin)
+
+        self._white_times: None | list[ndarray] = None
+        self._white_fluxes: None | list[ndarray] = None
+        self._white_errors: None | list[ndarray] = None
+        self._white_models: None | list[ndarray] = None
+        self.white_gp_models: None | list[ndarray] = None
+        
 class Priors:
     def __init__(self, prior_list: list[GParameter]):
 
