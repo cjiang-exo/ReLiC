@@ -2,12 +2,12 @@ import numba
 from astropy.stats import sigma_clip
 from numpy import (any, array, asarray, concatenate, exp, float64, hstack,
                    int64, interp, log, log2, ndarray, round, searchsorted,
-                   sqrt, sum as np_sum, zeros, zeros_like)
+                   sqrt, sum as np_sum, zeros, zeros_like, loadtxt)
 from numpy.polynomial import Chebyshev
 from petitRADTRANS.physics import rebin_spectrum_bin 
 
 class SpectrumDownsampler:
-    def __init__(self, wl_model: ndarray, wl_data: ndarray, wl_binwidths: ndarray, resolving_powers: ndarray | None = None, n_sigma=3):
+    def __init__(self, wl_model: ndarray, wl_data: ndarray, wl_binwidths: ndarray, spec_resolving_power_file: str | None = None, n_sigma=3):
         """ 
         Parameters
         ----------
@@ -17,52 +17,63 @@ class SpectrumDownsampler:
             Wavelength array of the observed spectra (concatenated and sorted).
         wl_binwidths : ndarray (1D, float64)
             Wavelength bin widths of the observed spectra.
-        resolving_powers : ndarray (1D, float64)
-            Instrument resolving power at each wavelength in wl_data.
+        spec_resolving_power_file : str | None
+            Path to the file containing the instrument resolving power at each wavelength in wl_data.
         n_sigma : float
             Number of standard deviations to include in the Gaussian kernel for convolution.
         """
-        self.wl_model = asarray(wl_model)
-        self.wl_data = asarray(wl_data)
-        self.wl_binwidths = asarray(wl_binwidths)
 
-        self.convolved_flux = zeros_like(wl_model)
-        self.rebinned_flux = zeros_like(wl_data)
+        _minwl         = wl_data[0] - wl_binwidths[0]
+        _maxwl         = wl_data[-1] + wl_binwidths[-1]
+        start          = searchsorted(wl_model, _minwl, side='left')
+        end            = searchsorted(wl_model, _maxwl, side='right')
+        self.sl_wl     = slice(start, end) 
 
-        if resolving_powers is None:  # no convolution, just rebinning
+        self.wl_model_trim = asarray(wl_model[self.sl_wl])
+        self.wl_data       = asarray(wl_data)
+        self.wl_binwidths  = asarray(wl_binwidths)
+
+        self.convolved_flux = zeros_like(self.wl_model_trim, dtype=float64)
+        self.rebinned_flux  = zeros_like(self.wl_data, dtype=float64)
+
+        if not spec_resolving_power_file:  # no convolution, just rebinning
             self._convolve = False
         else:  # precompute convolution kernels
             self._convolve = True
-            self.rp_data = asarray(resolving_powers)
-            self.rp_model = interp(wl_model, wl_data, resolving_powers)
 
-            sigmas = wl_model / self.rp_model / (2 * sqrt(2 * log(2)))
-            half_widths = n_sigma * sigmas
+            _wl, _rp = loadtxt(spec_resolving_power_file).T
+            self.rp_model = interp(self.wl_model_trim, _wl, _rp)
 
-            n_wl = len(wl_model)
-            self.slice_starts = zeros(n_wl, dtype=int64)
-            self.slice_ends = zeros(n_wl, dtype=int64)
-            kernel_list = []
+            sigmawls = self.wl_model_trim / self.rp_model / (2 * sqrt(2 * log(2)))
+            half_widths = n_sigma * sigmawls
+
+            n_wl                = len(self.wl_model_trim)
+            self.slice_starts   = zeros(n_wl, dtype=int64)
+            self.slice_ends     = zeros(n_wl, dtype=int64)
             self.kernel_offsets = zeros(n_wl + 1, dtype=int64)
+            
+            kernel_list         = []
+            for i, (wl, hw, sigma) in enumerate(
+                zip(self.wl_model_trim, half_widths, sigmawls)): 
 
-            for i, (wl, hw, sigma) in enumerate(zip(wl_model, half_widths, sigmas)):
-                lo, hi = wl - hw, wl + hw
-                start = searchsorted(wl_model, lo, side='left')
-                end = searchsorted(wl_model, hi, side='right')
+                start  = searchsorted(self.wl_model_trim, wl - hw, side='left')
+                end    = searchsorted(self.wl_model_trim, wl + hw, side='right')
                 self.slice_starts[i] = start
                 self.slice_ends[i] = end
-                sub_wl = wl_model[start:end] - wl
+                sub_wl = self.wl_model_trim[start:end] - wl
                 kernel = exp(-0.5 * (sub_wl / sigma) ** 2)
                 kernel /= kernel.sum()
                 kernel_list.append(kernel)
-                self.kernel_offsets[i + 1] = self.kernel_offsets[i] + len(kernel)
+
+                len_kernel = end - start
+                self.kernel_offsets[i + 1] = self.kernel_offsets[i] + len_kernel
 
             self.kernels_flat = concatenate(kernel_list).astype(float64)
 
     def convolve(self, model_flux: ndarray): 
         if self._convolve:
             _convolve_numba(
-                model_flux,
+                model_flux[self.sl_wl],
                 self.slice_starts, self.slice_ends,
                 self.kernels_flat, self.kernel_offsets,
                 self.convolved_flux,
@@ -71,20 +82,22 @@ class SpectrumDownsampler:
         return model_flux
 
     def rebin(self, model_flux: ndarray):
-        self.rebinned_flux[:] = rebin_spectrum_bin(self.wl_model, model_flux, self.wl_data, self.wl_binwidths)
+        self.rebinned_flux[:] = rebin_spectrum_bin(
+            self.wl_model_trim, model_flux[self.sl_wl], 
+            self.wl_data, self.wl_binwidths)
         return self.rebinned_flux
 
     def convolve_and_rebin(self, model_flux: ndarray):
         if self._convolve:
             _convolve_numba(
-                model_flux,
+                model_flux[self.sl_wl],
                 self.slice_starts, self.slice_ends,
                 self.kernels_flat, self.kernel_offsets,
                 self.convolved_flux,
             )
         else:
-            self.convolved_flux[:] = model_flux
-        self.rebinned_flux[:] = rebin_spectrum_bin(self.wl_model, self.convolved_flux, self.wl_data, self.wl_binwidths)
+            self.convolved_flux[:] = model_flux[self.sl_wl]
+        self.rebinned_flux[:] = rebin_spectrum_bin(self.wl_model_trim, self.convolved_flux, self.wl_data, self.wl_binwidths)
         return self.rebinned_flux
 
 @numba.njit(cache=True)

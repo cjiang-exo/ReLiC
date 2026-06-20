@@ -12,13 +12,11 @@ from multiprocessing import Pool
 import argparse
 import numpy as np 
 
-from relic.core import ReLic
-from relic.atmosphere import *
+from relic.core import ReLic 
 from relic.plots import PlotFigure
 from relic.utils import optimize_parallelization
 
 DEFAULT_CFG = '/work/relic/source/config/HD209458b-jwst-pix-tp6fastchem.toml'
-
 
 if 'get_ipython' in globals(): 
     config = DEFAULT_CFG # use DEFAULT_CFG if running in Jupyter Notebook

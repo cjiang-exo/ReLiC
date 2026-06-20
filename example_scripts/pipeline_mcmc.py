@@ -7,19 +7,16 @@ os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] =    "1"
 os.environ["NUMBA_NUM_THREADS"] =      "1" 
 os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'   
+from multiprocessing import Pool   
 
 import argparse
-import numpy as np
-import tomllib    
-from relic.core import ReLic 
-from relic.atmosphere import TP6EqChem as AtmosModel
-from relic.plots import PlotFigure
+import numpy as np 
 
-from relic.utils import generate_covariates, get_maxlike_estimates
-from multiprocessing import Pool   
-from numpy import inf
+from relic.core import ReLic  
+from relic.plots import PlotFigure 
+from relic.utils import get_maxlike_estimates, optimize_parallelization 
 
-DEFAULT_CFG = 'config/HD209458b_benchmark-r100.toml'
+DEFAULT_CFG = '/work/relic/source/config/HD209458b-jwst-pix-tp6fastchem.toml'
 
 if 'get_ipython' in globals(): 
     config = DEFAULT_CFG # use DEFAULT_CFG if running in Jupyter Notebook

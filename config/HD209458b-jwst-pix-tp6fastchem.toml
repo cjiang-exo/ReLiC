@@ -100,7 +100,7 @@ resume       = false
 save_checkpoint = true
 
 [FASTCHEM]
-element_abundances = "/home/ubuntu/work/fastchem/lodders_2025.dat"
-logk = "/home/ubuntu/work/fastchem/logK.dat"
-logk_condensates = "/home/ubuntu/work/fastchem/logK_condensates.dat"
+element_abundances = "/work/relic/data/fastchem/lodders_2025.dat"
+logk = "/work/relic/data/fastchem/logK.dat"
+logk_condensates = "/work/relic/data/fastchem/logK_condensates.dat"
 condensation_mode = "rainout"

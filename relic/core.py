@@ -19,7 +19,7 @@ from numpy.random import default_rng
 from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP
 from scipy.stats import norm, truncnorm
 
-from .atmosphere import BaseAtmosphere
+from .atmosphere import *
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
 
@@ -165,6 +165,7 @@ class ReLic:
             ldmodel        = self.ldmodel, 
             data           = self.tsdata, 
             atmos_model    = self.atmos_model,  
+            spec_resolving_power_files = self.cfg["PATH"]["spec_resolving_power_files"],
             circular_orbit = self.cfg["PLANET"]["circular_orbit"],
             noise_model    = self.cfg["EXOIRIS"]["noise_model"],  
         )
@@ -423,7 +424,6 @@ class ReLic:
 
         ndim = len(self.exoiris._tsa.ps)
         
-
         if self.cfg['SAMPLER']['method'] == 'dynesty':
             rng = default_rng(seed)
             unit_cubes = rng.uniform(size=(nsamples, ndim))
@@ -441,7 +441,8 @@ class ReLic:
 
 class ReLicExoIris(ExoIris):
     def __init__(self, name: str, ldmodel, data: TSDataGroup | TSData,
-            atmos_model: BaseAtmosphere, tmpars: dict | None = None,
+            atmos_model: BaseAtmosphere, spec_resolving_power_files: list[str] = None,  
+            tmpars: dict | None = None,
             circular_orbit: bool = True, noise_model: Literal["white_profiled", 
             "white_marginalized", "fixed_gp", "free_gp"] = 'white_profiled',  
         ):
@@ -468,7 +469,7 @@ class ReLicExoIris(ExoIris):
             raise ValueError("The epoch groups must start from 0 and be consecutive.")
  
         self._tsa = NewTSLPF(self, name, ldmodel, data, atmos_model=atmos_model, 
-            tmpars=tmpars, noise_model=noise_model, circular_orbit=circular_orbit)
+            spec_resolving_power_files=spec_resolving_power_files, tmpars=tmpars, noise_model=noise_model, circular_orbit=circular_orbit)
         self._wa: None | NewWhiteLPF = None
 
         self.nthreads: int = 1
