@@ -191,15 +191,12 @@ class PlotFigure:
 
     def plot_transmission_spectra(self, maxlike_param:ndarray,
                                   samples:ndarray=None, samplesize:int=100,
-                                  fiducial_resolution:int=100, logscalex:bool=False,
+                                  fiducial_resolution:int=100,
                                   figname:str="transmission_spectrum.png", 
                                   pool=None):
         tsa = self.relic.exoiris._tsa
-        trans_spec = 100 * self.relic.atmos_model(maxlike_param)
-        # trans_spec[:] = tsa.downsampler.convolve(trans_spec)
-        ts_rebin_best = [rebin_spectrum_bin(tsa.wl_model, trans_spec, data_wl,
-                                            bin_widths=tsa.bin_widths[i])
-                         for i, data_wl in enumerate(tsa.wavelengths)]
+        trans_spec = 100 * self.relic.atmos_model(maxlike_param) 
+        ts_rebin_best = [ds.convolve_and_rebin(trans_spec) for ds in tsa.downsamplers]
 
         _flatwl = np.hstack(self.relic.exoiris._tsa.wavelengths)
         wl_min, wl_max = _flatwl.min(), _flatwl.max()
@@ -211,23 +208,21 @@ class PlotFigure:
         fig, ax = pl.subplots(1, 1, figsize=(6, 4))
 
         ax.plot(wl_fiducial, ts_rebin_fiducial, c='k', lw=1,
-                label=f'model at R={fiducial_resolution:d}')
+                label=f'R={fiducial_resolution:d}')
 
         if samples is not None:
             for _isample in range(samplesize):
                 trans_spec_sample = 100 * self.relic.atmos_model(samples[_isample])
-                ts_rebin_sample = [rebin_spectrum_bin(tsa.wl_model, trans_spec_sample,
-                                                      data_wl,
-                                                      bin_widths=tsa.bin_widths[i])
-                                   for i, data_wl in enumerate(tsa.wavelengths)]
+                ts_rebin_sample = [ds.convolve_and_rebin(trans_spec_sample) for ds in tsa.downsamplers]
                 for i, data_wl in enumerate(tsa.wavelengths):
-                    ax.plot(data_wl, ts_rebin_sample[i], c='C0', lw=0.5, alpha=0.2)
+                    ax.plot(data_wl, ts_rebin_sample[i], c='C1', lw=0.5, alpha=0.2)
 
         for i, data_wl in enumerate(tsa.wavelengths):
-            ax.plot(data_wl, ts_rebin_best[i], c='k', lw=2, zorder=3)
+            ax.plot(data_wl, ts_rebin_best[i], c='C0', lw=2, zorder=3, label='Best-fit')
 
         ax.set_xlabel('Wavelength [micron]')
         ax.set_ylabel('Transit depth (%)')
+        ax.legend(loc='best', fontsize=8, frameon=False)
         if wl_fiducial[-1] / wl_fiducial[0] > 10:
             ax.set_xscale('log')
         fig.tight_layout()

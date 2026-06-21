@@ -32,8 +32,9 @@ NM_WHITE_PROFILED = 3
 
 class ReLic: 
 
-    def __init__(self, configuration_file: str):
+    def __init__(self, configuration_file: str, idle: bool = False):
 
+        self.idle = idle
         self.cfg = self._load_config(configuration_file)
 
         self.atmos_model = eval(self.cfg['ATMOSPHERE']['model_class'])(self.cfg)
@@ -42,6 +43,10 @@ class ReLic:
         if self.atmos_model.wavelengths is None: 
             raise ValueError("The atmosphere model must have initialized wavelength grid.") 
 
+        if self.idle: 
+            print("Idle mode.")
+            return
+        
         self.raw_data    = self._load_raw_data()
         self.tsdata      = self._init_TSData()
         self.ldmodel     = self._init_LDModel()
@@ -61,6 +66,8 @@ class ReLic:
     def _load_config(self, configuration_file: str):
 
         cfg = tomllib.load(open(configuration_file, 'rb'))
+        if self.idle:
+            return cfg
         
         # Verify that the configuration file contains all required sections and keys
         required_sections = [
@@ -97,17 +104,19 @@ class ReLic:
             except KeyError:
                 wl_edges = None
 
-            _flux = rd['flux'][:]
-            _flux_err = rd['flux_err'][:] 
-            if _flux.shape[0] != len(rd['wavelength'][:]):
-                _flux = _flux.T
-                _flux_err = _flux_err.T
+            time = _get_data(rd, ['bjd_tdb', 'bjd', 'time'])
+            wavelength = _get_data(rd, ['wavelength', 'wavelengths'])
+            fluxes = _get_data(rd, ['flux', 'fluxes'])
+            flux_errors = _get_data(rd, ['errors', 'flux_err', 'flux_error', 'flux_errors', 'ferrors']) 
+            if fluxes.shape[0] != len(wavelength):
+                fluxes = fluxes.T
+                flux_errors = flux_errors.T
  
             dlist.append(TSData(
-                time        = rd['bjd_tdb'][:], 
-                wavelength  = rd['wavelength'][:], 
-                fluxes      = _flux, 
-                errors      = _flux_err, 
+                time        = time, 
+                wavelength  = wavelength, 
+                fluxes      = fluxes, 
+                errors      = flux_errors, 
                 wl_edges    = wl_edges, 
                 name        = self.cfg['EXOIRIS']['instruments'][i] + f"_d{i}", 
                 noise_group = self.cfg["EXOIRIS"]["noise_groups"][i], 
@@ -553,3 +562,9 @@ class Priors:
             )
 
         return pv
+
+def _get_data(data: dict, key_aliases: list[str]) -> np.ndarray:
+    for k in key_aliases:
+        if k in data.keys():
+            return data[k]
+    raise KeyError(f"None of the keys {key_aliases} found in the data.")
