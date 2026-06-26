@@ -71,5 +71,42 @@ An example retrieval script can be found:
 
 Our ReLiC paper is going to be submitted.
 
+The ReLiC code is primarily built upon [ExoIris](https://github.com/hpparvi/ExoIris), [PyTransit](https://github.com/hpparvi/PyTransit), and [LDTk](https://github.com/hpparvi/ldtk) developed by Hannu Parviainen. Thus, please also consider citing the following papers:
+
+```latex
+
+@ARTICLE{2026AJ....171..237P,
+       author = {{Parviainen}, Hannu},
+        title = "{ExoIris: Fast Exoplanet Transmission Spectroscopy in Python}",
+      journal = {\aj}, 
+         year = 2026, 
+       volume = {171}, 
+        pages = {237},
+          doi = {10.3847/1538-3881/ae47ee},   
+}
+
+@ARTICLE{2015MNRAS.450.3233P,
+       author = {{Parviainen}, Hannu},
+        title = "{PYTRANSIT: fast and easy exoplanet transit modelling in PYTHON}",
+      journal = {\mnras}, 
+         year = 2015, 
+       volume = {450}, 
+        pages = {3233-3238},
+          doi = {10.1093/mnras/stv894}, 
+}
+
+@ARTICLE{2015MNRAS.453.3821P,
+       author = {{Parviainen}, H. and {Aigrain}, S.},
+        title = "{LDTK: Limb Darkening Toolkit}",
+      journal = {\mnras}, 
+         year = 2015, 
+       volume = {453}, 
+        pages = {3821-3826},
+          doi = {10.1093/mnras/stv1857}, 
+}
+
+
+```
+
 ---
 

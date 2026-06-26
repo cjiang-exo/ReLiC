@@ -15,7 +15,10 @@ from pytransit.lpf.lpf import map_ldc
 from .tslpf import NewTSLPF
 
 class NewWhiteLPF(BaseLPF):
-    def __init__(self, tsa: NewTSLPF, covariates: list[ndarray] = [None, ...]):
+    def __init__(self, tsa: NewTSLPF, covariates: list[ndarray] = None):
+
+        if covariates is None:
+            covariates = [d.covs for d in tsa.data]
  
         fluxes, times, errors = [], [], []
         for i, (t, f, e, cov) in enumerate(zip(tsa.data.times, tsa.data.fluxes, tsa.data.errors, covariates)):
@@ -113,7 +116,7 @@ class NewWhiteLPF(BaseLPF):
 
         if isscalar(lnp):
             if isfinite(lnp):
-                lnp += self.lnlikelihood(pv)
+                lnp += self.lnlikelihood(pv)[0]
             return lnp if isfinite(lnp) else -inf 
 
         mask = isfinite(lnp) 

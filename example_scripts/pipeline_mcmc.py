@@ -12,8 +12,8 @@ from multiprocessing import Pool
 import argparse
 import numpy as np 
 
-from relic.core import ReLic  
-from relic.plots import PlotFigure 
+from relic.core import Relic  
+from relic.plots import RelicVisualization 
 from relic.utils import get_maxlike_estimates, optimize_parallelization 
 
 DEFAULT_CFG = '/work/relic/source/config/HD209458b-jwst-pix-tp6fastchem.toml'
@@ -29,8 +29,8 @@ else: # for command line execution
 
 #%% Initialization #############################################################
 
-relic = ReLic(config)
-pfig  = PlotFigure(relic)
+relic = Relic(config)
+pfig  = RelicVisualization(relic)
 
 #%% fit white light curves to validate the covariates ##########################
  

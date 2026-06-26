@@ -1,6 +1,6 @@
 """ReLic: atmospheric Retrievals using spectral Light Curves."""
 
-from .core import ReLic, ReLicExoIris
+from .core import Relic, RelicExoIris
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
 from .atmosphere import (
@@ -24,11 +24,11 @@ from .utils import (
     SpectrumDownsampler,
 )
 from .physics import calc_teq
-from .plots import PlotFigure
+from .plots import RelicVisualization
 
 __all__ = [
-    "ReLic",
-    "ReLicExoIris",
+    "Relic",
+    "RelicExoIris",
     "NewTSLPF",
     "NewWhiteLPF",
     "BaseAtmosphere",
@@ -48,5 +48,5 @@ __all__ = [
     "replace_outliers",
     "SpectrumDownsampler",
     "calc_teq",
-    "PlotFigure",
+    "RelicVisualization",
 ]

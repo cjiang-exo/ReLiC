@@ -4,8 +4,8 @@ import matplotlib.pyplot as pl
 import os   
 from numpy import ndarray, savetxt, where, diff, median, sqrt
 from astropy.visualization import ZScaleInterval
-from petitRADTRANS.physics import rebin_spectrum_bin, rebin_spectrum
-from relic.core import ReLic
+# from petitRADTRANS.physics import rebin_spectrum_bin, rebin_spectrum
+from relic.core import Relic
 # from multiprocessing import Pool
 
 NM_WHITE_MARGINALIZED = 0
@@ -14,10 +14,10 @@ NM_GP_FREE = 2
 NM_WHITE_PROFILED = 3
 
 
-class PlotFigure:
+class RelicVisualization:
     """A collection of plotting methods for ReLic results."""
 
-    def __init__(self, relic: ReLic, dpi: int = 100, save: bool = True):
+    def __init__(self, relic: Relic, dpi: int = 100, save: bool = True):
         self.relic = relic
         self.dpi = dpi
         self.save = save
