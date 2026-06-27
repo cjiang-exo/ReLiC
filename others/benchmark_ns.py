@@ -13,9 +13,9 @@ import numpy as np
 import tomllib     
 import shutil
 
-from relic.core import ReLic
+from relic.core import Relic
 from relic.atmosphere import TP6EqChem as AtmosModel
-from relic.plots import PlotFigure
+from relic.plots import RelicVisualization
 from relic.utils import generate_covariates, get_maxlike_estimates, print_elapsed_time, optimize_parallelization
  
 from multiprocessing import Pool
@@ -42,7 +42,7 @@ shutil.copy(py_args.config, os.path.join(cfg["PATH"]["output_dir"], os.path.base
  
 atmos_model = AtmosModel(cfg) # user-defined
 
-relic = ReLic(atmos_model)
+relic = Relic(atmos_model)
  
 relic.init_prior_transform() # if using nested sampling
 
@@ -132,18 +132,18 @@ with Pool(cfg["SAMPLER"]["npools"], maxtasksperchild=maxtasks) as pool:
 #%% Post analysis and plotting #################################################
 
 """ Plot 2D fluxes and errors """
-PlotFigure(relic).plot_2dfluxes(figname='fluxes.png')
+RelicVisualization(relic).plot_2dfluxes(figname='fluxes.png')
 
 """ Plot limb darkening profiles """
-PlotFigure(relic).plot_ldprofiles(figname='ldprofiles.png')
+RelicVisualization(relic).plot_ldprofiles(figname='ldprofiles.png')
 
 """ Plot posterior distributions """ 
 samples = results.samples_equal()
-PlotFigure(relic).plot_corners(samples=samples, truths=truth_pv, figname='corners.pdf')
+RelicVisualization(relic).plot_corners(samples=samples, truths=truth_pv, figname='corners.pdf')
 
 """ Plot best-fit residuals """ 
 median_params = np.median(samples, axis=0)
-PlotFigure(relic).plot_residuals(median_params, figname='residuals.png')
+RelicVisualization(relic).plot_residuals(median_params, figname='residuals.png')
 
 print("Done!")
 # %%

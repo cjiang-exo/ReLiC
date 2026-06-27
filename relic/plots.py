@@ -3,10 +3,9 @@ import numpy as np
 import matplotlib.pyplot as pl
 import os   
 from numpy import ndarray, savetxt, where, diff, median, sqrt
-from astropy.visualization import ZScaleInterval
-from petitRADTRANS.physics import rebin_spectrum_bin, rebin_spectrum
-from relic.core import ReLic
-# from multiprocessing import Pool
+from astropy.visualization import ZScaleInterval 
+from relic.core import Relic
+from relic.utils import SpectrumDownsampler 
 
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -14,10 +13,10 @@ NM_GP_FREE = 2
 NM_WHITE_PROFILED = 3
 
 
-class PlotFigure:
+class RelicVisualization:
     """A collection of plotting methods for ReLic results."""
 
-    def __init__(self, relic: ReLic, dpi: int = 100, save: bool = True):
+    def __init__(self, relic: Relic, dpi: int = 100, save: bool = True):
         self.relic = relic
         self.dpi = dpi
         self.save = save
@@ -189,41 +188,38 @@ class PlotFigure:
             print(f"Evolution of posterior probability saved as {outputname}.")
         return fig
 
-    def plot_transmission_spectra(self, maxlike_param:ndarray,
-                                  samples:ndarray=None, samplesize:int=100,
-                                  fiducial_resolution:int=100,
+    def plot_transmission_spectra(self, maxlike_param:ndarray, 
                                   figname:str="transmission_spectrum.png", 
                                   pool=None):
-        tsa = self.relic.exoiris._tsa
-        trans_spec = 100 * self.relic.atmos_model(maxlike_param) 
-        ts_rebin_best = [ds.convolve_and_rebin(trans_spec) for ds in tsa.downsamplers]
+        
+        wl_model = self.relic.atmos_model.wavelengths
+        ts_modelmaxlike = 100 * self.relic.atmos_model(maxlike_param)
+ 
+        wavelengths = [d.wavelength for d in self.relic.tsdata]
+        binwidths = [d._wl_r_edges - d._wl_l_edges for d in self.relic.tsdata]
+        rpfiles = self.relic.cfg["PATH"]["spec_resolving_power_files"] 
+        downsamplers = [
+            SpectrumDownsampler(self.relic.atmos_model.wavelengths, wl, bw, rpf) \
+                for wl, bw, rpf in zip(
+                    wavelengths, 
+                    binwidths, 
+                    rpfiles
+                )
+        ]
 
-        _flatwl = np.hstack(self.relic.exoiris._tsa.wavelengths)
-        wl_min, wl_max = _flatwl.min(), _flatwl.max()
-        len_wl = np.log(wl_max / wl_min) * fiducial_resolution
-        len_wl = int(np.round(len_wl))
-        wl_fiducial = np.logspace(np.log10(wl_min), np.log10(wl_max), len_wl)
-        ts_rebin_fiducial = rebin_spectrum(tsa.wl_model, trans_spec, wl_fiducial)
+        wl_lowres = [ds.wl_data for ds in downsamplers]
+        ts_lowres = [ds.convolve_and_rebin(ts_modelmaxlike).copy() for ds in downsamplers] 
 
         fig, ax = pl.subplots(1, 1, figsize=(6, 4))
 
-        ax.plot(wl_fiducial, ts_rebin_fiducial, c='k', lw=1,
-                label=f'R={fiducial_resolution:d}')
-
-        if samples is not None:
-            for _isample in range(samplesize):
-                trans_spec_sample = 100 * self.relic.atmos_model(samples[_isample])
-                ts_rebin_sample = [ds.convolve_and_rebin(trans_spec_sample) for ds in tsa.downsamplers]
-                for i, data_wl in enumerate(tsa.wavelengths):
-                    ax.plot(data_wl, ts_rebin_sample[i], c='C1', lw=0.5, alpha=0.2)
-
-        for i, data_wl in enumerate(tsa.wavelengths):
-            ax.plot(data_wl, ts_rebin_best[i], c='C0', lw=2, zorder=3, label='Best-fit')
+        _a_highres, = ax.plot(wl_model, ts_modelmaxlike, c='C1', lw=0.5, alpha=0.5, label=f'original model')
+        for wl, ts in zip(wl_lowres, ts_lowres): 
+            _a_lowres, = ax.plot(wl, ts, lw=1, label='data-resolution', color='#5e3c99')
 
         ax.set_xlabel('Wavelength [micron]')
         ax.set_ylabel('Transit depth (%)')
-        ax.legend(loc='best', fontsize=8, frameon=False)
-        if wl_fiducial[-1] / wl_fiducial[0] > 10:
+        ax.legend([_a_highres, _a_lowres], ['original model', 'data-resolution'], loc='best', fontsize=8)
+        if wl_model[-1] / wl_model[0] > 10:
             ax.set_xscale('log')
         fig.tight_layout()
         if self.save:

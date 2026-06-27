@@ -30,7 +30,7 @@ NM_WHITE_PROFILED = 3
 
 """ pv should be scalar input, no more vectorization """
 
-class ReLic: 
+class Relic: 
 
     def __init__(self, configuration_file: str, idle: bool = False):
 
@@ -53,6 +53,8 @@ class ReLic:
         self.exoiris     = self._init_ExoIris() 
 
         self._update_exoiris_parameters() 
+
+        self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa)
 
         if self.cfg['SAMPLER']['method'] in 'dynesty' :
             self.prior_transform = Priors(self.exoiris.ps)
@@ -169,7 +171,7 @@ class ReLic:
     def _init_ExoIris(self):
         print("\nInitializing ExoIris model...")
 
-        return ReLicExoIris( 
+        return RelicExoIris( 
             name           = self.cfg["PLANET"]["name"], 
             ldmodel        = self.ldmodel, 
             data           = self.tsdata, 
@@ -218,21 +220,27 @@ class ReLic:
         self.exoiris.ps.freeze()
         self.exoiris.print_parameters()
 
-    # def init_prior_transform(self,):
-    #     self.prior_transform = Priors(self.exoiris.ps)
-
-    def fit_white(self, covariates: list[np.ndarray], update_covariates:bool=False, pool:Optional[Pool]=None, ):
-        print("Fitting white light curves to validate covariates...")
+    def update_covariates(self, additional_covariates: list[np.ndarray], ):
+        covariates = self.generate_covariates(additional_covariates)
+        for i, cov in enumerate(covariates):
+            self.exoiris.data[i].covs = cov.copy()
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa, covariates=covariates)
 
-        niter = self.cfg["SAMPLER"]["niter_white"]
-        npop = self.cfg["SAMPLER"]["nwalkers"]
+    def fit_white(self, pool:Optional[Pool]=None, lnpost:Optional[Callable]=None, npop=100):
+        print("Fitting white light curves to validate covariates...") 
 
-        def white_lnpost(pv):
-            return self.exoiris._wa.lnposterior(pv)
+        niter = self.cfg["SAMPLER"]["niter_white"] 
+        vectorize = True if pool is None else False
+
+        if pool is not None and lnpost is None:
+            raise ValueError("If `pool` is provided, `lnpost` must also be provided for parallel optimization.")
+        
+        if lnpost is None:
+            lnpost = self.exoiris._wa.lnposterior
         
         self.exoiris._wa.optimize_global(niter=niter, npop=npop, pool=pool, 
-            lnpost=white_lnpost, plot_convergence=False, use_tqdm=True, leave=True)
+            lnpost=lnpost, plot_convergence=False, 
+            vectorize=vectorize, use_tqdm=True, leave=True)
 
         self.exoiris._wa.optimize()
 
@@ -241,12 +249,9 @@ class ReLic:
         self.exoiris.transit_duration = self.exoiris._wa.transit_duration
         self.exoiris.data.mask_transit(self.exoiris.zero_epoch, 
             self.exoiris.period, self.exoiris.transit_duration
-        )
-
-        if update_covariates:
-            self.update_covariates()
+        ) 
         
-    def generate_covariates(self, jitters: list) -> list[ndarray]:
+    def generate_covariates(self, state_vectors: list=None) -> list[ndarray]:
         period_hst = 95.42 / 60.0 / 24.0 # in days
         _standardize = lambda x: 2 * (x - x.min()) / (x.max() - x.min()) - 1 # to [-1, 1]
 
@@ -260,27 +265,27 @@ class ReLic:
             else: # JWST
                 x = _standardize(d.time) 
             _covs = array([Chebyshev.basis(deg)(x) for deg in range(n+1)]).T 
-            if jitters[i] is not None:
-                _covs = hstack([_covs, _standardize(jitters[i])]) 
+            if (state_vectors is not None) and (state_vectors[i] is not None):
+                _covs = hstack([_covs, _standardize(state_vectors[i])]) 
             covariates.append(_covs)
         return covariates
         
-    def update_covariates(self,):
-        fmod = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=False))
-        # ffit = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=True))
-        for i, (_t, _cov) in enumerate(zip(self.exoiris._wa.times, self.exoiris._wa.covariates)):
-            newt = self.exoiris.data[i].time
-            if "JWST" in self.exoiris.data[i].name:
-                sl = self.exoiris._wa.lcslices[i]
-                white_systematics = self.exoiris._wa.ofluxa[sl] - fmod[sl]
-                # white_systematics = ffit[sl] - fmod[sl]
-                white_systematics -= np.mean(white_systematics)
-                white_systematics /= np.std(white_systematics) 
-                self.exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
-            else: # HST
-                newcov = [np.interp(newt, _t, _c) for _c in _cov.T]
-                self.exoiris.data[i].covs[:] = np.array(newcov).T
-        print("Covariates updated based on white light curve fit.")
+    # def update_covariates(self,):
+    #     raise NotImplementedError("This method has not been validated.")
+    #     fmod = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=False)) 
+    #     for i, (_t, _cov) in enumerate(zip(self.exoiris._wa.times, self.exoiris._wa.covariates)):
+    #         newt = self.exoiris.data[i].time
+    #         if "JWST" in self.exoiris.data[i].name:
+    #             sl = self.exoiris._wa.lcslices[i]
+    #             white_systematics = self.exoiris._wa.ofluxa[sl] - fmod[sl]
+    #             # white_systematics = ffit[sl] - fmod[sl]
+    #             white_systematics -= np.mean(white_systematics)
+    #             white_systematics /= np.std(white_systematics) 
+    #             self.exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
+    #         else: # HST
+    #             newcov = [np.interp(newt, _t, _c) for _c in _cov.T]
+    #             self.exoiris.data[i].covs[:] = np.array(newcov).T
+    #     print("Covariates updated based on white light curve fit.")
 
     def sample_from_prior(self, size: int) -> ndarray:
         return squeeze(self.exoiris.ps.sample_from_prior(size))
@@ -448,7 +453,7 @@ class ReLic:
         print("Test complete.") 
         return prior_params, pp
 
-class ReLicExoIris(ExoIris):
+class RelicExoIris(ExoIris):
     def __init__(self, name: str, ldmodel, data: TSDataGroup | TSData,
             atmos_model: BaseAtmosphere, spec_resolving_power_files: list[str] = None,  
             tmpars: dict | None = None,

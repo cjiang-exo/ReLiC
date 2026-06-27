@@ -11,9 +11,9 @@ os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'
 import argparse
 import numpy as np
 import tomllib    
-from relic.core import ReLic 
+from relic.core import Relic 
 from relic.atmosphere import TP6EqChem as AtmosModel
-from relic.plots import PlotFigure
+from relic.plots import RelicVisualization
 
 from relic.utils import generate_covariates, get_maxlike_estimates
 from multiprocessing import Pool   
@@ -40,7 +40,7 @@ print(f"Configuration file loaded: {py_args.config}")
 
 atmos_model = AtmosModel(cfg) # user-defined
 
-relic = ReLic(atmos_model)
+relic = Relic(atmos_model)
 
 def additional_priors(pv):
     p1, p2, p3 = pv[16:19]
@@ -80,7 +80,7 @@ with Pool(cfg["SAMPLER"]["npools"]) as pool:
 
 relic.update_covariates()
 
-PlotFigure(relic).plot_white()
+RelicVisualization(relic).plot_white()
 
 
 #%% test likelihood evaluation #################################################
@@ -136,20 +136,20 @@ with Pool(cfg["SAMPLER"]["npools"]) as pool:
 relic.save_mcmc(overwrite=True, config_file=py_args.config)
 
 """ Plot likelihood evolutions """
-PlotFigure(relic).plot_lnprob_evolution(figname='lnprob.png')
+RelicVisualization(relic).plot_lnprob_evolution(figname='lnprob.png')
 
 """ Plot 2D fluxes and errors """
-PlotFigure(relic).plot_2dfluxes(figname='fluxes.png')
+RelicVisualization(relic).plot_2dfluxes(figname='fluxes.png')
 
 """ Plot limb darkening profiles """
-PlotFigure(relic).plot_ldprofiles(figname='ldprofiles.png')
+RelicVisualization(relic).plot_ldprofiles(figname='ldprofiles.png')
 
 """ Plot posterior distributions """
 maxlike_params = get_maxlike_estimates(relic)
-PlotFigure(relic).plot_corners(truths=truth_pv, figname='corners.pdf')
+RelicVisualization(relic).plot_corners(truths=truth_pv, figname='corners.pdf')
 
 """ Plot best-fit residuals """
-PlotFigure(relic).plot_residuals(maxlike_params, figname='residuals.png')
+RelicVisualization(relic).plot_residuals(maxlike_params, figname='residuals.png')
 
 print("Done!")
 # %%
