@@ -1,14 +1,23 @@
 [PATH]
-input_file = [
-  "../data/HD209458b/HST/new_results_G430L_20030503.h5",
-  "../data/HD209458b/HST/new_results_G430L_20030625.h5",
-  "../data/HD209458b/HST/new_results_G750L_20030531.h5",
-  "../data/HD209458b/HST/new_results_G750L_20030705.h5",
-  "../data/HD209458b/HST/WFC3G141_Iraclis_Deming12181.h5",
-  "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
-  "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
+lightcurve_files = [
+  "/data/HD209458b/HST/results_G430L_20030503.h5",
+  "/data/HD209458b/HST/results_G430L_20030625.h5",
+  "/data/HD209458b/HST/results_G750L_20030531.h5",
+  "/data/HD209458b/HST/results_G750L_20030705.h5",
+  "/data/HD209458b/HST/WFC3G141_Iraclis_Deming12181.h5", 
+  "/data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
+  "/data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260529-pix-tp6eqc/"
+spec_resolving_power_files = [  
+  "", 
+  "", 
+  "", 
+  "", 
+  "",
+  "/data/resolving_power/NIRCam.dat",
+  "/data/resolving_power/NIRCam.dat",
+]
+output_dir = "./results/HD209458b/results-260621-joint-pix-fastchem/"
 
 [STAR]
 reference   = "2017AJ....153..136S"
@@ -32,16 +41,16 @@ circular_orbit          = true
 [ATMOSPHERE]
 pressure_layers          = 101
 pressure_bounds_log10bar = [-8, 2]
-wavelength_bounds_micron = [0.298, 5.05]
+wavelength_bounds_micron = [0.295, 5.05]
 chemical_species = [
-  "Na", "K", 
-  "H2O", "CO", "CO2", "CH4", 
-  "NH3", "HCN", 
+  "Na", "K", "TiO", "VO", "FeH", 
+  "H2O", "CO", "CO2", "CH4", "NH3", 
+  "C2H2", "HCN", "SiO", "H2S", "PH3"
 ]
 rayleigh_species  = ["H2", "He"]
 continuum_species = ["H2--H2", "H2--He"]
 opacity_mode      = "lbl"
-model_class       = "TP6EqChem"
+model_class       = "TP6FastChem"
 
 [EXOIRIS]
 instruments = [ # NO SPACE
@@ -55,8 +64,8 @@ instruments = [ # NO SPACE
 ]
 wl_range_micron   = [ [], [], [], [], [], [2.4, 4.0], [3.9, 5.0] ]
 time_range_bjd    = [ [], [], [], [], [], [], [2459890.03, 2459890.3] ]
-noise_groups      = [0, 0, 1, 1, 2, 3, 4]
-n_baselines       = [2, 2, 2, 2, 2, 2, 2] 
+noise_groups      = [0, 0, 1, 1, 2, 3, 4] 
+n_baselines       = [4, 4, 4, 4, 4, 2, 2] 
 rebin_resolutions = [0, 0, 0, 0, 0, 0, 0] # set to 0 for native resolution. 
 noise_model        = "white_marginalized"
 
@@ -79,29 +88,33 @@ sigma_m_03  = ["UP", 0.2, 5, -inf, inf, "noise factor 03", ""]
 sigma_m_04  = ["UP", 0.2, 5, -inf, inf, "noise factor 04", ""]
 
 [PRIORS.ATMOSPHERE]
-mp          = ["NP", 0.73, 0.04, 0.53, 0.93, "planet mass", "M_j"] 
+mp          = ["NP", 0.73, 0.04, 0.53, 0.93, "planet mass", "M_j"]
 ref_p       = ["UP", -8, 2, -inf, inf, "reference pressure", "log10bar"] 
 cloud_p     = ["UP", -8, 2, -inf, inf, "cloud-top pressure", "log10bar"] 
 cloud_f     = ["UP", 0.0, 1.0, 0, 1.0, "cloud fraction", ""]
-temp0       = ["UP", 0, 3000, -inf, inf, "temperature 0", "K"]
+haze_f      = ["UP", -3, 3, -inf, inf, "haze factor", "log10"]
+temp0       = ["UP", 100, 3000, -inf, inf, "temperature 0", "K"]
 lga1        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a1", ""]
 lga2        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a2", ""]
-lgp1        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p1", "log10bar"] 
+lgp1        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p1", "log10bar"]
 lgp2        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p2", "log10bar"] 
-m2h         = ["UP", -1, 3, -1, 3, "atmospheric metallicity", ""]
-c2o         = ["UP", 0.1, 1.6, 0.1, 1.6, "C/O ratio", ""]
-
+m2h         = ["UP", -3, 3, -inf, inf, "atmospheric metallicity", "log10"]
+c2o         = ["UP", 0.1, 2, -inf, inf, "C/O ratio", " "]
 
 [SAMPLER]
 method      = "dynesty" 
-npools      = 30 
-niter_white = 2000
-nwalkers    = 60 
-# niter_de    = 1000 
-# niter_mcmc  = 2000 
+npools      = 8 
+niter_white = 2000 
 bound       = "multi"
 sample      = "rwalk"
-n_live_points = 480 
+n_live_points = 240 
 n_effective = 400 
-dlogz_init  = 0.1
-# maxiter_batch = 2000
+dlogz_init  = 0.1 
+resume       = false
+save_checkpoint = true
+
+[FASTCHEM]
+element_abundances = "/data/fastchem/lodders_2025.dat"
+logk = "/data/fastchem/logK.dat"
+logk_condensates = "/data/fastchem/logK_condensates.dat"
+condensation_mode = "rainout"

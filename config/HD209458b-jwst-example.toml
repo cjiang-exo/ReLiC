@@ -1,9 +1,13 @@
 [PATH]
-input_file = [
-  "../data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
-  "../data/HD209458b/JWST/NIRCAM_F444W_new.h5",
+lightcurve_files = [
+  "/data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
+  "/data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
-output_dir = "../results/HD209458b/results-260526-jwst-r100-gp-tp6eqc/"
+spec_resolving_power_files = [  
+  "/data/resolving_power/NIRCam.dat",
+  "/data/resolving_power/NIRCam.dat",
+]
+output_dir = "./results/HD209458b/results-260619-jwst-pix-fastchem/"
 
 [STAR]
 reference   = "2017AJ....153..136S"
@@ -26,7 +30,7 @@ circular_orbit          = true
 
 [ATMOSPHERE]
 pressure_layers          = 101
-pressure_bounds_log10bar = [-6, 2]
+pressure_bounds_log10bar = [-8, 2]
 wavelength_bounds_micron = [2.35, 5.05]
 chemical_species = [
   # "Na", "K", "TiO", "VO", "FeH", 
@@ -36,6 +40,7 @@ chemical_species = [
 rayleigh_species  = ["H2", "He"]
 continuum_species = ["H2--H2", "H2--He"]
 opacity_mode      = "lbl"
+model_class       = "TP6FastChem"
 
 [EXOIRIS]
 instruments = [ # NO SPACE
@@ -45,9 +50,9 @@ instruments = [ # NO SPACE
 wl_range_micron   = [ [2.4, 4.0], [3.9, 5.0] ]
 time_range_bjd    = [ [], [2459890.03, 2459890.3] ]
 noise_groups      = [0, 1]
-n_baselines       = [1, 1] 
-rebin_resolutions = [100, 100] # set to 0 for native resolution. 
-noise_model        = "free_gp"
+n_baselines       = [2, 2] 
+rebin_resolutions = [0, 0] # set to 0 for native resolution. 
+noise_model        = "white_marginalized"
 
 [PRIORS.TRANSIT]
 rho         = ["NP", 1.04, 0.07, 0.7, 1.4, "stellar density", "cgs"]
@@ -61,37 +66,37 @@ logg        = ["NP", 4.45, 0.02, 4, 5, "stellar gravity", "log10 cgs"]
 metal       = ["NP", 0.01, 0.05, -1, 1, "stellar metallicity", ""]
 
 [PRIORS.NOISE]
-gp_lg_sigma_0  = ["UP", -6, -2, -inf, inf, "GP log sigma of noise group 0", "log10"]
-gp_lg_rho_0    = ["UP", -3, 0, -inf, inf, "GP log rho of noise group 0", "log10"]
-gp_lg_jitter_0 = ["UP", -6, -2, -inf, inf, "GP log jitter of noise group 0", "log10"]
-gp_lg_sigma_1  = ["UP", -6, -2, -inf, inf, "GP log sigma of noise group 1", "log10"]
-gp_lg_rho_1    = ["UP", -3, 0, -inf, inf, "GP log rho of noise group 1", "log10"]
-gp_lg_jitter_1 = ["UP", -6, -2, -inf, inf, "GP log jitter of noise group 1", "log10"]
+sigma_m_00  = ["UP", 0.2, 5, -inf, inf, "noise factor 00", ""]
+sigma_m_01  = ["UP", 0.2, 5, -inf, inf, "noise factor 01", ""]
 
 [PRIORS.ATMOSPHERE]
 mp          = ["NP", 0.73, 0.04, 0.53, 0.93, "planet mass", "M_j"]
-ref_p       = ["UP", -6, 2, -inf, inf, "reference pressure", "log10bar"] 
-cloud_p     = ["UP", -6, 2, -inf, inf, "cloud-top pressure", "log10bar"] 
+ref_p       = ["UP", -8, 2, -inf, inf, "reference pressure", "log10bar"] 
+cloud_p     = ["UP", -8, 2, -inf, inf, "cloud-top pressure", "log10bar"] 
 cloud_f     = ["UP", 0.0, 1.0, 0, 1.0, "cloud fraction", ""]
-temp0       = ["UP", 0, 3000, -inf, inf, "temperature 0", "K"]
+haze_f      = ["UP", -3, 3, -inf, inf, "haze factor", "log10"]
+temp0       = ["UP", 100, 3000, -inf, inf, "temperature 0", "K"]
 lga1        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a1", ""]
 lga2        = ["UP", -1, 1, -inf, inf, "temperature profile parameter a2", ""]
-lgp1        = ["UP", -6, 0, -inf, inf, "temperature profile parameter p1", "log10bar"]
-lgp2        = ["UP", -6, 0, -inf, inf, "temperature profile parameter p2", "log10bar"] 
-m2h         = ["UP", -1, 3, -1, 3, "atmospheric metallicity", ""]
-c2o         = ["UP", 0.1, 1.6, 0.1, 1.6, "C/O ratio", ""]
-
+lgp1        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p1", "log10bar"]
+lgp2        = ["UP", -8, 0, -inf, inf, "temperature profile parameter p2", "log10bar"] 
+m2h         = ["UP", -3, 3, -inf, inf, "atmospheric metallicity", "log10"]
+c2o         = ["UP", 0.1, 2, -inf, inf, "C/O ratio", " "]
 
 [SAMPLER]
 method      = "dynesty" 
-npools      = 30 
-niter_white = 1000
-nwalkers    = 60 
-# niter_de    = 1000 
-# niter_mcmc  = 2000 
+npools      = 8 
+niter_white = 2000 
 bound       = "multi"
 sample      = "rwalk"
 n_live_points = 240 
-n_effective = 500 
-dlogz_init  = 1.0
-# maxiter_batch = 2000
+n_effective = 400 
+dlogz_init  = 0.1 
+resume       = false
+save_checkpoint = true
+
+[FASTCHEM]
+element_abundances = "/data/fastchem/lodders_2025.dat"
+logk = "/data/fastchem/logK.dat"
+logk_condensates = "/data/fastchem/logK_condensates.dat"
+condensation_mode = "rainout"

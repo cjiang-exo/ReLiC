@@ -489,16 +489,6 @@ class TP6FastChem_SO2(TP6FastChem):
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class GuillotEQChem(BaseAtmosphere):
-    def __init__(self, cfg, radtrans: Radtrans, chem: PreCalculatedEquilibriumChemistryTable):
-        super().__init__(cfg)
-        self.radtrans = radtrans
-        self.chem = chem
-
-    def __call__(self, pv: ndarray) -> ndarray: 
-        raise NotImplementedError()
-
-
 def tp6madhu(pbar: ndarray, t0: float, lga1: float, lga2: float, 
         lgp1: float, lgp2: float, lgp3: float=0) -> ndarray:
     """
@@ -531,68 +521,4 @@ def tp6madhu(pbar: ndarray, t0: float, lga1: float, lga2: float,
     temperatures = convolve(tpad, ones(10) / 10.0, mode='valid')
 
     return temperatures
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-# def calc_ts_prt_guillot(atm_params, atmosphere: Radtrans, 
-#     chem: PreCalculatedEquilibriumChemistryTable, 
-#     planet_radius_cm: float, star_radius_cm: float,
-#     equilibrium_temperature: float, quench_id: int=1,
-#     return_contribution=False):
-
-#     planet_mass     = atm_params[0]*m_jup # g
-#     ref_pressure    = 10**atm_params[1] # bar
-#     cloudtop_pbar   = 10**atm_params[2] # bar
-#     cloud_fraction  = atm_params[-1]
-#     pres_bar        = atmosphere.pressures*1e-6 # cgs to bar
-
-#     # Assume Guillot's T-P model
-#     ref_gravity = g_const * planet_mass / planet_radius_cm**2 
-#     temperatures = get_tprofile(
-#         pressures               = pres_bar, 
-#         infrared_mean_opacity   = 10**atm_params[3],
-#         gamma                   = 10**atm_params[4], 
-#         gravities               = ref_gravity,
-#         intrinsic_temperature   = atm_params[5],
-#         equilibrium_temperature = equilibrium_temperature,
-#     )
-    
-#     # Assume equilibrium chemistry
-#     metallicities = atm_params[7] * ones_like(pres_bar)
-#     co_ratios = atm_params[8] * ones_like(pres_bar)
-#     mass_fractions = chem.interpolate_mass_fractions(
-#         co_ratios               = co_ratios,
-#         log10_metallicities     = metallicities,
-#         temperatures            = temperatures,
-#         pressures               = pres_bar, 
-#         full                    = False,
-#     ) 
-
-#     # quenching the chemistry above 1E-7 bar
-#     for sp in atmosphere._line_species: 
-#         mass_fractions[sp][:quench_id] = mass_fractions[sp][quench_id]
-
-#     mmw = compute_mean_molar_masses(mass_fractions)
-
-#     # allow for partial cloud coverage
-#     _, transit_radius_cm, _add = atmosphere.calculate_transit_radii(
-#         temperatures                = temperatures,
-#         mass_fractions              = mass_fractions,
-#         mean_molar_masses           = mmw,
-#         reference_gravity           = ref_gravity,
-#         planet_radius               = planet_radius_cm,
-#         reference_pressure          = ref_pressure,
-#         opaque_cloud_top_pressure   = cloudtop_pbar,
-#         cloud_fraction              = cloud_fraction,
-#         return_contribution         = return_contribution,
-#     ) 
-
-#     transit_depths = (transit_radius_cm / star_radius_cm)**2
-#     if not return_contribution:
-#         return transit_depths
-#     return transit_depths, _add
-
-# from astropy.convolution import convolve, Box1DKernel
-
-
  

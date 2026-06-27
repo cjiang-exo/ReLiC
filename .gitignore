@@ -24,6 +24,8 @@ plots/
 tests/
 results/
 data/
+ignore/
+config2/
 
 # OS
 .DS_Store
