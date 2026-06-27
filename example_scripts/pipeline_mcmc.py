@@ -9,12 +9,11 @@ os.environ["NUMBA_NUM_THREADS"] =      "1"
 os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'   
 from multiprocessing import Pool   
 
-import argparse
-import numpy as np 
+import argparse 
 
 from relic.core import Relic  
 from relic.plots import RelicVisualization 
-from relic.utils import get_maxlike_estimates, optimize_parallelization 
+from relic.utils import get_maxlike_estimates 
 
 DEFAULT_CFG = '/work/relic/source/config/HD209458b-jwst-pix-tp6fastchem.toml'
 
@@ -30,26 +29,30 @@ else: # for command line execution
 #%% Initialization #############################################################
 
 relic = Relic(config)
-pfig  = RelicVisualization(relic)
+visual  = RelicVisualization(relic)
 
 #%% fit white light curves to validate the covariates ##########################
  
-jitters = []
+state_vectors_alldata = []
 for i, rd in enumerate(relic.raw_data):
     if "STIS" in relic.exoiris.data[i].name:
-        _jit = rd["pca_jitters"][:, :2]
+        _state_vectors = rd["pca_jitters"][:, :2]
     elif "WFC3" in relic.exoiris.data[i].name:
-        _jit = rd["pca_jitters"][:, :2]
+        _state_vectors = rd["pca_jitters"][:, :2]
     else:
-        _jit = None
-    jitters.append(_jit)
-white_covariates = relic.generate_covariates(jitters)
- 
+        _state_vectors = None
+    state_vectors_alldata.append(_state_vectors) 
+
+relic.update_covariates(state_vectors_alldata)
+
+def lnpost_white(pv):
+    return relic.exoiris._wa.lnposterior(pv)
+
 npools = relic.cfg["SAMPLER"]["npools"]
 with Pool(npools) as pool:
-    relic.fit_white(covariates=white_covariates, update_covariates=False, pool=pool)
-
-pfig.plot_white()
+    relic.fit_white(pool=pool, lnpost=lnpost_white)
+ 
+visual.plot_white()
 
 #%% test likelihood evaluation #################################################
 
@@ -85,20 +88,20 @@ with Pool(npools) as pool:
 relic.save_mcmc(overwrite=True, config_file=config)
 
 """ Plot likelihood evolutions """
-pfig.plot_mcmc_lnprob(figname='lnprob.png')
+visual.plot_mcmc_lnprob(figname='lnprob.png')
 
 """ Plot 2D fluxes and errors """
-pfig.plot_2dfluxes(figname='fluxes.png')
+visual.plot_2dfluxes(figname='fluxes.png')
 
 """ Plot limb darkening profiles """
-pfig.plot_ldprofiles(figname='ldprofiles.png')
+visual.plot_ldprofiles(figname='ldprofiles.png')
 
 """ Plot posterior distributions """
 maxlike_params = get_maxlike_estimates(relic)
-pfig.plot_corners(truths=maxlike_params, figname='corners.pdf')
+visual.plot_corners(truths=maxlike_params, figname='corners.pdf')
 
 """ Plot best-fit residuals """
-pfig.plot_residuals(maxlike_params, figname='residuals.png')
+visual.plot_residuals(maxlike_params, figname='residuals.png')
 
 print("Done!")
 # %%

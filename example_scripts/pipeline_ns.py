@@ -9,14 +9,11 @@ os.environ["NUMBA_NUM_THREADS"] =      "1"
 os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'   
 from multiprocessing import Pool
 
-import argparse
-import numpy as np 
-
+import argparse 
 from relic.core import Relic 
-from relic.plots import RelicVisualization
-from relic.utils import optimize_parallelization
+from relic.plots import RelicVisualization 
 
-DEFAULT_CFG = '/work/relic/source/config/HD209458b-jwst-pix-tp6fastchem.toml'
+DEFAULT_CFG = 'tmp.toml'
 
 if 'get_ipython' in globals(): 
     config = DEFAULT_CFG # use DEFAULT_CFG if running in Jupyter Notebook
@@ -52,9 +49,7 @@ def lnpost_white(pv):
 npools = relic.cfg["SAMPLER"]["npools"]
 with Pool(npools) as pool:
     relic.fit_white(pool=pool, lnpost=lnpost_white)
-
-# relic.fit_white()
-                
+ 
 visual.plot_white()
 
 #%% test likelihood evaluation #################################################
@@ -67,9 +62,6 @@ def loglikelihood(pv):
     return relic.lnlikelihood_ns(pv)
 def prior_transform(uv):
     return relic.prior_transform(uv)
-
-# nlivepoints, maxtasks = optimize_parallelization(
-#     relic.cfg["SAMPLER"]["n_live_points"], relic.cfg["SAMPLER"]["npools"])
 
 with Pool(npools, maxtasksperchild=100) as pool:
     results = relic.run_dynesty(

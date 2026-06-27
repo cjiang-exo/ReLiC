@@ -7,7 +7,7 @@ spec_resolving_power_files = [
   "/work/relic/data/resolving_power/NIRCam.dat",
   "/work/relic/data/resolving_power/NIRCam.dat",
 ]
-output_dir = "/work/relic/results/HD209458b/results-260619-jwst-pix-fastchem/"
+output_dir = "/work/relic/results/HD209458b/results-test/"
 
 [STAR]
 reference   = "2017AJ....153..136S"
@@ -51,7 +51,7 @@ wl_range_micron   = [ [2.4, 4.0], [3.9, 5.0] ]
 time_range_bjd    = [ [], [2459890.03, 2459890.3] ]
 noise_groups      = [0, 1]
 n_baselines       = [2, 2] 
-rebin_resolutions = [0, 0] # set to 0 for native resolution. 
+rebin_resolutions = [20, 20] # set to 0 for native resolution. 
 noise_model        = "white_marginalized"
 
 [PRIORS.TRANSIT]
@@ -85,9 +85,9 @@ c2o         = ["UP", 0.1, 2, -inf, inf, "C/O ratio", " "]
 
 [SAMPLER]
 method      = "dynesty" 
-npools      = 60 
-niter_white = 1000
-nwalkers    = 60 
+npools      = 8 
+niter_white = 2000
+npop_white  = 100 
 # niter_de    = 1000 
 # niter_mcmc  = 2000 
 bound       = "multi"
