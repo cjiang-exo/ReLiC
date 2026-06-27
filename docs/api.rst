@@ -1,8 +1,6 @@
 API Reference
 =============
 
-This page provides auto-generated API documentation for the ReLiC package.
-
 .. automodule:: relic
    :members:
    :undoc-members:
@@ -20,6 +18,38 @@ Atmosphere
 ----------
 
 .. automodule:: relic.atmosphere
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+TSLPF
+-----
+
+.. automodule:: relic.tslpf
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+White
+-----
+
+.. automodule:: relic.white
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Utils
+-----
+
+.. automodule:: relic.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Physics
+-------
+
+.. automodule:: relic.physics
    :members:
    :undoc-members:
    :show-inheritance:

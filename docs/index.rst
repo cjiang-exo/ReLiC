@@ -1,9 +1,7 @@
 ReLiC Documentation
 ===================
 
-**ReLiC** — atmospheric **R**etrievals using spectral **L**ight **C**urves — is a Python package for
-atmospheric retrieval of transiting exoplanets. It combines spectral light curve
-fitting with atmospheric forward models to constrain exoplanet atmospheric
+**ReLiC** (atmospheric Retrievals using spectral Light Curves) is a Python package for atmospheric retrieval of transiting exoplanets. It combines spectral light curve fitting with atmospheric forward models to constrain exoplanet atmospheric
 properties.
 
 .. toctree::
