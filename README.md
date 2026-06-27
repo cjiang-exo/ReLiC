@@ -61,9 +61,9 @@ results = relic.run_dynesty(
 
 ```
 
-An example retrieval script can be found:
+An example retrieval script can be found: [`example_scripts/pipeline_ns.py`](example_scripts/pipeline_ns.py)
 
-📓 [`example_scripts/pipeline_ns.py`](example_scripts/pipeline_ns.py)
+See [ReLiC documentation](https://relic.readthedocs.io/en/latest/quickstart.html) for details.
 
 ---
 
