@@ -42,7 +42,7 @@ class Relic:
             raise NotImplementedError("The __call__ method must be implemented to compute a spectrum.")
         if self.atmos_model.wavelengths is None: 
             raise ValueError("The atmosphere model must have initialized wavelength grid.") 
-        
+
         if self.idle: 
             print("Idle mode.")
             return
@@ -567,7 +567,7 @@ class Priors:
             )
 
         return pv
-    
+
 def _get_data(data: dict, key_aliases: list[str]) -> np.ndarray:
     for k in key_aliases:
         if k in data.keys():

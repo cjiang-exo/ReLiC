@@ -1,13 +1,23 @@
 [PATH]
 lightcurve_files = [
+  "/home/ubuntu/work/relic/data/HD209458b/HST/results_G430L_20030503.h5",
+  "/home/ubuntu/work/relic/data/HD209458b/HST/results_G430L_20030625.h5",
+  "/home/ubuntu/work/relic/data/HD209458b/HST/results_G750L_20030531.h5",
+  "/home/ubuntu/work/relic/data/HD209458b/HST/results_G750L_20030705.h5",
+  "/home/ubuntu/work/relic/data/HD209458b/HST/WFC3G141_Iraclis_Deming12181.h5", 
   "/home/ubuntu/work/relic/data/HD209458b/JWST/NIRCAM_F322W2_new.h5",
   "/home/ubuntu/work/relic/data/HD209458b/JWST/NIRCAM_F444W_new.h5",
 ]
 spec_resolving_power_files = [  
+  "", 
+  "", 
+  "", 
+  "", 
+  "",
   "/home/ubuntu/work/relic/data/resolving_power/NIRCam.dat",
   "/home/ubuntu/work/relic/data/resolving_power/NIRCam.dat",
 ]
-output_dir = "/home/ubuntu/work/relic/results/HD209458b/results-260619-jwst-pix-fastchem/"
+output_dir = "/home/ubuntu/work/relic/results/HD209458b/results-260621-joint-pix-fastchem/"
 
 [STAR]
 reference   = "2017AJ....153..136S"
@@ -31,9 +41,9 @@ circular_orbit          = true
 [ATMOSPHERE]
 pressure_layers          = 101
 pressure_bounds_log10bar = [-8, 2]
-wavelength_bounds_micron = [2.35, 5.05]
+wavelength_bounds_micron = [0.295, 5.05]
 chemical_species = [
-  # "Na", "K", "TiO", "VO", "FeH", 
+  "Na", "K", "TiO", "VO", "FeH", 
   "H2O", "CO", "CO2", "CH4", "NH3", 
   "C2H2", "HCN", "SiO", "H2S", "PH3"
 ]
@@ -44,14 +54,19 @@ model_class       = "TP6FastChem"
 
 [EXOIRIS]
 instruments = [ # NO SPACE
+  "HST/STIS_G430L", 
+  "HST/STIS_G430L", 
+  "HST/STIS_G750L", 
+  "HST/STIS_G750L", 
+  "HST/WFC3_G141", 
   "JWST/NIRCam_F322W2", 
   "JWST/NIRCam_F444W"
 ]
-wl_range_micron   = [ [2.4, 4.0], [3.9, 5.0] ]
-time_range_bjd    = [ [], [2459890.03, 2459890.3] ]
-noise_groups      = [0, 1]
-n_baselines       = [2, 2] 
-rebin_resolutions = [20, 20] # set to 0 for native resolution. 
+wl_range_micron   = [ [], [], [], [], [], [2.4, 4.0], [3.9, 5.0] ]
+time_range_bjd    = [ [], [], [], [], [], [], [2459890.03, 2459890.3] ]
+noise_groups      = [0, 0, 1, 1, 2, 3, 4] 
+n_baselines       = [4, 4, 4, 4, 4, 2, 2] 
+rebin_resolutions = [0, 0, 0, 0, 0, 0, 0] # set to 0 for native resolution. 
 noise_model        = "white_marginalized"
 
 [PRIORS.TRANSIT]
@@ -68,6 +83,9 @@ metal       = ["NP", 0.01, 0.05, -1, 1, "stellar metallicity", ""]
 [PRIORS.NOISE]
 sigma_m_00  = ["UP", 0.2, 5, -inf, inf, "noise factor 00", ""]
 sigma_m_01  = ["UP", 0.2, 5, -inf, inf, "noise factor 01", ""]
+sigma_m_02  = ["UP", 0.2, 5, -inf, inf, "noise factor 02", ""]
+sigma_m_03  = ["UP", 0.2, 5, -inf, inf, "noise factor 03", ""]
+sigma_m_04  = ["UP", 0.2, 5, -inf, inf, "noise factor 04", ""]
 
 [PRIORS.ATMOSPHERE]
 mp          = ["NP", 0.73, 0.04, 0.53, 0.93, "planet mass", "M_j"]
@@ -85,9 +103,9 @@ c2o         = ["UP", 0.1, 2, -inf, inf, "C/O ratio", " "]
 
 [SAMPLER]
 method      = "dynesty" 
-npools      = 8 
+npools      = 60 
 niter_white = 2000
-npop_white  = 100 
+nwalkers    = 60 
 # niter_de    = 1000 
 # niter_mcmc  = 2000 
 bound       = "multi"
