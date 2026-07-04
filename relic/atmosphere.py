@@ -143,11 +143,12 @@ class IsothermalFreeChem(BaseAtmosphere):
         ref_pressure    = 10**atm_params[1] # bar
         cloudtop_pbar   = 10**atm_params[2] # bar
         cloud_fraction  = atm_params[3] 
+        haze_factor     = 10**atm_params[4]
 
-        temperatures = full_like(self.pressures_bar, atm_params[4]) 
+        temperatures = full_like(self.pressures_bar, atm_params[5]) 
 
         for i, sp in enumerate(self.radtrans._line_species):
-            self.mass_fractions[sp][:] = full_like(self.pressures_bar, 10**atm_params[5+i])
+            self.mass_fractions[sp][:] = full_like(self.pressures_bar, 10**atm_params[6+i])
 
         _msum = sum([self.mass_fractions[sp][0] for sp in self.radtrans._line_species])
         if _msum < 1.0:
@@ -170,6 +171,7 @@ class IsothermalFreeChem(BaseAtmosphere):
             reference_pressure          = ref_pressure,
             opaque_cloud_top_pressure   = cloudtop_pbar,
             cloud_fraction              = cloud_fraction,
+            haze_factor                 = haze_factor,
             return_contribution         = return_contribution,
         ) 
         transit_depths = (transit_radius_cm / self.star_radius_cm)**2
