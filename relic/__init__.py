@@ -10,8 +10,7 @@ from .atmosphere import (
     TP6EqChem,
     TP6FreeChem,
     TP6FastChem,
-    TP6FastChem_SO2,
-    GuillotEQChem,
+    TP6FastChem_SO2, 
     tp6madhu,
 )
 from .utils import (
