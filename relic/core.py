@@ -63,7 +63,7 @@ class Relic:
         else:
             raise ValueError(f"Sampling method should be either 'dynesty' or 'emcee', got: {self.cfg['SAMPLER']['method']}")
         
-        print("Initialization complete.") 
+        print("Initialization complete.", flush=True) 
 
     def _load_config(self, configuration_file: str):
 
@@ -89,12 +89,12 @@ class Relic:
         shutil.copy(configuration_file, os.path.join(
             cfg["PATH"]["output_dir"], os.path.basename(configuration_file)
         ))
-        print(f"Configuration file loaded: {configuration_file}")
+        print(f"Configuration file loaded: {configuration_file}", flush=True)
         return cfg
         
     def _load_raw_data(self) -> list[h5py.File]:
         filelist = self.cfg["PATH"]["lightcurve_files"]
-        print("\nLoading data: ")
+        print("\nLoading data: ", flush=True)
         [print(f"  {f}") for f in filelist]
         return [h5py.File(f, 'r') for f in filelist]
     
@@ -115,7 +115,7 @@ class Relic:
                 flux_errors = flux_errors.T
  
             dlist.append(TSData(
-                time        = time, 
+                time        = np.asarray(time) - 2459890.2, 
                 wavelength  = wavelength, 
                 fluxes      = fluxes, 
                 errors      = flux_errors, 
@@ -141,20 +141,20 @@ class Relic:
 
             print("Loaded dataset #{0:d} with nwl={1:d}, nt={2:d}.".format(
                 i, *dlist[i].fluxes.shape
-            ))
+            ), flush=True)
 
             r = self.cfg["EXOIRIS"]["rebin_resolutions"][i]
             if r > 0:
                 dlist[-1] = dlist[-1].bin_wavelength(r=r, estimate_errors=False)
                 print(f"  Rebinned to resolution R={r}. "
-                      f"New nwl={dlist[-1].fluxes.shape[0]}.")
+                      f"New nwl={dlist[-1].fluxes.shape[0]}.", flush=True)
             else:
-                print("  No wavelength binning applied, using native resolution.")
+                print("  No wavelength binning applied, using native resolution.", flush=True)
 
         return reduce(lambda x,y: x+y, dlist)
     
     def _init_LDModel(self):
-        print('\nInitializing LDTk model... It takes 1 -- 30 minutes. Be patient!')
+        print('\nInitializing LDTk model... It takes 1 -- 30 minutes. Be patient!', flush=True)
 
         _t = self.cfg['STAR']['teff']
         _g = self.cfg['STAR']['logg']
@@ -163,13 +163,13 @@ class Relic:
         return LDTkLD(
             data    = self.tsdata, 
             teff    = (_t[0], max(_t[1], 50)),
-            logg    = (_g[0], max(_g[1], 0.05)), 
-            metal   = (_m[0], max(_m[1], 0.05)),
+            logg    = (_g[0], max(_g[1], 0.02)),
+            metal   = (_m[0], max(_m[1], 0.02)),
             dataset = 'visir'
         )
     
     def _init_ExoIris(self):
-        print("\nInitializing ExoIris model...")
+        print("\nInitializing ExoIris model...", flush=True)
 
         return RelicExoIris( 
             name           = self.cfg["PLANET"]["name"], 
@@ -227,7 +227,7 @@ class Relic:
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa, covariates=covariates)
 
     def fit_white(self, pool:Optional[Pool]=None, lnpost:Optional[Callable]=None, npop=100):
-        print("Fitting white light curves to validate covariates...") 
+        print("Fitting white light curves to validate covariates...", flush=True)
 
         niter = self.cfg["SAMPLER"]["niter_white"] 
         vectorize = True if pool is None else False
@@ -269,23 +269,6 @@ class Relic:
                 _covs = hstack([_covs, _standardize(state_vectors[i])]) 
             covariates.append(_covs)
         return covariates
-        
-    # def update_covariates(self,):
-    #     raise NotImplementedError("This method has not been validated.")
-    #     fmod = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=False)) 
-    #     for i, (_t, _cov) in enumerate(zip(self.exoiris._wa.times, self.exoiris._wa.covariates)):
-    #         newt = self.exoiris.data[i].time
-    #         if "JWST" in self.exoiris.data[i].name:
-    #             sl = self.exoiris._wa.lcslices[i]
-    #             white_systematics = self.exoiris._wa.ofluxa[sl] - fmod[sl]
-    #             # white_systematics = ffit[sl] - fmod[sl]
-    #             white_systematics -= np.mean(white_systematics)
-    #             white_systematics /= np.std(white_systematics) 
-    #             self.exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
-    #         else: # HST
-    #             newcov = [np.interp(newt, _t, _c) for _c in _cov.T]
-    #             self.exoiris.data[i].covs[:] = np.array(newcov).T
-    #     print("Covariates updated based on white light curve fit.")
 
     def sample_from_prior(self, size: int) -> ndarray:
         return squeeze(self.exoiris.ps.sample_from_prior(size))
