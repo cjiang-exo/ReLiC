@@ -365,22 +365,26 @@ class Relic:
             shutil.copy(config_file, outname)
             print(f"Configuration file copied to {outname}.")
 
-    def run_nautilus(self, prior: Callable, loglikelihood: Callable, pool: Optional[Pool] = None, n_live_points: int = 2000, n_effective: int = 10000, n_networks: int = 8):   
+    def run_nautilus(self, prior: Callable, loglikelihood: Callable, pool: Optional[Pool] = None, n_networks: int = 8) -> tuple[NautilusSampler, dict]:   
         start_time = datetime.now()
         print(f"Start time: {start_time}", flush=True)
+
+        filepath = os.path.join(self.cfg["PATH"]["output_dir"], 'checkpoint.hdf5')
 
         n_dim = len(self.exoiris.ps)
         sampler = NautilusSampler(
             prior, loglikelihood, 
             n_dim            = n_dim, 
-            n_live           = n_live_points, 
+            n_live           = self.cfg['SAMPLER']['n_live_points'], 
             n_networks       = n_networks, 
             n_batch          = 20 * self.cfg["SAMPLER"]["npools"], 
             enlarge_per_dim  = min(1 + (1.0 / n_dim), 1.1), 
             pool             = pool, 
             pass_dict        = False, 
+            filepath         = filepath,
+            resume           = self.cfg["SAMPLER"]["resume"],
         )
-        sampler.run(verbose=True, n_eff=n_effective)
+        sampler.run(verbose=True, n_eff=self.cfg["SAMPLER"]["n_effective"])
 
         end_time = datetime.now()
         delta_time = end_time - start_time
