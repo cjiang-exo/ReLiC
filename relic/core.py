@@ -18,6 +18,8 @@ from numpy.polynomial import Chebyshev
 from numpy.random import default_rng
 from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP
 from scipy.stats import norm, truncnorm
+# from time import time
+from datetime import datetime
 
 from nautilus import Prior as NautilusPrior
 from nautilus import Sampler as NautilusSampler
@@ -60,22 +62,7 @@ class Relic:
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa)
 
         if self.cfg['SAMPLER']['method'] in ['dynesty', 'nautilus'] :
-            self.prior_transform = Priors(self.exoiris.ps)
-        # elif self.cfg['SAMPLER']['method'] == 'nautilus':
-        #     self.prior_transform = NautilusPrior()
-        #     for item in self.exoiris.ps:
-        #         if isinstance(item.prior, UP):
-        #             a, b = item.prior.a, item.prior.b
-        #             self.prior_transform.add_parameter(item.name, dist=(a, b)) 
-        #         elif isinstance(item.prior, NP):
-        #             lb, ub = item.bounds
-        #             mean, std = item.prior.mean, item.prior.std
-        #             if isfinite(lb) and isfinite(ub): # truncated normal
-        #                 a = (lb - mean) / std
-        #                 b = (ub - mean) / std
-        #                 self.prior_transform.add_parameter(item.name, dist=truncnorm(a, b, mean, std)) 
-        #             else: # unbounded normal
-        #                 self.prior_transform.add_parameter(item.name, dist=norm(mean, std))  
+            self.prior_transform = Priors(self.exoiris.ps) 
         elif self.cfg['SAMPLER']['method'] == 'emcee':
             pass
         else:
@@ -378,16 +365,28 @@ class Relic:
             shutil.copy(config_file, outname)
             print(f"Configuration file copied to {outname}.")
 
-    def run_nautilus(self, prior: Callable, loglikelihood: Callable, pool: Optional[Pool] = None, n_live_points: int = 2000, n_effective: int = 10000, n_networks: int = 4):  
+    def run_nautilus(self, prior: Callable, loglikelihood: Callable, pool: Optional[Pool] = None, n_live_points: int = 2000, n_effective: int = 10000, n_networks: int = 8):   
+        start_time = datetime.now()
+        print(f"Start time: {start_time}", flush=True)
+
+        n_dim = len(self.exoiris.ps)
         sampler = NautilusSampler(
             prior, loglikelihood, 
-            n_dim      = len(self.exoiris.ps),
-            n_live     = n_live_points, 
-            n_networks = n_networks,
-            pool       = pool, 
-            pass_dict  = False,
+            n_dim            = n_dim, 
+            n_live           = n_live_points, 
+            n_networks       = n_networks, 
+            n_batch          = 20 * self.cfg["SAMPLER"]["npools"], 
+            enlarge_per_dim  = min(1 + (1.0 / n_dim), 1.1), 
+            pool             = pool, 
+            pass_dict        = False, 
         )
         sampler.run(verbose=True, n_eff=n_effective)
+
+        end_time = datetime.now()
+        delta_time = end_time - start_time
+        
+        print(f"End time: {end_time}")
+        print(f"Time elapsed: {delta_time}", flush=True)
 
         samples, log_w, log_l = sampler.posterior()
         results = {
