@@ -64,15 +64,23 @@ def prior_transform(uv):
     return relic.prior_transform(uv)
 
 with Pool(npools, maxtasksperchild=100) as pool:
-    results = relic.run_dynesty(
-        loglikelihood   = loglikelihood,
-        prior_transform = prior_transform,
-        pool            = pool,
-        queue_size      = npools,
-        nlivepoints     = relic.cfg["SAMPLER"]["n_live_points"],
-        bound           = "multi",
-        sample          = "rwalk", 
+    results = relic.run_nautilus(
+        loglikelihood   = loglikelihood, 
+        pool            = pool, 
+        n_live_points   = relic.cfg["SAMPLER"]["n_live_points"],
+        n_effective     = relic.cfg["SAMPLER"]["n_effective"],
     )
+
+# with Pool(npools, maxtasksperchild=100) as pool:
+#     results = relic.run_dynesty(
+#         loglikelihood   = loglikelihood,
+#         prior_transform = prior_transform,
+#         pool            = pool,
+#         queue_size      = npools,
+#         nlivepoints     = relic.cfg["SAMPLER"]["n_live_points"],
+#         bound           = "multi",
+#         sample          = "rwalk", 
+#     )
 
 #%% Post analysis and plotting #################################################
 

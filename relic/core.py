@@ -19,6 +19,9 @@ from numpy.random import default_rng
 from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP
 from scipy.stats import norm, truncnorm
 
+from nautilus import Prior as NautilusPrior
+from nautilus import Sampler as NautilusSampler
+
 from .atmosphere import *
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
@@ -56,8 +59,23 @@ class Relic:
 
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa)
 
-        if self.cfg['SAMPLER']['method'] in 'dynesty' :
+        if self.cfg['SAMPLER']['method'] in ['dynesty', 'nautilus'] :
             self.prior_transform = Priors(self.exoiris.ps)
+        # elif self.cfg['SAMPLER']['method'] == 'nautilus':
+        #     self.prior_transform = NautilusPrior()
+        #     for item in self.exoiris.ps:
+        #         if isinstance(item.prior, UP):
+        #             a, b = item.prior.a, item.prior.b
+        #             self.prior_transform.add_parameter(item.name, dist=(a, b)) 
+        #         elif isinstance(item.prior, NP):
+        #             lb, ub = item.bounds
+        #             mean, std = item.prior.mean, item.prior.std
+        #             if isfinite(lb) and isfinite(ub): # truncated normal
+        #                 a = (lb - mean) / std
+        #                 b = (ub - mean) / std
+        #                 self.prior_transform.add_parameter(item.name, dist=truncnorm(a, b, mean, std)) 
+        #             else: # unbounded normal
+        #                 self.prior_transform.add_parameter(item.name, dist=norm(mean, std))  
         elif self.cfg['SAMPLER']['method'] == 'emcee':
             pass
         else:
@@ -360,6 +378,36 @@ class Relic:
             shutil.copy(config_file, outname)
             print(f"Configuration file copied to {outname}.")
 
+    def run_nautilus(self, prior: Callable, loglikelihood: Callable, pool: Optional[Pool] = None, n_live_points: int = 2000, n_effective: int = 10000, n_networks: int = 4):  
+        sampler = NautilusSampler(
+            prior, loglikelihood, 
+            n_dim      = len(self.exoiris.ps),
+            n_live     = n_live_points, 
+            n_networks = n_networks,
+            pool       = pool, 
+            pass_dict  = False,
+        )
+        sampler.run(verbose=True, n_eff=n_effective)
+
+        samples, log_w, log_l = sampler.posterior()
+        results = {
+            'log_evidence': sampler.log_z,
+            'log_evidence_error': 1 / np.sqrt(sampler.n_eff),
+            'n_effective_samples': sampler.n_eff,
+            'posterior_samples': samples,
+            'log_weights': log_w,
+            'log_likelihoods': log_l,
+        }
+        odir = self.cfg["PATH"]["output_dir"]
+        with open(os.path.join(odir, 'ns_results.pkl'), 'wb') as f:
+            pickle.dump(results, f)
+            print(f"Sampling results saved to {os.path.join(odir, 'ns_results.pkl')}")
+
+        print('log Z = {:.2f} +/- {:.2f}'.format(sampler.log_z, 1 / np.sqrt(sampler.n_eff)))
+        print('Number of effective samples: {}'.format(sampler.n_eff))
+        print('Sampling complete.')
+        return sampler, results
+
     def run_dynesty(self, loglikelihood: Callable, prior_transform: Callable, pool: Optional[Pool] = None, nlivepoints: int = 100, bound='multi', sample='rwalk', queue_size: int = None): 
 
         save_checkpoint = self.cfg["SAMPLER"].get("save_checkpoint", False)
@@ -401,7 +449,7 @@ class Relic:
         odir = self.cfg["PATH"]["output_dir"]
         with open(os.path.join(odir, 'ns_results.pkl'), 'wb') as f:
             pickle.dump(results, f)
-            print(f"Dynesty results saved to {os.path.join(odir, 'ns_results.pkl')}")
+            print(f"Sampling results saved to {os.path.join(odir, 'ns_results.pkl')}")
 
         results.summary() 
         n_effective = get_neff_from_logwt(results.logwt)
@@ -421,12 +469,19 @@ class Relic:
 
         ndim = len(self.exoiris._tsa.ps)
         
-        if self.cfg['SAMPLER']['method'] == 'dynesty':
+        if self.cfg['SAMPLER']['method'] in ['dynesty', 'nautilus']:
             rng = default_rng(seed)
             unit_cubes = rng.uniform(size=(nsamples, ndim))
             prior_params = [self.prior_transform(c) for c in unit_cubes]
             pp = [self.lnlikelihood_ns(p) for p in prior_params]
             [print(f"lnprob = {_v:.6e}") for _v in pp]
+
+        # elif self.cfg['SAMPLER']['method'] == 'nautilus':
+        #     rng = default_rng(seed)
+        #     unit_cubes = rng.uniform(size=(nsamples, ndim))
+        #     prior_params = [self.prior_transform.unit_to_physical(c) for c in unit_cubes]
+        #     pp = [self.lnlikelihood_ns(p) for p in prior_params]
+        #     [print(f"lnprob = {_v:.6e}") for _v in pp]
 
         elif self.cfg['SAMPLER']['method'] == 'emcee':
             prior_params = self.sample_from_prior(nsamples)

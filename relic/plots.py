@@ -127,7 +127,7 @@ class RelicVisualization:
 
         return figs
     
-    def plot_corners(self, samples=None, truths=None, figname="corners.pdf"):
+    def plot_corners(self, samples=None, weights=None, truths=None, figname="corners.pdf"):
 
         if samples is None:
             samples = self.relic.exoiris._tsa.sampler.flatchain
@@ -135,6 +135,7 @@ class RelicVisualization:
         fig = corner.corner(
             samples,
             labels=[p.name for p in self.relic.exoiris.ps],
+            weights=weights,
             truths=truths,
             show_titles=True, title_fmt='.4g',
             plot_datapoints=False, plot_density=True,
