@@ -170,7 +170,7 @@ class Relic:
                 t14 = self.cfg["PLANET"]["transit_duration_d"][0]
             ) 
             dlist[-1].normalize_to_poly()
-            dlist[-1].mask_outliers(sigma=8.0)
+            dlist[-1].mask_outliers(sigma=10.0)
 
             print("Loaded dataset #{0:d} with nwl={1:d}, nt={2:d}.".format(
                 i, *dlist[i].fluxes.shape
