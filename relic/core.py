@@ -1,6 +1,8 @@
+import importlib
 import os
 import pickle
 import shutil
+import sys
 import tomllib
 from functools import reduce
 from multiprocessing.pool import Pool
@@ -20,11 +22,10 @@ from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP
 from scipy.stats import norm, truncnorm
 # from time import time
 from datetime import datetime
-
-from nautilus import Prior as NautilusPrior
+ 
 from nautilus import Sampler as NautilusSampler
 
-from .atmosphere import *
+from .atmosphere import BaseAtmosphere
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
 
@@ -37,12 +38,14 @@ NM_WHITE_PROFILED = 3
 
 class Relic: 
 
-    def __init__(self, configuration_file: str, idle: bool = False):
+    def __init__(self, config: str, idle: bool = False):
 
         self.idle = idle
-        self.cfg = self._load_config(configuration_file)
+        
+        self.cfg = self._validate_config(config)
+        self.atmos_model = self._resolve_atmosphere_class(
+            self.cfg['ATMOSPHERE']['model_class'])(self.cfg)
 
-        self.atmos_model = eval(self.cfg['ATMOSPHERE']['model_class'])(self.cfg)
         if self.atmos_model.__class__.__call__ is BaseAtmosphere.__call__:
             raise NotImplementedError("The __call__ method must be implemented to compute a spectrum.")
         if self.atmos_model.wavelengths is None: 
@@ -70,7 +73,7 @@ class Relic:
         
         print("Initialization complete.", flush=True) 
 
-    def _load_config(self, configuration_file: str):
+    def _validate_config(self, configuration_file: str):
 
         cfg = tomllib.load(open(configuration_file, 'rb'))
         if self.idle:
@@ -96,6 +99,25 @@ class Relic:
         ))
         print(f"Configuration file loaded: {configuration_file}", flush=True)
         return cfg
+     
+    def _resolve_atmosphere_class(self, class_name: str):
+        """ Resolve an atmosphere model class by name. """ 
+        atm_mod = sys.modules.get('relic.atmosphere')
+        try:
+            return getattr(atm_mod, class_name)
+        except AttributeError:
+            pass
+
+        main_mod = sys.modules.get('__main__') 
+        try:
+            return getattr(main_mod, class_name)
+        except AttributeError:
+            pass
+
+        raise NameError(
+            f"Could not resolve atmosphere model class '{class_name}'. "
+            f"Define or import it in your main script."
+        )
         
     def _load_raw_data(self) -> list[h5py.File]:
         filelist = self.cfg["PATH"]["lightcurve_files"]
@@ -468,7 +490,7 @@ class Relic:
         return results
     
     def run_test(self, nsamples:int=3, seed:int=None):
-        print("Running a quick test of posterior evaluation...")
+        print("Running a quick sampling test...")
 
         ndim = len(self.exoiris._tsa.ps)
         
@@ -477,14 +499,7 @@ class Relic:
             unit_cubes = rng.uniform(size=(nsamples, ndim))
             prior_params = [self.prior_transform(c) for c in unit_cubes]
             pp = [self.lnlikelihood_ns(p) for p in prior_params]
-            [print(f"lnprob = {_v:.6e}") for _v in pp]
-
-        # elif self.cfg['SAMPLER']['method'] == 'nautilus':
-        #     rng = default_rng(seed)
-        #     unit_cubes = rng.uniform(size=(nsamples, ndim))
-        #     prior_params = [self.prior_transform.unit_to_physical(c) for c in unit_cubes]
-        #     pp = [self.lnlikelihood_ns(p) for p in prior_params]
-        #     [print(f"lnprob = {_v:.6e}") for _v in pp]
+            [print(f"lnprob = {_v:.6e}") for _v in pp] 
 
         elif self.cfg['SAMPLER']['method'] == 'emcee':
             prior_params = self.sample_from_prior(nsamples)

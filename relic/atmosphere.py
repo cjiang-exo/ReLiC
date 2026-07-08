@@ -6,11 +6,13 @@ import os
 
 from astropy import constants as const
 from numpy import array, ones, full_like, logspace, ndarray, where, log, empty_like, convolve, pad, zeros_like, zeros
+from math import sqrt
 from petitRADTRANS.physical_constants import m_jup, r_jup_mean, r_sun, G as g_const
 from petitRADTRANS.radtrans import Radtrans
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
 from petitRADTRANS.chemistry.utils import compute_mean_molar_masses
-from petitRADTRANS.physics import temperature_profile_function_guillot_global as get_tprofile  
+from petitRADTRANS.physics import temperature_profile_function_guillot 
+from pytransit.orbits import as_from_rhop
 import pyfastchem as fc
 
 KB = const.k_B.cgs.value
@@ -447,6 +449,54 @@ class TP6FastChem(BaseAtmosphere):
             self._mass_frac_dict[n][:] = self._gas_mass_frac[:, i] + 1e-99
         
         return self._mass_frac_dict
+
+class GuillotFastChem_validation(TP6FastChem):
+    def __call__(self, pv: ndarray, return_contribution: bool = False):
+
+        atm_params      = pv[self._sl_atm]
+        ref_gravity     = atm_params[0] * self._cgravity # cgs
+        ref_pressure    = 10**atm_params[1] # bar
+        cloudtop_pbar   = 10**atm_params[2] # bar
+        cloud_fraction  = atm_params[3]  
+
+        teff      = pv[4]
+        a_rs      = as_from_rhop(pv[0], pv[1])
+        albedo    = atm_params[7]
+        teq       = teff * sqrt(0.5 / a_rs) * (1 - albedo)**0.25 
+
+        temperatures = temperature_profile_function_guillot(
+            self.pressures_bar, 
+            infrared_mean_opacity = 10**atm_params[4],
+            gamma                 = 10**atm_params[5],
+            gravities             = ref_gravity,
+            intrinsic_temperature = atm_params[6],
+            equilibrium_temperature = teq,
+        ) 
+        temperatures = temperatures.clip(100, 3400)  
+ 
+        metallicity = 10**atm_params[8]
+        co_ratios = atm_params[9]
+ 
+        mass_fractions = self.get_mass_fractions(metallicity, co_ratios, temperatures)
+        if mass_fractions == -1:
+            return zeros_like(self.wavelengths) # capture and return null values
+ 
+        _, transit_radius_cm, _add = self.radtrans.calculate_transit_radii(
+            temperatures                = temperatures,
+            mass_fractions              = mass_fractions,
+            mean_molar_masses           = self.mmw,
+            reference_gravity           = ref_gravity,
+            planet_radius               = self.planet_radius_cm,
+            reference_pressure          = ref_pressure,
+            opaque_cloud_top_pressure   = cloudtop_pbar, 
+            cloud_fraction              = cloud_fraction,
+            return_contribution         = return_contribution,
+        ) 
+        transit_depths = (transit_radius_cm / self.star_radius_cm)**2 
+
+        if not return_contribution:
+            return transit_depths
+        return transit_depths, _add
 
 class TP6FastChem_SO2(TP6FastChem):
     def __call__(self, pv: ndarray, return_contribution: bool = False):
