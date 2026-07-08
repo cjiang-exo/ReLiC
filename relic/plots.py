@@ -190,8 +190,7 @@ class RelicVisualization:
         return fig
 
     def plot_transmission_spectra(self, maxlike_param:ndarray, 
-                                  figname:str="transmission_spectrum.png", 
-                                  pool=None):
+                                  figname:str="transmission_spectrum.png" ):
         
         wl_model = self.relic.atmos_model.wavelengths
         ts_modelmaxlike = 100 * self.relic.atmos_model(maxlike_param)

@@ -1,4 +1,3 @@
-import importlib
 import os
 import pickle
 import shutil
@@ -126,6 +125,13 @@ class Relic:
         return [h5py.File(f, 'r') for f in filelist]
     
     def _init_TSData(self) -> TSDataGroup:
+
+        def _get_data(data: dict, key_aliases: list[str]) -> np.ndarray:
+            for k in key_aliases:
+                if k in data.keys():
+                    return data[k]
+            raise KeyError(f"None of the keys {key_aliases} found in the data.")
+
         dlist = []
         for i, rd in enumerate(self.raw_data):
             try:  # specify edges for STIS and WFC3
@@ -624,8 +630,3 @@ class Priors:
 
         return pv
 
-def _get_data(data: dict, key_aliases: list[str]) -> np.ndarray:
-    for k in key_aliases:
-        if k in data.keys():
-            return data[k]
-    raise KeyError(f"None of the keys {key_aliases} found in the data.")

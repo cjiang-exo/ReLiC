@@ -10,6 +10,7 @@ os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'
 from multiprocessing import Pool
 
 import argparse 
+import numpy as np
 from relic.core import Relic 
 from relic.plots import RelicVisualization 
 
@@ -63,24 +64,13 @@ def loglikelihood(pv):
 def prior_transform(uv):
     return relic.prior_transform(uv)
 
-with Pool(npools, maxtasksperchild=100) as pool:
+with Pool(npools, maxtasksperchild=500) as pool:
     results = relic.run_nautilus(
         loglikelihood   = loglikelihood, 
         pool            = pool, 
         n_live_points   = relic.cfg["SAMPLER"]["n_live_points"],
         n_effective     = relic.cfg["SAMPLER"]["n_effective"],
     )
-
-# with Pool(npools, maxtasksperchild=100) as pool:
-#     results = relic.run_dynesty(
-#         loglikelihood   = loglikelihood,
-#         prior_transform = prior_transform,
-#         pool            = pool,
-#         queue_size      = npools,
-#         nlivepoints     = relic.cfg["SAMPLER"]["n_live_points"],
-#         bound           = "multi",
-#         sample          = "rwalk", 
-#     )
 
 #%% Post analysis and plotting #################################################
 
@@ -90,15 +80,17 @@ visual.plot_2dfluxes(figname='fluxes.png')
 """ Plot limb darkening profiles """
 visual.plot_ldprofiles(figname='ldprofiles.png')
 
-""" Plot posterior distributions """  
-maxlike_params = results['samples'][results['logl'].argmax()]
-visual.plot_corners(samples=results.samples_equal(), truths=maxlike_params, figname='corners.pdf') 
+""" Plot posterior distributions """   
+samples = results['posterior_samples']
+maxlike_params = samples[results['log_likelihoods'].argmax()]
+weights = np.exp(results['log_weights'])
+visual.plot_corners(samples=samples, weights=weights, truths=maxlike_params, figname='corners.pdf') 
 
 """ Plot best-fit residuals """ 
 visual.plot_residuals(maxlike_params, figname='residuals.png')
 
 """ Plot transmission spectra """
-visual.plot_transmission_spectra(maxlike_params, samples=results.samples_equal())
+visual.plot_transmission_spectra(maxlike_params, figname='transmission_spectra.png')
 
 print("Done!")
 
