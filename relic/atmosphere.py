@@ -3,7 +3,6 @@ This is where users define their own atmospheric models.
 """
 
 import os
-
 from astropy import constants as const
 from numpy import array, ones, full_like, logspace, ndarray, where, log, empty_like, convolve, pad, zeros_like, zeros
 from math import sqrt
