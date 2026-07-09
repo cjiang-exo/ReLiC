@@ -129,7 +129,7 @@ class Relic:
         def _get_data(data: dict, key_aliases: list[str]) -> np.ndarray:
             for k in key_aliases:
                 if k in data.keys():
-                    return data[k]
+                    return data[k].astype(np.float64)
             raise KeyError(f"None of the keys {key_aliases} found in the data.")
 
         dlist = []
@@ -148,7 +148,7 @@ class Relic:
                 flux_errors = flux_errors.T
  
             dlist.append(TSData(
-                time        = np.asarray(time), # - 2459890.2,
+                time        = np.asarray(time), # -2459890.2,
                 wavelength  = wavelength, 
                 fluxes      = fluxes, 
                 errors      = flux_errors, 
@@ -299,7 +299,8 @@ class Relic:
                 x = _standardize(d.time) 
             _covs = array([Chebyshev.basis(deg)(x) for deg in range(n+1)]).T 
             if (state_vectors is not None) and (state_vectors[i] is not None):
-                _covs = hstack([_covs, _standardize(state_vectors[i])]) 
+                v = state_vectors[i].astype(np.float64)
+                _covs = hstack([_covs, _standardize(v)])
             covariates.append(_covs)
         return covariates
 
