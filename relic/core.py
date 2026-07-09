@@ -148,7 +148,7 @@ class Relic:
                 flux_errors = flux_errors.T
  
             dlist.append(TSData(
-                time        = np.asarray(time) - 2459890.2, 
+                time        = np.asarray(time), # - 2459890.2,
                 wavelength  = wavelength, 
                 fluxes      = fluxes, 
                 errors      = flux_errors, 
@@ -421,10 +421,16 @@ class Relic:
         print(f"Time elapsed: {delta_time}", flush=True)
 
         samples, log_w, log_l = sampler.posterior()
+        pnames = [p.name for p in self.exoiris.ps]
+        maxlike_params = samples[log_l.argmax()]
+        bestfit_model  = self.exoiris._tsa.flux_model(maxlike_params, include_baseline=True) 
         results = {
             'log_evidence': sampler.log_z,
             'log_evidence_error': 1 / np.sqrt(sampler.n_eff),
             'n_effective_samples': sampler.n_eff,
+            'param_names': pnames,
+            'maxlike_params': maxlike_params,
+            'bestfit_model': bestfit_model,
             'posterior_samples': samples,
             'log_weights': log_w,
             'log_likelihoods': log_l,
