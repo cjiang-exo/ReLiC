@@ -499,32 +499,30 @@ class GuillotFastChem(TP6FastChem):
             return transit_depths
         return transit_depths, _add
     
-class GuillotFastChem_validation(TP6FastChem):
+class GuillotFastChem_clear(TP6FastChem):
     def __call__(self, pv: ndarray, return_contribution: bool = False):
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
-        ref_pressure    = 10**atm_params[1] # bar
-        cloudtop_pbar   = 10**atm_params[2] # bar
-        cloud_fraction  = atm_params[3]  
+        ref_pressure    = 10**atm_params[1] # bar 
 
         teff      = pv[4]
         a_rs      = as_from_rhop(pv[0], pv[1])
-        albedo    = atm_params[7]
+        albedo    = atm_params[5]
         teq       = teff * sqrt(0.5 / a_rs) * (1 - albedo)**0.25 
 
         temperatures = temperature_profile_function_guillot(
             self.pressures_bar, 
-            infrared_mean_opacity = 10**atm_params[4],
-            gamma                 = 10**atm_params[5],
+            infrared_mean_opacity = 10**atm_params[2],
+            gamma                 = 10**atm_params[3],
             gravities             = ref_gravity,
-            intrinsic_temperature = atm_params[6],
+            intrinsic_temperature = atm_params[4],
             equilibrium_temperature = teq,
         ) 
         temperatures = temperatures.clip(100, 3400)  
  
-        metallicity = 10**atm_params[8]
-        co_ratios = atm_params[9]
+        metallicity = 10**atm_params[6]
+        co_ratios = atm_params[7]
  
         mass_fractions = self.get_mass_fractions(metallicity, co_ratios, temperatures)
         if mass_fractions == -1:
@@ -536,9 +534,7 @@ class GuillotFastChem_validation(TP6FastChem):
             mean_molar_masses           = self.mmw,
             reference_gravity           = ref_gravity,
             planet_radius               = self.planet_radius_cm,
-            reference_pressure          = ref_pressure,
-            opaque_cloud_top_pressure   = cloudtop_pbar, 
-            cloud_fraction              = cloud_fraction,
+            reference_pressure          = ref_pressure, 
             return_contribution         = return_contribution,
         ) 
         transit_depths = (transit_radius_cm / self.star_radius_cm)**2 
