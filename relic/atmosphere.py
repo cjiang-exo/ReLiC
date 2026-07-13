@@ -333,11 +333,14 @@ class M09FastChem(BaseAtmosphere):
         self.star_radius_cm   = cfg["STAR"]["radius_rsun"][0] * r_sun 
         self._cgravity        = g_const * m_jup / self.planet_radius_cm**2   
         
-        if os.path.exists(cfg["FASTCHEM"]["logk"]) and os.path.exists(cfg["FASTCHEM"]["element_abundances"]):
+        logk_path = os.path.expanduser(cfg["FASTCHEM"]["logk"])
+        elem_path = os.path.expanduser(cfg["FASTCHEM"]["element_abundances"])
+        cond_path = os.path.expanduser(cfg["FASTCHEM"].get("logk_condensates", "none"))
+        if os.path.exists(logk_path) and os.path.exists(elem_path):
             self.fastchem = fc.FastChem(
-                cfg["FASTCHEM"]["element_abundances"],
-                cfg["FASTCHEM"]["logk"],
-                cfg["FASTCHEM"].get("logk_condensates", "none"),
+                elem_path,
+                logk_path,
+                cond_path,
                 0
             )
         else:

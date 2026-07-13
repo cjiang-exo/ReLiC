@@ -88,10 +88,22 @@ class Relic:
 
         # Verify that the input files exist
         lightcurve_files = cfg["PATH"].get("lightcurve_files", [])
-        for f in lightcurve_files:
-            if not os.path.isfile(f):
+        for i, f in enumerate(lightcurve_files):
+            f_expanded = os.path.expanduser(f)
+            if not os.path.isfile(f_expanded):
                 raise FileNotFoundError(f"Input file '{f}' does not exist.")
+            cfg["PATH"]["lightcurve_files"][i] = f_expanded
+ 
+        spec_files = cfg["PATH"].get("spec_resolving_power_files", [])
+        for i, f in enumerate(spec_files):
+            cfg["PATH"]["spec_resolving_power_files"][i] = os.path.expanduser(f)
+ 
+        if "FASTCHEM" in cfg:
+            for key in ["element_abundances", "logk", "logk_condensates"]:
+                if key in cfg["FASTCHEM"] and isinstance(cfg["FASTCHEM"][key], str):
+                    cfg["FASTCHEM"][key] = os.path.expanduser(cfg["FASTCHEM"][key])
 
+        cfg["PATH"]["output_dir"] = os.path.expanduser(cfg["PATH"]["output_dir"])
         os.makedirs(cfg["PATH"]["output_dir"], exist_ok=True)
         shutil.copy(configuration_file, os.path.join(
             cfg["PATH"]["output_dir"], os.path.basename(configuration_file)
