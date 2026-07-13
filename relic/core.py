@@ -68,7 +68,7 @@ class Relic:
         elif self.cfg['SAMPLER']['method'] == 'emcee':
             pass
         else:
-            raise ValueError(f"Sampling method should be either 'dynesty' or 'emcee', got: {self.cfg['SAMPLER']['method']}")
+            raise ValueError(f"Sampling method should be one of 'dynesty', 'nautilus', or 'emcee', got: {self.cfg['SAMPLER']['method']}")
         
         print("Initialization complete.", flush=True) 
 
