@@ -121,7 +121,8 @@ class Relic:
     def _load_raw_data(self) -> list[h5py.File]:
         filelist = self.cfg["PATH"]["lightcurve_files"]
         print("\nLoading data: ", flush=True)
-        [print(f"  {f}") for f in filelist]
+        for f in filelist:
+            print(f"  {f}", flush=True)
         return [h5py.File(f, 'r') for f in filelist]
     
     def _init_TSData(self) -> TSDataGroup:
