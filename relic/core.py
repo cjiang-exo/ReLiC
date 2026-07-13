@@ -1,6 +1,7 @@
 import os
 import pickle
 import shutil
+import sys
 import tomllib
 from functools import reduce
 from multiprocessing.pool import Pool
@@ -18,8 +19,12 @@ from numpy.polynomial import Chebyshev
 from numpy.random import default_rng
 from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP
 from scipy.stats import norm, truncnorm
+# from time import time
+from datetime import datetime
+ 
+from nautilus import Sampler as NautilusSampler
 
-from .atmosphere import *
+from .atmosphere import BaseAtmosphere
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
 
@@ -32,12 +37,14 @@ NM_WHITE_PROFILED = 3
 
 class Relic: 
 
-    def __init__(self, configuration_file: str, idle: bool = False):
+    def __init__(self, config: str, idle: bool = False):
 
         self.idle = idle
-        self.cfg = self._load_config(configuration_file)
+        
+        self.cfg = self._validate_config(config)
+        self.atmos_model = self._resolve_atmosphere_class(
+            self.cfg['ATMOSPHERE']['model_class'])(self.cfg)
 
-        self.atmos_model = eval(self.cfg['ATMOSPHERE']['model_class'])(self.cfg)
         if self.atmos_model.__class__.__call__ is BaseAtmosphere.__call__:
             raise NotImplementedError("The __call__ method must be implemented to compute a spectrum.")
         if self.atmos_model.wavelengths is None: 
@@ -56,16 +63,16 @@ class Relic:
 
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa)
 
-        if self.cfg['SAMPLER']['method'] in 'dynesty' :
-            self.prior_transform = Priors(self.exoiris.ps)
+        if self.cfg['SAMPLER']['method'] in ['dynesty', 'nautilus'] :
+            self.prior_transform = Priors(self.exoiris.ps) 
         elif self.cfg['SAMPLER']['method'] == 'emcee':
             pass
         else:
-            raise ValueError(f"Sampling method should be either 'dynesty' or 'emcee', got: {self.cfg['SAMPLER']['method']}")
+            raise ValueError(f"Sampling method should be one of 'dynesty', 'nautilus', or 'emcee', got: {self.cfg['SAMPLER']['method']}")
         
-        print("Initialization complete.") 
+        print("Initialization complete.", flush=True) 
 
-    def _load_config(self, configuration_file: str):
+    def _validate_config(self, configuration_file: str):
 
         cfg = tomllib.load(open(configuration_file, 'rb'))
         if self.idle:
@@ -89,16 +96,43 @@ class Relic:
         shutil.copy(configuration_file, os.path.join(
             cfg["PATH"]["output_dir"], os.path.basename(configuration_file)
         ))
-        print(f"Configuration file loaded: {configuration_file}")
+        print(f"Configuration file loaded: {configuration_file}", flush=True)
         return cfg
+     
+    def _resolve_atmosphere_class(self, class_name: str):
+        """ Resolve an atmosphere model class by name. """ 
+        atm_mod = sys.modules.get('relic.atmosphere')
+        try:
+            return getattr(atm_mod, class_name)
+        except AttributeError:
+            pass
+
+        main_mod = sys.modules.get('__main__') 
+        try:
+            return getattr(main_mod, class_name)
+        except AttributeError:
+            pass
+
+        raise NameError(
+            f"Could not resolve atmosphere model class '{class_name}'. "
+            f"Define or import it in your main script."
+        )
         
     def _load_raw_data(self) -> list[h5py.File]:
         filelist = self.cfg["PATH"]["lightcurve_files"]
-        print("\nLoading data: ")
-        [print(f"  {f}") for f in filelist]
+        print("\nLoading data: ", flush=True)
+        for f in filelist:
+            print(f"  {f}", flush=True)
         return [h5py.File(f, 'r') for f in filelist]
     
     def _init_TSData(self) -> TSDataGroup:
+
+        def _get_data(data: dict, key_aliases: list[str]) -> np.ndarray:
+            for k in key_aliases:
+                if k in data.keys():
+                    return data[k].astype(np.float64)
+            raise KeyError(f"None of the keys {key_aliases} found in the data.")
+
         dlist = []
         for i, rd in enumerate(self.raw_data):
             try:  # specify edges for STIS and WFC3
@@ -115,7 +149,7 @@ class Relic:
                 flux_errors = flux_errors.T
  
             dlist.append(TSData(
-                time        = time, 
+                time        = np.asarray(time), #  -2459890.2,
                 wavelength  = wavelength, 
                 fluxes      = fluxes, 
                 errors      = flux_errors, 
@@ -137,24 +171,24 @@ class Relic:
                 t14 = self.cfg["PLANET"]["transit_duration_d"][0]
             ) 
             dlist[-1].normalize_to_poly()
-            dlist[-1].mask_outliers(sigma=8.0)
+            dlist[-1].mask_outliers(sigma=10.0)
 
             print("Loaded dataset #{0:d} with nwl={1:d}, nt={2:d}.".format(
                 i, *dlist[i].fluxes.shape
-            ))
+            ), flush=True)
 
             r = self.cfg["EXOIRIS"]["rebin_resolutions"][i]
             if r > 0:
                 dlist[-1] = dlist[-1].bin_wavelength(r=r, estimate_errors=False)
                 print(f"  Rebinned to resolution R={r}. "
-                      f"New nwl={dlist[-1].fluxes.shape[0]}.")
+                      f"New nwl={dlist[-1].fluxes.shape[0]}.", flush=True)
             else:
-                print("  No wavelength binning applied, using native resolution.")
+                print("  No wavelength binning applied, using native resolution.", flush=True)
 
         return reduce(lambda x,y: x+y, dlist)
     
     def _init_LDModel(self):
-        print('\nInitializing LDTk model... It takes 1 -- 30 minutes. Be patient!')
+        print('\nInitializing LDTk model... It takes 1 -- 30 minutes. Be patient!', flush=True)
 
         _t = self.cfg['STAR']['teff']
         _g = self.cfg['STAR']['logg']
@@ -163,13 +197,13 @@ class Relic:
         return LDTkLD(
             data    = self.tsdata, 
             teff    = (_t[0], max(_t[1], 50)),
-            logg    = (_g[0], max(_g[1], 0.05)), 
-            metal   = (_m[0], max(_m[1], 0.05)),
+            logg    = (_g[0], max(_g[1], 0.02)),
+            metal   = (_m[0], max(_m[1], 0.02)),
             dataset = 'visir'
         )
     
     def _init_ExoIris(self):
-        print("\nInitializing ExoIris model...")
+        print("\nInitializing ExoIris model...", flush=True)
 
         return RelicExoIris( 
             name           = self.cfg["PLANET"]["name"], 
@@ -227,7 +261,7 @@ class Relic:
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa, covariates=covariates)
 
     def fit_white(self, pool:Optional[Pool]=None, lnpost:Optional[Callable]=None, npop=100):
-        print("Fitting white light curves to validate covariates...") 
+        print("Fitting white light curves to validate covariates...", flush=True)
 
         niter = self.cfg["SAMPLER"]["niter_white"] 
         vectorize = True if pool is None else False
@@ -266,26 +300,10 @@ class Relic:
                 x = _standardize(d.time) 
             _covs = array([Chebyshev.basis(deg)(x) for deg in range(n+1)]).T 
             if (state_vectors is not None) and (state_vectors[i] is not None):
-                _covs = hstack([_covs, _standardize(state_vectors[i])]) 
+                v = state_vectors[i].astype(np.float64)
+                _covs = hstack([_covs, _standardize(v)])
             covariates.append(_covs)
         return covariates
-        
-    # def update_covariates(self,):
-    #     raise NotImplementedError("This method has not been validated.")
-    #     fmod = squeeze(self.exoiris._wa.flux_model(self.exoiris._wa.de.minimum_location, add_baseline=False)) 
-    #     for i, (_t, _cov) in enumerate(zip(self.exoiris._wa.times, self.exoiris._wa.covariates)):
-    #         newt = self.exoiris.data[i].time
-    #         if "JWST" in self.exoiris.data[i].name:
-    #             sl = self.exoiris._wa.lcslices[i]
-    #             white_systematics = self.exoiris._wa.ofluxa[sl] - fmod[sl]
-    #             # white_systematics = ffit[sl] - fmod[sl]
-    #             white_systematics -= np.mean(white_systematics)
-    #             white_systematics /= np.std(white_systematics) 
-    #             self.exoiris.data[i].covs[:, -1] = np.interp(newt, _t, white_systematics)
-    #         else: # HST
-    #             newcov = [np.interp(newt, _t, _c) for _c in _cov.T]
-    #             self.exoiris.data[i].covs[:] = np.array(newcov).T
-    #     print("Covariates updated based on white light curve fit.")
 
     def sample_from_prior(self, size: int) -> ndarray:
         return squeeze(self.exoiris.ps.sample_from_prior(size))
@@ -377,6 +395,58 @@ class Relic:
             shutil.copy(config_file, outname)
             print(f"Configuration file copied to {outname}.")
 
+    def run_nautilus(self, prior: Callable, loglikelihood: Callable, pool: Optional[Pool] = None, n_networks: int = 8) -> tuple[NautilusSampler, dict]:   
+        start_time = datetime.now()
+        print(f"Start time: {start_time}", flush=True)
+
+        filepath = os.path.join(self.cfg["PATH"]["output_dir"], 'checkpoint.hdf5')
+
+        n_dim = len(self.exoiris.ps)
+        sampler = NautilusSampler(
+            prior, loglikelihood, 
+            n_dim            = n_dim, 
+            n_live           = self.cfg['SAMPLER']['n_live_points'], 
+            n_networks       = n_networks, 
+            n_batch          = 20 * self.cfg["SAMPLER"]["npools"], 
+            enlarge_per_dim  = min(1 + (1.0 / n_dim), 1.1), 
+            pool             = pool, 
+            pass_dict        = False, 
+            filepath         = filepath,
+            resume           = self.cfg["SAMPLER"]["resume"],
+        )
+        sampler.run(verbose=True, n_eff=self.cfg["SAMPLER"]["n_effective"])
+
+        end_time = datetime.now()
+        delta_time = end_time - start_time
+        
+        print(f"End time: {end_time}")
+        print(f"Time elapsed: {delta_time}", flush=True)
+
+        samples, log_w, log_l = sampler.posterior()
+        pnames = [p.name for p in self.exoiris.ps]
+        maxlike_params = samples[log_l.argmax()]
+        bestfit_model  = self.exoiris._tsa.flux_model(maxlike_params, include_baseline=True) 
+        results = {
+            'log_evidence': sampler.log_z,
+            'log_evidence_error': 1 / np.sqrt(sampler.n_eff),
+            'n_effective_samples': sampler.n_eff,
+            'param_names': pnames,
+            'maxlike_params': maxlike_params,
+            'bestfit_model': bestfit_model,
+            'posterior_samples': samples,
+            'log_weights': log_w,
+            'log_likelihoods': log_l,
+        }
+        odir = self.cfg["PATH"]["output_dir"]
+        with open(os.path.join(odir, 'ns_results.pkl'), 'wb') as f:
+            pickle.dump(results, f)
+            print(f"Sampling results saved to {os.path.join(odir, 'ns_results.pkl')}")
+
+        print('log Z = {:.2f} +/- {:.2f}'.format(sampler.log_z, 1 / np.sqrt(sampler.n_eff)))
+        print('Number of effective samples: {}'.format(sampler.n_eff))
+        print('Sampling complete.')
+        return sampler, results
+
     def run_dynesty(self, loglikelihood: Callable, prior_transform: Callable, pool: Optional[Pool] = None, nlivepoints: int = 100, bound='multi', sample='rwalk', queue_size: int = None): 
 
         save_checkpoint = self.cfg["SAMPLER"].get("save_checkpoint", False)
@@ -418,7 +488,7 @@ class Relic:
         odir = self.cfg["PATH"]["output_dir"]
         with open(os.path.join(odir, 'ns_results.pkl'), 'wb') as f:
             pickle.dump(results, f)
-            print(f"Dynesty results saved to {os.path.join(odir, 'ns_results.pkl')}")
+            print(f"Sampling results saved to {os.path.join(odir, 'ns_results.pkl')}")
 
         results.summary() 
         n_effective = get_neff_from_logwt(results.logwt)
@@ -434,16 +504,16 @@ class Relic:
         return results
     
     def run_test(self, nsamples:int=3, seed:int=None):
-        print("Running a quick test of posterior evaluation...")
+        print("Running a quick sampling test...")
 
         ndim = len(self.exoiris._tsa.ps)
         
-        if self.cfg['SAMPLER']['method'] == 'dynesty':
+        if self.cfg['SAMPLER']['method'] in ['dynesty', 'nautilus']:
             rng = default_rng(seed)
             unit_cubes = rng.uniform(size=(nsamples, ndim))
             prior_params = [self.prior_transform(c) for c in unit_cubes]
             pp = [self.lnlikelihood_ns(p) for p in prior_params]
-            [print(f"lnprob = {_v:.6e}") for _v in pp]
+            [print(f"lnprob = {_v:.6e}") for _v in pp] 
 
         elif self.cfg['SAMPLER']['method'] == 'emcee':
             prior_params = self.sample_from_prior(nsamples)
@@ -568,8 +638,3 @@ class Priors:
 
         return pv
 
-def _get_data(data: dict, key_aliases: list[str]) -> np.ndarray:
-    for k in key_aliases:
-        if k in data.keys():
-            return data[k]
-    raise KeyError(f"None of the keys {key_aliases} found in the data.")

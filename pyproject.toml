@@ -30,12 +30,12 @@ dependencies = [
     "dynesty",
     "celerite2",
     "numba",
-    "mpi4py",
+    "nautilus",
     "pyfastchem",
 ]
 
 [project.urls]
-Repository = "https://github.com/czjiang1125/ReLic"
+Repository = "https://github.com/cjiang-exo/ReLiC"
 
 [tool.setuptools.packages.find]
 include = ["relic*"]

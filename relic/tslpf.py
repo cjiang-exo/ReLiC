@@ -280,7 +280,7 @@ class NewTSLPF(TSLPF):
 
     def lnlikelihood_ns(self, pv: ndarray) -> float:
         if any(pv <= self.ps.lbounds) | any(pv >= self.ps.ubounds):
-            return -inf
+            return -1e99
         lnp = self.additional_priors(pv)
-        return -inf if not isfinite(lnp) else self.lnlikelihood(pv) 
+        return -1e99 if not isfinite(lnp) else self.lnlikelihood(pv) 
     

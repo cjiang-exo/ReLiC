@@ -1,24 +1,24 @@
 """ReLic: atmospheric Retrievals using spectral Light Curves."""
 
-from .core import Relic, RelicExoIris
+from .core import Priors, Relic, RelicExoIris
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
 from .atmosphere import (
     BaseAtmosphere,
+    GuillotFastChem,
     IsothermalEqChem,
     IsothermalFreeChem,
-    TP6EqChem,
-    TP6FreeChem,
-    TP6FastChem,
-    TP6FastChem_SO2, 
-    tp6madhu,
+    M09EqChem,
+    M09FastChem,
+    M09FastChem_clear,
+    M09FastChem_SO2,
+    M09FreeChem,
 )
 from .utils import (
     generate_covariates,
     get_maxlike_estimates,
     print_elapsed_time,
-    optimize_parallelization,
-    print_info,
+    optimize_parallelization, 
     replace_outliers,
     SpectrumDownsampler,
 )
@@ -26,26 +26,26 @@ from .physics import calc_teq
 from .plots import RelicVisualization
 
 __all__ = [
-    "Relic",
-    "RelicExoIris",
-    "NewTSLPF",
-    "NewWhiteLPF",
     "BaseAtmosphere",
+    "GuillotFastChem",
     "IsothermalEqChem",
     "IsothermalFreeChem",
-    "TP6EqChem",
-    "TP6FreeChem",
-    "TP6FastChem",
-    "TP6FastChem_SO2",
-    "GuillotEQChem",
-    "tp6madhu",
-    "generate_covariates",
-    "get_maxlike_estimates",
-    "print_elapsed_time",
-    "optimize_parallelization",
-    "print_info",
-    "replace_outliers",
+    "M09EqChem",
+    "M09FastChem",
+    "M09FastChem_clear",
+    "M09FastChem_SO2",
+    "M09FreeChem",
+    "NewTSLPF",
+    "NewWhiteLPF",
+    "Priors",
+    "Relic",
+    "RelicExoIris",
+    "RelicVisualization",
     "SpectrumDownsampler",
     "calc_teq",
-    "RelicVisualization",
+    "generate_covariates",
+    "get_maxlike_estimates",
+    "optimize_parallelization",
+    "print_elapsed_time",
+    "replace_outliers",
 ]

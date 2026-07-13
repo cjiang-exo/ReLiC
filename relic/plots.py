@@ -34,23 +34,23 @@ class RelicVisualization:
     def plot_2dfluxes(self, figname="fluxes.png"):
         figs = []
         for i, d in enumerate(self.relic.exoiris.data):
-            fig, ax = pl.subplots(2, 1, figsize=(7.2, 7.2))
+            fig, ax = pl.subplots(2, 1, figsize=(4.8, 4.8))
             _t = d.time
             _w = d.wavelength
 
-            zscale = ZScaleInterval()
+            zscale = ZScaleInterval(contrast=0.5)
             vmin, vmax = zscale.get_limits(d.fluxes)
 
             _im0 = ax[0].pcolormesh(_t, _w, d.fluxes, shading='auto', vmin=vmin, vmax=vmax, zorder=0)
-            _im1 = ax[1].pcolormesh(_t, _w, d.errors, shading='auto', zorder=0)
+            _im1 = ax[1].pcolormesh(_t, _w, d.errors*100, shading='auto', zorder=0)
 
-            disc_cols = where(diff(_t) > 2 * median(diff(_t)))[0]
+            disc_cols = where(diff(_t) > 5 * median(diff(_t)))[0]
             for _c in disc_cols:
                 ax[0].axvspan(_t[_c], _t[_c + 1], facecolor='white', lw=0, alpha=1, zorder=1)
                 ax[1].axvspan(_t[_c], _t[_c + 1], facecolor='white', lw=0, alpha=1, zorder=1)
 
-            ax[0].set_title('Fluxes')
-            ax[1].set_title('Errors')
+            ax[0].set_title('Fluxes', fontsize='medium')
+            ax[1].set_title('Errors [%]', fontsize='medium')
             [a.set_xlabel('Time') for a in ax]
             [a.set_ylabel('Wavelength [micron]') for a in ax]
 
@@ -82,7 +82,7 @@ class RelicVisualization:
             if tsa._nm in (NM_WHITE_MARGINALIZED, NM_WHITE_PROFILED):
                 wn_multiplier = maxlike_params[tsa._sl_wnm][d.noise_group]
                 fresidual = d.fluxes - ffit[i]
-                fdetrend = fresidual + fmod[i]
+                # fdetrend = fresidual + fmod[i]
                 zres = fresidual / (d.errors * wn_multiplier)
             elif tsa._nm in (NM_GP_FIXED, NM_GP_FREE):  # using GP
                 if tsa._nm == NM_GP_FREE:
@@ -92,30 +92,38 @@ class RelicVisualization:
                 fresidual = tsa._gp_flux[i] - fmod[i][tsa.data[i].mask]
                 gp_trend = tsa._gp[i].predict(fresidual, tsa._gp_time[i])
                 fresidual = (fresidual - gp_trend).reshape(fmod[i].shape)
-                fdetrend = fresidual + fmod[i]
+                # fdetrend = fresidual + fmod[i]
                 zres = fresidual / sqrt(tsa._gp[i]._diag.reshape(fmod[i].shape))
 
-            fig, ax = pl.subplots(2, 1, figsize=(6, 6))
+            fig, ax = pl.subplots(3, 1, figsize=(4.8, 7.2))
 
-            im_f = ax[0].pcolormesh(d.time, d.wavelength, fdetrend, shading='auto')
-            im_z = ax[1].pcolormesh(d.time, d.wavelength, zres, shading='auto',
-                                    vmin=-5, vmax=5, cmap='PuOr_r')
+            zscale = ZScaleInterval(contrast=0.5)
+            vmin, vmax = zscale.get_limits(d.fluxes)
+            im_f = ax[0].pcolormesh(d.time, d.wavelength, d.fluxes, shading='auto', 
+                                    vmin=vmin, vmax=vmax)
+            vmin, vmax = zscale.get_limits(ffit[i])
+            im_m = ax[1].pcolormesh(d.time, d.wavelength, ffit[i], shading='auto', 
+                                    vmin=vmin, vmax=vmax)
+            im_z = ax[2].pcolormesh(d.time, d.wavelength, zres, shading='auto',
+                                    vmin=-5, vmax=5, cmap='RdYlBu_r')
 
             _t = d.time
-            disc_cols = where(diff(_t) > 2 * median(diff(_t)))[0]
+            disc_cols = where(diff(_t) > 5 * median(diff(_t)))[0]
             for _c in disc_cols:
                 ax[0].axvspan(_t[_c], _t[_c + 1], facecolor='white', lw=0, alpha=1, zorder=1)
                 ax[1].axvspan(_t[_c], _t[_c + 1], facecolor='white', lw=0, alpha=1, zorder=1)
+                ax[2].axvspan(_t[_c], _t[_c + 1], facecolor='white', lw=0, alpha=1, zorder=1)
 
             [a.set_xlabel('Time [BJD]') for a in ax]
-            [a.set_ylabel('Wavelength [micron]') for a in ax]
+            [a.set_ylabel('Wavelength [$\mu$m]') for a in ax]
 
             transit_limits = d.ephemeris.transit_limits(d.time.mean())
             [ax[0].axvline(tl, ls='--', color='k', alpha=0.8) for tl in transit_limits]
             [ax[1].axvline(tl, ls='--', color='k', alpha=0.8) for tl in transit_limits]
 
-            fig.colorbar(im_f, ax=ax[0], label='Fluxes')
-            fig.colorbar(im_z, ax=ax[1], label='Residuals (sigma)')
+            fig.colorbar(im_f, ax=ax[0], label='Observed fluxes')
+            fig.colorbar(im_m, ax=ax[1], label='Model fluxes')
+            fig.colorbar(im_z, ax=ax[2], label='Residuals (sigma)')
             fig.tight_layout()
             figs.append(fig)
 
@@ -127,7 +135,7 @@ class RelicVisualization:
 
         return figs
     
-    def plot_corners(self, samples=None, truths=None, figname="corners.pdf"):
+    def plot_corners(self, samples=None, weights=None, truths=None, figname="corners.pdf"):
 
         if samples is None:
             samples = self.relic.exoiris._tsa.sampler.flatchain
@@ -135,6 +143,7 @@ class RelicVisualization:
         fig = corner.corner(
             samples,
             labels=[p.name for p in self.relic.exoiris.ps],
+            weights=weights,
             truths=truths,
             show_titles=True, title_fmt='.4g',
             plot_datapoints=False, plot_density=True,
@@ -189,8 +198,7 @@ class RelicVisualization:
         return fig
 
     def plot_transmission_spectra(self, maxlike_param:ndarray, 
-                                  figname:str="transmission_spectrum.png", 
-                                  pool=None):
+                                  figname:str="transmission_spectrum.png" ):
         
         wl_model = self.relic.atmos_model.wavelengths
         ts_modelmaxlike = 100 * self.relic.atmos_model(maxlike_param)

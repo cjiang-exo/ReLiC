@@ -26,7 +26,7 @@ results/
 data/
 ignore/
 config2/
-config3/
+config_paper/ 
 
 # OS
 .DS_Store

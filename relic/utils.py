@@ -163,21 +163,6 @@ def generate_covariates(relic, jitters: list) -> list[ndarray]:
         covariates.append(_covs)
     return covariates
 
-def print_info(comm, string: str):
-    """
-    Print something when using mpiexec
-
-    Parameters
-    ----------
-    comm : mpi4py.MPI.Comm
-        MPI communicator.
-    string : str
-        String to print.
-    """
-    if comm.Get_rank() == 0:
-        print(string, flush=True)
-    comm.Barrier()
-
 def print_elapsed_time(elapsed_time:float):   
     """
     Prints the elapsed time in a formatted string of hours, minutes, and seconds.
