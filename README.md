@@ -34,7 +34,7 @@ Install the package and all dependencies in development mode:
 
 ```bash
 git clone https://github.com/cjiang-exo/ReLiC.git
-cd ReLic/source
+cd ReLiC
 pip install -e .
 ```
 
