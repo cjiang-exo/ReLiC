@@ -34,9 +34,12 @@ visual = RelicVisualization(relic, dpi=100, save=True)
 #%% fit white light curves to validate the covariates ##########################
  
 state_vectors_alldata = []
-for i, rd in enumerate(relic.raw_data):  
-    _state_vectors = rd["pca_jitters"][:, :2]   
-    state_vectors_alldata.append(_state_vectors) 
+for i, rd in enumerate(relic.raw_data):
+    if "pca_jitters" in rd:
+        _state_vectors = rd["pca_jitters"][:, :2]
+    else:
+        _state_vectors = None
+    state_vectors_alldata.append(_state_vectors)
 relic.update_covariates(state_vectors_alldata)
 
 def lnpost_white(pv):
