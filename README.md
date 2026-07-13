@@ -35,6 +35,7 @@ Install the package and all dependencies in development mode:
 ```bash
 git clone https://github.com/cjiang-exo/ReLiC.git
 cd ReLiC
+conda install -c conda-forge openmpi
 pip install -e .
 ```
 

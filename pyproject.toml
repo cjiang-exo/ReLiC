@@ -31,6 +31,7 @@ dependencies = [
     "celerite2",
     "numba",
     "nautilus",
+    "mpi4py",
     "pyfastchem",
 ]
 
