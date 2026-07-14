@@ -120,6 +120,7 @@ class RelicVisualization:
             transit_limits = d.ephemeris.transit_limits(d.time.mean())
             [ax[0].axvline(tl, ls='--', color='k', alpha=0.8) for tl in transit_limits]
             [ax[1].axvline(tl, ls='--', color='k', alpha=0.8) for tl in transit_limits]
+            [ax[2].axvline(tl, ls='--', color='k', alpha=0.8) for tl in transit_limits]
 
             fig.colorbar(im_f, ax=ax[0], label='Observed fluxes')
             fig.colorbar(im_m, ax=ax[1], label='Model fluxes')
