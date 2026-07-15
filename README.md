@@ -45,9 +45,9 @@ pip install -e .
 
 Basic usage:
 ```python
-from relic.core import ReLic 
+from relic import Relic
 
-relic = ReLic('input_config.toml')
+relic = Relic('input_config.toml')
 
 def loglikelihood(pv):
     return relic.lnlikelihood_ns(pv)
