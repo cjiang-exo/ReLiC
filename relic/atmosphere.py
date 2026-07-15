@@ -430,7 +430,7 @@ class M09FastChem(BaseAtmosphere):
         return transit_depths, _add
 
     @staticmethod
-    def get_temperatures(pbar: ndarray, t0: float, lga1: float, lga2: float, 
+    def get_temperatures(pbar: ndarray, t0: float, a1: float, a2: float, 
             lgp1: float, lgp2: float, lgp3: float=0) -> ndarray:
         """
         Parametric T-P profile from Madhusudhan & Seager 2009 (2009ApJ...707...24M).
@@ -440,8 +440,8 @@ class M09FastChem(BaseAtmosphere):
 
         temperatures = empty_like(pbar)
 
-        a1 = 10**lga1
-        a2 = 10**lga2
+        # a1 = 10**lga1
+        # a2 = 10**lga2
         p1 = 10**lgp1
         p2 = 10**lgp2
         p3 = 10**lgp3
