@@ -46,8 +46,8 @@ class IsothermalFreeChem(BaseAtmosphere):
         ) 
 
         self.mass_fractions = {
-            "H2": full_like(self.pressures_bar, 0.74),
-            "He": full_like(self.pressures_bar, 0.25),
+            "H2": full_like(self.pressures_bar, 0.762),
+            "He": full_like(self.pressures_bar, 0.238),
         }
         self.mass_fractions.update({
             sp: full_like(self.pressures_bar, 1e-3) for sp in self.radtrans._line_species
@@ -75,8 +75,8 @@ class IsothermalFreeChem(BaseAtmosphere):
 
         _msum = sum([self.mass_fractions[sp][0] for sp in self.radtrans._line_species])
         if _msum < 1.0:
-            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.74 * (1 - _msum))
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.25 * (1 - _msum))
+            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.762 * (1 - _msum))
+            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.238 * (1 - _msum))
         else:
             self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.0)
             self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.0)
@@ -221,7 +221,7 @@ class M09EqChem(BaseAtmosphere):
         cloud_fraction  = atm_params[3] 
         haze_factor     = 10**atm_params[4]
 
-        temperatures = self.m09_temperatures(self.pressures_bar, *atm_params[5:10])
+        temperatures = self.get_temperatures(self.pressures_bar, *atm_params[5:10])
 
         # Assume equilibrium chemistry
         metallicities = full_like(self.pressures_bar, atm_params[10])
@@ -260,8 +260,8 @@ class M09FreeChem(M09EqChem):
         super().__init__(cfg) 
 
         self.mass_fractions = {
-            "H2": full_like(self.pressures_bar, 0.74),
-            "He": full_like(self.pressures_bar, 0.25),
+            "H2": full_like(self.pressures_bar, 0.762),
+            "He": full_like(self.pressures_bar, 0.238),
         }
         self.mass_fractions.update({
             sp: full_like(self.pressures_bar, 1e-3) for sp in self.radtrans._line_species
@@ -276,15 +276,15 @@ class M09FreeChem(M09EqChem):
         cloud_fraction  = atm_params[3] 
         haze_factor     = 10**atm_params[4]
 
-        temperatures = self.m09_temperatures(self.pressures_bar, *atm_params[5:10])
+        temperatures = self.get_temperatures(self.pressures_bar, *atm_params[5:10])
 
         for i, sp in enumerate(self.radtrans._line_species):
             self.mass_fractions[sp][:] = full_like(self.pressures_bar, 10**atm_params[10+i])
 
         _msum = sum([self.mass_fractions[sp][0] for sp in self.radtrans._line_species])
         if _msum < 1.0:
-            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.74 * (1 - _msum))
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.25 * (1 - _msum))
+            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.762 * (1 - _msum))
+            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.238 * (1 - _msum))
         else:
             self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.0)
             self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.0)
@@ -333,11 +333,14 @@ class M09FastChem(BaseAtmosphere):
         self.star_radius_cm   = cfg["STAR"]["radius_rsun"][0] * r_sun 
         self._cgravity        = g_const * m_jup / self.planet_radius_cm**2   
         
-        if os.path.exists(cfg["FASTCHEM"]["logk"]) and os.path.exists(cfg["FASTCHEM"]["element_abundances"]):
+        logk_path = os.path.expanduser(cfg["FASTCHEM"]["logk"])
+        elem_path = os.path.expanduser(cfg["FASTCHEM"]["element_abundances"])
+        cond_path = os.path.expanduser(cfg["FASTCHEM"].get("logk_condensates", "none"))
+        if os.path.exists(logk_path) and os.path.exists(elem_path):
             self.fastchem = fc.FastChem(
-                cfg["FASTCHEM"]["element_abundances"],
-                cfg["FASTCHEM"]["logk"],
-                cfg["FASTCHEM"].get("logk_condensates", "none"),
+                elem_path,
+                logk_path,
+                cond_path,
                 0
             )
         else:
@@ -347,15 +350,17 @@ class M09FastChem(BaseAtmosphere):
         self.fastchem_input.pressure = sorted(self.pressures_bar)[::-1] # descending 
         self.fastchem_input.temperature = full_like(self.pressures_bar, 1000) 
 
-        if cfg["FASTCHEM"]["condensation_mode"] == "equilibrium":
-            self.fastchem_input.equilibrium_condensation = True
-            self.fastchem_input.rainout_condensation = False
-        elif cfg["FASTCHEM"]["condensation_mode"] == "rainout":
+        if cfg["FASTCHEM"]["condensation_mode"] == "rainout":
             self.fastchem_input.equilibrium_condensation = False
             self.fastchem_input.rainout_condensation = True
-        else:
+        elif cfg["FASTCHEM"]["condensation_mode"] == "equilibrium_condensation":
+            self.fastchem_input.equilibrium_condensation = True
+            self.fastchem_input.rainout_condensation = False
+        elif cfg["FASTCHEM"]["condensation_mode"] == "no_condensation":
             self.fastchem_input.equilibrium_condensation = False
             self.fastchem_input.rainout_condensation = False 
+        else:
+            raise ValueError("Invalid FASTCHEM condensation mode. Choose from 'rainout', 'equilibrium_condensation', or 'no_condensation' in config['FASTCHEM']['condensation_mode'].")
 
         self.init_abundances = array(self.fastchem.getElementAbundances())
         self.index_C = self.fastchem.getElementIndex('C')
@@ -396,7 +401,7 @@ class M09FastChem(BaseAtmosphere):
         cloud_fraction  = atm_params[3] 
         haze_factor     = 10**atm_params[4] 
 
-        temperatures = self.m09_temperatures(self.pressures_bar, *atm_params[5:10]) # ascending
+        temperatures = self.get_temperatures(self.pressures_bar, *atm_params[5:10]) # ascending
         temperatures = temperatures.clip(100, 3400)  
  
         metallicity = 10**atm_params[10]
@@ -425,7 +430,7 @@ class M09FastChem(BaseAtmosphere):
         return transit_depths, _add
 
     @staticmethod
-    def m09_temperatures(pbar: ndarray, t0: float, lga1: float, lga2: float, 
+    def get_temperatures(pbar: ndarray, t0: float, lga1: float, lga2: float, 
             lgp1: float, lgp2: float, lgp3: float=0) -> ndarray:
         """
         Parametric T-P profile from Madhusudhan & Seager 2009 (2009ApJ...707...24M).
@@ -542,7 +547,7 @@ class M09FastChem_clear(M09FastChem):
         ref_gravity     = atm_params[0] * self._cgravity # cgs
         ref_pressure    = 10**atm_params[1] # bar 
 
-        temperatures = self.m09_temperatures(self.pressures_bar, *atm_params[2:7]) # ascending
+        temperatures = self.get_temperatures(self.pressures_bar, *atm_params[2:7]) # ascending
         temperatures = temperatures.clip(100, 3400)  
  
         metallicity = 10**atm_params[7]
@@ -577,7 +582,7 @@ class M09FastChem_SO2(M09FastChem):
         cloud_fraction  = atm_params[3] 
         haze_factor     = 10**atm_params[4] 
 
-        temperatures = self.m09_temperatures(self.pressures_bar, *atm_params[5:10]) # ascending
+        temperatures = self.get_temperatures(self.pressures_bar, *atm_params[5:10]) # ascending
         temperatures = temperatures.clip(100, 3400)  
  
         metallicity = 10**atm_params[10]

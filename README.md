@@ -35,6 +35,7 @@ Install the package and all dependencies in development mode:
 ```bash
 git clone https://github.com/cjiang-exo/ReLiC.git
 cd ReLiC
+conda install -c conda-forge openmpi
 pip install -e .
 ```
 
@@ -44,9 +45,9 @@ pip install -e .
 
 Basic usage:
 ```python
-from relic.core import ReLic 
+from relic import Relic
 
-relic = ReLic('input_config.toml')
+relic = Relic('input_config.toml')
 
 def loglikelihood(pv):
     return relic.lnlikelihood_ns(pv)
