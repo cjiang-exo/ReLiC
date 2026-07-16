@@ -109,6 +109,8 @@ class Relic:
         dest_path = os.path.join(
             cfg["PATH"]["output_dir"], os.path.basename(configuration_file)
         )
+        if os.path.exists(dest_path):
+            os.chmod(dest_path, 0o666)
         shutil.copy(configuration_file, dest_path)
         os.chmod(dest_path, 0o444)
         
@@ -165,7 +167,7 @@ class Relic:
                 flux_errors = flux_errors.T
  
             dlist.append(TSData(
-                time        = np.asarray(time),# -2459890.2,
+                time        = np.asarray(time) -2459890.2,
                 wavelength  = wavelength, 
                 fluxes      = fluxes, 
                 errors      = flux_errors, 
