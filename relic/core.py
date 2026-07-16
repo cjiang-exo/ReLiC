@@ -54,6 +54,7 @@ class Relic:
             print("Idle mode.")
             return
         
+        t_start = datetime.now()
         self.raw_data    = self._load_raw_data()
         self.tsdata      = self._init_TSData()
         self.ldmodel     = self._init_LDModel()
@@ -71,6 +72,7 @@ class Relic:
             raise ValueError(f"Sampling method should be one of 'dynesty', 'nautilus', or 'emcee', got: {self.cfg['SAMPLER']['method']}")
         
         print("Initialization complete.", flush=True) 
+        print("Time spent: ", datetime.now() - t_start, flush=True)
 
     def _validate_config(self, configuration_file: str):
 
@@ -167,7 +169,7 @@ class Relic:
                 flux_errors = flux_errors.T
  
             dlist.append(TSData(
-                time        = np.asarray(time),# -2459890.2,
+                time        = np.asarray(time) -2459890.2,
                 wavelength  = wavelength, 
                 fluxes      = fluxes, 
                 errors      = flux_errors, 
