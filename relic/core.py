@@ -105,9 +105,13 @@ class Relic:
 
         cfg["PATH"]["output_dir"] = os.path.expanduser(cfg["PATH"]["output_dir"])
         os.makedirs(cfg["PATH"]["output_dir"], exist_ok=True)
-        shutil.copy(configuration_file, os.path.join(
+
+        dest_path = os.path.join(
             cfg["PATH"]["output_dir"], os.path.basename(configuration_file)
-        ))
+        )
+        shutil.copy(configuration_file, dest_path)
+        os.chmod(dest_path, 0o444)
+        
         print(f"Configuration file loaded: {configuration_file}", flush=True)
         return cfg
      
