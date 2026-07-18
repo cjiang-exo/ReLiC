@@ -169,7 +169,7 @@ class Relic:
                 flux_errors = flux_errors.T
  
             dlist.append(TSData(
-                time        = np.asarray(time),# -2459890.2,
+                time        = np.asarray(time),
                 wavelength  = wavelength, 
                 fluxes      = fluxes, 
                 errors      = flux_errors, 
