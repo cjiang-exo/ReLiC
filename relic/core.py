@@ -179,12 +179,9 @@ class Relic:
                 n_baseline  = self.cfg['EXOIRIS']['n_baselines'][i],
             ))
 
-            _wlrange = self.cfg["EXOIRIS"]["wl_range_micron"][i]
-            _trange  = self.cfg["EXOIRIS"]["time_range_bjd"][i]
+            _wlrange = self.cfg["EXOIRIS"]["wl_range_micron"][i] 
             if _wlrange != []:
-                dlist[-1].crop_wavelength(*_wlrange)
-            if _trange != []:
-                dlist[-1].crop_time(*_trange)
+                dlist[-1].crop_wavelength(*_wlrange) 
             dlist[-1].mask_transit(
                 t0  = self.cfg["PLANET"]["transit_epoch_bjd"][0], 
                 p   = self.cfg["PLANET"]["transit_period_d"][0],

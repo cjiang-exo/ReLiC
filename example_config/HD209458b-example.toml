@@ -1,11 +1,11 @@
 [PATH]
 lightcurve_files = [
-  "/data/HD209458b/JWST/NIRCAM_F322W2.h5",
-  "/data/HD209458b/JWST/NIRCAM_F444W.h5",
+  "~/work/relic/data/HD209458b/JWST/NIRCAM_F322W2.h5",
+  "~/work/relic/data/HD209458b/JWST/NIRCAM_F444W.h5",
 ]
 spec_resolving_power_files = [  
-  "/data/resolving_power/NIRCam.dat", 
-  "/data/resolving_power/NIRCam.dat",
+  "~/work/relic/data/resolving_power/NIRCam.dat", 
+  "~/work/relic/data/resolving_power/NIRCam.dat",
 ] # contains two columns: wavelength (micron) and resolving power 
 output_dir = "./results/HD209458b/"
 
@@ -44,8 +44,7 @@ instruments = [
   "JWST/NIRCam_F322W2", 
   "JWST/NIRCam_F444W"
 ]
-wl_range_micron   = [ [], [3.9, 5.0] ]
-time_range_bjd    = [ [], [2459890.03, 2459890.3] ]
+wl_range_micron   = [ [], [3.9, 5.0] ] 
 noise_groups      = [0, 1] 
 n_baselines       = [2, 2] # second-order polynomials
 rebin_resolutions = [100, 100] # set to 0 for native resolution. 
@@ -85,7 +84,7 @@ n_effective = 10000
 resume       = false 
 
 [FASTCHEM]
-element_abundances = "/data/fastchem/lodders_2025.dat"
-logk = "/data/fastchem/logK.dat"
-logk_condensates = "/data/fastchem/logK_condensates.dat"
+element_abundances = "~/work/relic/data/fastchem/lodders_2025.dat"
+logk = "~/work/relic/data/fastchem/logK.dat"
+logk_condensates = "~/work/relic/data/fastchem/logK_condensates.dat"
 condensation_mode = "no_condensation"

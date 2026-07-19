@@ -14,7 +14,7 @@ from multiprocessing import Pool
 from relic import Relic, RelicVisualization 
 from relic.atmosphere import *
 
-DEFAULT_CFG = '/home/ubuntu/work/relic/source/config_paper/HD209458b-jwst-pix-fiducial.toml'
+DEFAULT_CFG = '/home/ubuntu/work/relic/source/example_config/HD209458b-example.toml'
 
 if 'get_ipython' in globals(): 
     config = DEFAULT_CFG # use DEFAULT_CFG if running in Jupyter Notebook
@@ -33,12 +33,12 @@ visual = RelicVisualization(relic, dpi=100, save=True)
 #%% fit white light curves to validate the covariates ##########################
  
 state_vectors_alldata = []
-for i, rd in enumerate(relic.raw_data):
-    if "pca_jitters" in rd:
-        _state_vectors = rd["pca_jitters"][:, :2]
-    else:
+for i, rd in enumerate(relic.raw_data):  
+    if "JWST" in relic.exoiris.data[i].name:
         _state_vectors = None
-    state_vectors_alldata.append(_state_vectors)
+    else:
+        _state_vectors = rd["pca_jitters"][:, :2]   
+    state_vectors_alldata.append(_state_vectors) 
 relic.update_covariates(state_vectors_alldata)
 
 def lnpost_white(pv):
@@ -67,7 +67,7 @@ def loglikelihood(pv):
 def prior_transform(uv):
     return relic.prior_transform(uv)
  
-with Pool(relic.cfg["SAMPLER"]["npools"], maxtasksperchild=500) as pool:
+with Pool(relic.cfg["SAMPLER"]["npools"], maxtasksperchild=200) as pool:
     sampler, results = relic.run_nautilus(
         prior           = prior_transform,
         loglikelihood   = loglikelihood, 

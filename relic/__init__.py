@@ -7,33 +7,29 @@ from .atmosphere import (
     BaseAtmosphere,
     GuillotFastChem,
     IsothermalEqChem,
-    IsothermalFreeChem,
-    M09EqChem,
+    IsothermalFastChem,
+    IsothermalFreeChem, 
     M09FastChem,
-    M09FastChem_clear,
-    M09FastChem_SO2,
     M09FreeChem,
 )
 from .utils import (
     generate_covariates,
     get_maxlike_estimates,
     print_elapsed_time,
-    optimize_parallelization, 
+    optimize_parallelization,
     replace_outliers,
     SpectrumDownsampler,
 )
-from .physics import calc_teq
+from .physics import calc_teq, get_temperatures_g10, get_temperatures_m09
 from .plots import RelicVisualization
 
 __all__ = [
     "BaseAtmosphere",
     "GuillotFastChem",
     "IsothermalEqChem",
+    "IsothermalFastChem",
     "IsothermalFreeChem",
-    "M09EqChem",
     "M09FastChem",
-    "M09FastChem_clear",
-    "M09FastChem_SO2",
     "M09FreeChem",
     "NewTSLPF",
     "NewWhiteLPF",
@@ -45,6 +41,8 @@ __all__ = [
     "calc_teq",
     "generate_covariates",
     "get_maxlike_estimates",
+    "get_temperatures_g10",
+    "get_temperatures_m09",
     "optimize_parallelization",
     "print_elapsed_time",
     "replace_outliers",
