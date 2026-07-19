@@ -26,7 +26,7 @@ class SpectrumDownsampler:
         _minwl         = wl_data[0] - wl_binwidths[0]
         _maxwl         = wl_data[-1] + wl_binwidths[-1]
         start          = searchsorted(wl_model, _minwl, side='left')
-        end            = searchsorted(wl_model, _maxwl, side='right')
+        end            = min(searchsorted(wl_model, _maxwl, side='right') + 1, len(wl_model))
         self.sl_wl     = slice(start, end) 
 
         self.wl_model_trim = asarray(wl_model[self.sl_wl])
