@@ -11,9 +11,8 @@ os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'
 import argparse  
 import numpy as np
 from multiprocessing import Pool
-from relic.core import Relic 
-from relic.atmosphere import * 
-from relic.plots import RelicVisualization 
+from relic import Relic, RelicVisualization 
+from relic.atmosphere import *
 
 DEFAULT_CFG = '/home/ubuntu/work/relic/source/config_paper/HD209458b-jwst-pix-fiducial.toml'
 
