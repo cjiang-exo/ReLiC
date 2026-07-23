@@ -54,6 +54,7 @@ class Relic:
             print("Idle mode.")
             return
         
+        t_start = datetime.now()
         self.raw_data    = self._load_raw_data()
         self.tsdata      = self._init_TSData()
         self.ldmodel     = self._init_LDModel()
@@ -71,6 +72,7 @@ class Relic:
             raise ValueError(f"Sampling method should be one of 'dynesty', 'nautilus', or 'emcee', got: {self.cfg['SAMPLER']['method']}")
         
         print("Initialization complete.", flush=True) 
+        print("Time spent: ", datetime.now() - t_start, flush=True)
 
     def _validate_config(self, configuration_file: str):
 
@@ -105,9 +107,15 @@ class Relic:
 
         cfg["PATH"]["output_dir"] = os.path.expanduser(cfg["PATH"]["output_dir"])
         os.makedirs(cfg["PATH"]["output_dir"], exist_ok=True)
-        shutil.copy(configuration_file, os.path.join(
+
+        dest_path = os.path.join(
             cfg["PATH"]["output_dir"], os.path.basename(configuration_file)
-        ))
+        )
+        if os.path.exists(dest_path):
+            os.chmod(dest_path, 0o666)
+        shutil.copy(configuration_file, dest_path)
+        os.chmod(dest_path, 0o444)
+        
         print(f"Configuration file loaded: {configuration_file}", flush=True)
         return cfg
      
@@ -161,7 +169,7 @@ class Relic:
                 flux_errors = flux_errors.T
  
             dlist.append(TSData(
-                time        = np.asarray(time),# -2459890.2,
+                time        = np.asarray(time),
                 wavelength  = wavelength, 
                 fluxes      = fluxes, 
                 errors      = flux_errors, 
@@ -171,12 +179,9 @@ class Relic:
                 n_baseline  = self.cfg['EXOIRIS']['n_baselines'][i],
             ))
 
-            _wlrange = self.cfg["EXOIRIS"]["wl_range_micron"][i]
-            _trange  = self.cfg["EXOIRIS"]["time_range_bjd"][i]
+            _wlrange = self.cfg["EXOIRIS"]["wl_range_micron"][i] 
             if _wlrange != []:
-                dlist[-1].crop_wavelength(*_wlrange)
-            if _trange != []:
-                dlist[-1].crop_time(*_trange)
+                dlist[-1].crop_wavelength(*_wlrange) 
             dlist[-1].mask_transit(
                 t0  = self.cfg["PLANET"]["transit_epoch_bjd"][0], 
                 p   = self.cfg["PLANET"]["transit_period_d"][0],
