@@ -60,10 +60,9 @@ class IsothermalFreeChem(BaseAtmosphere):
         })
 
         self.wavelengths      = self.radtrans.get_wavelengths() * 1e4 # micron
-        self.planet_radius_cm = cfg["PLANET"]["radius_rjup"][0] * r_jup_mean
-        self.star_radius_cm   = cfg["STAR"]["radius_rsun"][0] * r_sun 
-        self._cgravity        = g_const * m_jup / self.planet_radius_cm**2
-        # self.temperatures     = zeros_like(self.pressures_bar)
+        self.planet_radius_cm = cfg["FIXED_PARAMETERS"]["planet_radius_rjup"] * r_jup_mean
+        self.star_radius_cm   = cfg["FIXED_PARAMETERS"]["star_radius_rsun"] * r_sun
+        self._cgravity        = g_const * m_jup / self.planet_radius_cm**2 
 
     def __call__(self, pv: ndarray, return_contribution: bool = False) -> ndarray:
 
