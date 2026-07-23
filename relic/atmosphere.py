@@ -74,7 +74,7 @@ class IsothermalFreeChem(BaseAtmosphere):
         cloud_fraction  = atm_params[3] 
         haze_factor     = 10**atm_params[4]
 
-        temperatures = full_like(self.pressures_bar, atm_params[5]) 
+        temperatures = self.get_temperatures(self.pressures_bar, atm_params[5])
 
         for i, sp in enumerate(self.radtrans._line_species):
             self.mass_fractions[sp][:] = full_like(self.pressures_bar, 10**atm_params[6+i])
@@ -108,6 +108,14 @@ class IsothermalFreeChem(BaseAtmosphere):
         if not return_contribution:
             return transit_depths
         return transit_depths, _add
+
+    @staticmethod
+    def get_temperatures(pbar: ndarray, temperature: float,) -> ndarray:
+        """
+        Isothermal temperature profile
+        """
+        temperatures = full_like(pbar, temperature)
+        return temperatures
     
 
 class IsothermalEqChem(BaseAtmosphere):
@@ -150,7 +158,7 @@ class IsothermalEqChem(BaseAtmosphere):
         cloudtop_pbar   = 10**atm_params[2] # bar
         cloud_fraction  = atm_params[3] 
 
-        temperatures = full_like(self.pressures_bar, atm_params[4]) 
+        temperatures = self.get_temperatures(self.pressures_bar, atm_params[4])
 
         # Assume equilibrium chemistry
         metallicities = full_like(self.pressures_bar, atm_params[5])
@@ -186,6 +194,14 @@ class IsothermalEqChem(BaseAtmosphere):
         if not return_contribution:
             return transit_depths
         return transit_depths, _add
+
+    @staticmethod
+    def get_temperatures(pbar: ndarray, temperature: float,) -> ndarray:
+        """
+        Isothermal temperature profile
+        """
+        temperatures = full_like(pbar, temperature)
+        return temperatures
 
 class IsothermalFastChem(BaseAtmosphere):
     def __init__(self, cfg):
