@@ -154,7 +154,7 @@ class Relic:
         def _get_data(data: dict, key_aliases: list[str]) -> np.ndarray:
             for k in key_aliases:
                 if k in data.keys():
-                    return data[k].astype(np.float64)
+                    return data[k][:].astype(np.float64)
             raise KeyError(f"None of the keys {key_aliases} found in the data.")
 
         dlist = []
