@@ -25,6 +25,10 @@ from datetime import datetime
 from nautilus import Sampler as NautilusSampler
 
 from .atmosphere import BaseAtmosphere
+##################################
+from .ldtk_patch import apply_ldtk_patch
+apply_ldtk_patch()  # parallelise LDPSetCreator.init_filters
+##################################
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
 
