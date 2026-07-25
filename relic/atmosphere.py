@@ -264,7 +264,8 @@ class IsothermalFastChem(BaseAtmosphere):
 
         _ = self.fastchem.calcDensities(self.fastchem_input, self.fastchem_output)
 
-        hillnotations = ['H2', 'He'] + [self.fastchem.convertToHillNotation(n) for n in cfg["ATMOSPHERE"]["chemical_species"]] 
+        hillnotations = ['H2', 'He', 'H', 'H1-', 'e-']
+        hillnotations += [self.fastchem.convertToHillNotation(n) for n in cfg["ATMOSPHERE"]["chemical_species"]]
         self.species_indices = [self.fastchem.getGasSpeciesIndex(n) for n in hillnotations]
         self.species_weights = array([self.fastchem.getGasSpeciesWeight(i) for i in self.species_indices])
  
@@ -279,7 +280,7 @@ class IsothermalFastChem(BaseAtmosphere):
         # self._gas_mole_frac   = zeros((n_layers, n_spec)) 
         self._gas_mass_frac   = zeros((n_layers, n_spec)) 
         self._mass_frac_dict  = { 
-            n: zeros_like(self.pressures_bar) for n in ['H2', 'He'] + self.radtrans._line_species
+            n: zeros_like(self.pressures_bar) for n in ['H2', 'He', 'H', 'H-', 'e-'] + self.radtrans._line_species
         }
 
     def __call__(self, pv: ndarray, return_contribution: bool = False):
