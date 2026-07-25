@@ -125,11 +125,8 @@ c2o         = ["UP", 0.1, 2, -inf, inf, "C/O ratio", " "]
 [SAMPLER]
 npools      = 60    # number of processes for multiprocessing
 niter_white = 1000  # number of DE iterations for white-light curve fitting
-method      = "dynesty"  # sampler for retrievals: ["dynesty", "emcee"]
-bound       = "multi"    # dynesty bound method
-sample      = "rwalk"    # dynesty sampling method
+method      = "nautilus"  # sampler for retrievals: ["nautilus", "emcee"]
 n_live_points = 240  # number of live points
-dlogz_init  = 0.1   # dlogz convergence threshold
 n_effective = 400   # minimum effective sample size (secondary stopping criterion)
 
 save_checkpoint = true   # enable checkpointing for resuming
@@ -230,7 +227,7 @@ relic.run_test(3)
 
 ### 4.4 Run the sampler
 
-Below is an example of running `dynesty` nested sampling with multiprocessing. As before, the likelihood and prior-transform functions must be defined at the module level:
+Below is an example of running `nautilus` nested sampling with multiprocessing. As before, the likelihood and prior-transform functions must be defined at the module level:
 
 ```python
 def loglikelihood(pv):
@@ -238,19 +235,15 @@ def loglikelihood(pv):
 def prior_transform(uv):
     return relic.prior_transform(uv)
 
-with Pool(npools, maxtasksperchild=100) as pool:
-    results = relic.run_dynesty(
+with Pool(relic.cfg["SAMPLER"]["npools"], maxtasksperchild=100) as pool:
+    sampler, results = relic.run_nautilus(
+        prior           = prior_transform,
         loglikelihood   = loglikelihood,
-        prior_transform = prior_transform,
         pool            = pool,
-        queue_size      = npools,
-        nlivepoints     = relic.cfg["SAMPLER"]["n_live_points"],
-        bound           = "multi",
-        sample          = "rwalk", 
     )
 ```
 
-The output `results` is a standard `dynesty.utils.Results` instance.
+The output `results` is a dictionary containing posterior samples, log weights, and other summary statistics.
 
 As a reference: with two JWST NIRCam datasets (2.5–5.0 μm), a retrieval with `n_live_points=240`, `npools=60`, and 10 chemical species takes roughly 10 hours.
 

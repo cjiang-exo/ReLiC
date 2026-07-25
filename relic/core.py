@@ -9,26 +9,24 @@ from typing import Callable, Literal, Optional
 
 import h5py
 import numpy as np
-from dynesty import DynamicNestedSampler
-from dynesty import plotting as dyplot
-from dynesty.utils import get_neff_from_logwt
 from exoiris import ExoIris, TSData, TSDataGroup
 from exoiris.ldtkld import LDTkLD
 from numpy import array, asarray, empty_like, floor, hstack, isfinite, ndarray, squeeze, unique
 from numpy.polynomial import Chebyshev
 from numpy.random import default_rng
 from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP
-from scipy.stats import norm, truncnorm
-# from time import time
+from scipy.stats import norm, truncnorm 
 from datetime import datetime
  
 from nautilus import Sampler as NautilusSampler
 
 from .atmosphere import BaseAtmosphere
-##################################
+
+# --- optimization patch for ldtk.LDPSetCreator.init_filters ---
 from .ldtk_patch import apply_ldtk_patch
-apply_ldtk_patch()  # parallelise LDPSetCreator.init_filters
-##################################
+apply_ldtk_patch()  
+# --------------------------------------------------------------
+
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
 
@@ -68,12 +66,12 @@ class Relic:
 
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa)
 
-        if self.cfg['SAMPLER']['method'] in ['dynesty', 'nautilus'] :
+        if self.cfg['SAMPLER']['method'] == 'nautilus':
             self.prior_transform = Priors(self.exoiris.ps) 
         elif self.cfg['SAMPLER']['method'] == 'emcee':
             pass
         else:
-            raise ValueError(f"Sampling method should be one of 'dynesty', 'nautilus', or 'emcee', got: {self.cfg['SAMPLER']['method']}")
+            raise ValueError(f"Sampling method should be one of 'nautilus' or 'emcee', got: {self.cfg['SAMPLER']['method']}")
         
         print("Initialization complete.", flush=True) 
         print("Time spent: ", datetime.now() - t_start, flush=True)
@@ -468,68 +466,12 @@ class Relic:
         print('Sampling complete.')
         return sampler, results
 
-    def run_dynesty(self, loglikelihood: Callable, prior_transform: Callable, pool: Optional[Pool] = None, nlivepoints: int = 100, bound='multi', sample='rwalk', queue_size: int = None): 
-
-        save_checkpoint = self.cfg["SAMPLER"].get("save_checkpoint", False)
-        if save_checkpoint:
-            checkpoint_file = os.path.join(self.cfg["PATH"]["output_dir"], 'checkpoint_dynesty.pkl')
-        else:
-            checkpoint_file = None
-
-        resume = self.cfg["SAMPLER"].get("resume", False)
-        if resume:
-            if checkpoint_file is not None:
-                sampler = DynamicNestedSampler.restore(checkpoint_file, pool=pool)
-            else:
-                raise ValueError("`resume` is True but no `checkpoint_file` specified in config.")
-        else:
-            sampler = DynamicNestedSampler( 
-                loglikelihood,
-                prior_transform,
-                len(self.exoiris._tsa.ps), 
-                pool=pool,
-                nlive=nlivepoints, 
-                bound=bound,
-                sample=sample,
-                queue_size=queue_size, 
-            ) 
-
-        sampler.run_nested(
-            dlogz_init=self.cfg["SAMPLER"].get("dlogz_init", 0.1),
-            n_effective=self.cfg["SAMPLER"].get("n_effective", None),
-            maxiter_init=self.cfg["SAMPLER"].get("maxiter_init", None),
-            maxiter_batch=self.cfg["SAMPLER"].get("maxiter_batch", None),
-            maxbatch=self.cfg["SAMPLER"].get("maxbatch", None),
-            resume=self.cfg["SAMPLER"].get("resume", False),
-            checkpoint_file=checkpoint_file,
-            checkpoint_every=300,
-        )
-
-        results = sampler.results
-        odir = self.cfg["PATH"]["output_dir"]
-        with open(os.path.join(odir, 'ns_results.pkl'), 'wb') as f:
-            pickle.dump(results, f)
-            print(f"Sampling results saved to {os.path.join(odir, 'ns_results.pkl')}")
-
-        results.summary() 
-        n_effective = get_neff_from_logwt(results.logwt)
-        print(f"Number of effective samples: {n_effective}")
-
-        try:
-            fig, axes = dyplot.runplot(results) 
-            fig.tight_layout()
-            fig.savefig(os.path.join(odir, 'dynesty_runplot.png'), dpi=100)
-        except Exception as e:
-            print(f"Error generating dynesty runplot: {e}")
-
-        return results
-    
     def run_test(self, nsamples:int=3, seed:int=None):
         print("Running a quick sampling test...")
 
         ndim = len(self.exoiris._tsa.ps)
         
-        if self.cfg['SAMPLER']['method'] in ['dynesty', 'nautilus']:
+        if self.cfg['SAMPLER']['method'] == 'nautilus':
             rng = default_rng(seed)
             unit_cubes = rng.uniform(size=(nsamples, ndim))
             prior_params = [self.prior_transform(c) for c in unit_cubes]
