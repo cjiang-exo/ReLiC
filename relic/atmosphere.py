@@ -68,24 +68,28 @@ class IsothermalFreeChem(BaseAtmosphere):
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
-        ref_pressure    = 10**atm_params[1] # bar
-        cloudtop_pbar   = 10**atm_params[2] # bar
+        ref_pressure    = 10.0**atm_params[1] # bar
+        cloudtop_pbar   = 10.0**atm_params[2] # bar
         cloud_fraction  = atm_params[3] 
-        haze_factor     = 10**atm_params[4]
+        haze_factor     = 10.0**atm_params[4]
 
         temperatures = self.get_temperatures(self.pressures_bar, atm_params[5])
 
-        for i, sp in enumerate(self.radtrans._line_species):
-            self.mass_fractions[sp][:] = full_like(self.pressures_bar, 10**atm_params[6+i])
+        line_species = self.radtrans._line_species
+        mmrs = 10.0 ** atm_params[6:6+len(line_species)]
 
-        _msum = sum([self.mass_fractions[sp][0] for sp in self.radtrans._line_species])
-        if _msum < 1.0:
-            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.762 * (1 - _msum))
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.238 * (1 - _msum))
+        for sp, mmr in zip(line_species, mmrs):
+            self.mass_fractions[sp][:] = mmr
+
+        _msum = float(mmrs.sum())
+        if _msum <= 1.0:
+            h2_he = 1.0 - _msum
+            self.mass_fractions["H2"][:] = 0.762 * h2_he
+            self.mass_fractions["He"][:] = 0.238 * h2_he
         else:
-            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.0)
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.0)
-            for sp in self.radtrans._line_species:
+            self.mass_fractions["H2"][:] = 0.0
+            self.mass_fractions["He"][:] = 0.0
+            for sp in line_species:
                 self.mass_fractions[sp] /= _msum
 
         mmw = compute_mean_molar_masses(self.mass_fractions)
@@ -411,24 +415,28 @@ class M09FreeChem(IsothermalFreeChem):
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
-        ref_pressure    = 10**atm_params[1] # bar
-        cloudtop_pbar   = 10**atm_params[2] # bar
+        ref_pressure    = 10.0**atm_params[1] # bar
+        cloudtop_pbar   = 10.0**atm_params[2] # bar
         cloud_fraction  = atm_params[3] 
-        haze_factor     = 10**atm_params[4]
+        haze_factor     = 10.0**atm_params[4]
 
         temperatures = self.get_temperatures(self.pressures_bar, *atm_params[5:10])
 
-        for i, sp in enumerate(self.radtrans._line_species):
-            self.mass_fractions[sp][:] = full_like(self.pressures_bar, 10**atm_params[10+i])
+        line_species = self.radtrans._line_species
+        mmrs = 10.0 ** atm_params[10:10+len(line_species)]
 
-        _msum = sum([self.mass_fractions[sp][0] for sp in self.radtrans._line_species])
-        if _msum < 1.0:
-            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.762 * (1 - _msum))
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.238 * (1 - _msum))
+        for sp, mmr in zip(line_species, mmrs):
+            self.mass_fractions[sp][:] = mmr
+
+        _msum = float(mmrs.sum())
+        if _msum <= 1.0:
+            h2_he = 1.0 - _msum
+            self.mass_fractions["H2"][:] = 0.762 * h2_he
+            self.mass_fractions["He"][:] = 0.238 * h2_he
         else:
-            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.0)
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.0)
-            for sp in self.radtrans._line_species:
+            self.mass_fractions["H2"][:] = 0.0
+            self.mass_fractions["He"][:] = 0.0 
+            for sp in line_species:
                 self.mass_fractions[sp] /= _msum
 
         mmw = compute_mean_molar_masses(self.mass_fractions)
