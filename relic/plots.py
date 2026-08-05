@@ -16,7 +16,7 @@ NM_WHITE_PROFILED = 3
 class RelicVisualization:
     """A collection of plotting methods for ReLic results."""
 
-    def __init__(self, relic: Relic, dpi: int = 100, save: bool = True):
+    def __init__(self, relic: Relic, dpi: int = 150, save: bool = True):
         self.relic = relic
         self.dpi = dpi
         self.save = save

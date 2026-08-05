@@ -60,33 +60,36 @@ class IsothermalFreeChem(BaseAtmosphere):
         })
 
         self.wavelengths      = self.radtrans.get_wavelengths() * 1e4 # micron
-        self.planet_radius_cm = cfg["PLANET"]["radius_rjup"][0] * r_jup_mean
-        self.star_radius_cm   = cfg["STAR"]["radius_rsun"][0] * r_sun 
-        self._cgravity        = g_const * m_jup / self.planet_radius_cm**2
-        # self.temperatures     = zeros_like(self.pressures_bar)
+        self.planet_radius_cm = cfg["FIXED_PARAMETERS"]["planet_radius_rjup"] * r_jup_mean
+        self.star_radius_cm   = cfg["FIXED_PARAMETERS"]["star_radius_rsun"] * r_sun
+        self._cgravity        = g_const * m_jup / self.planet_radius_cm**2 
 
     def __call__(self, pv: ndarray, return_contribution: bool = False) -> ndarray:
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
-        ref_pressure    = 10**atm_params[1] # bar
-        cloudtop_pbar   = 10**atm_params[2] # bar
+        ref_pressure    = 10.0**atm_params[1] # bar
+        cloudtop_pbar   = 10.0**atm_params[2] # bar
         cloud_fraction  = atm_params[3] 
-        haze_factor     = 10**atm_params[4]
+        haze_factor     = 10.0**atm_params[4]
 
-        temperatures = full_like(self.pressures_bar, atm_params[5]) 
+        temperatures = self.get_temperatures(self.pressures_bar, atm_params[5])
 
-        for i, sp in enumerate(self.radtrans._line_species):
-            self.mass_fractions[sp][:] = full_like(self.pressures_bar, 10**atm_params[6+i])
+        line_species = self.radtrans._line_species
+        mmrs = 10.0 ** atm_params[6:6+len(line_species)]
 
-        _msum = sum([self.mass_fractions[sp][0] for sp in self.radtrans._line_species])
-        if _msum < 1.0:
-            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.762 * (1 - _msum))
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.238 * (1 - _msum))
+        for sp, mmr in zip(line_species, mmrs):
+            self.mass_fractions[sp][:] = mmr
+
+        _msum = float(mmrs.sum())
+        if _msum <= 1.0:
+            h2_he = 1.0 - _msum
+            self.mass_fractions["H2"][:] = 0.762 * h2_he
+            self.mass_fractions["He"][:] = 0.238 * h2_he
         else:
-            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.0)
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.0)
-            for sp in self.radtrans._line_species:
+            self.mass_fractions["H2"][:] = 0.0
+            self.mass_fractions["He"][:] = 0.0
+            for sp in line_species:
                 self.mass_fractions[sp] /= _msum
 
         mmw = compute_mean_molar_masses(self.mass_fractions)
@@ -108,6 +111,14 @@ class IsothermalFreeChem(BaseAtmosphere):
         if not return_contribution:
             return transit_depths
         return transit_depths, _add
+
+    @staticmethod
+    def get_temperatures(pbar: ndarray, temperature: float,) -> ndarray:
+        """
+        Isothermal temperature profile
+        """
+        temperatures = full_like(pbar, temperature)
+        return temperatures
     
 
 class IsothermalEqChem(BaseAtmosphere):
@@ -137,8 +148,8 @@ class IsothermalEqChem(BaseAtmosphere):
         )
 
         self.wavelengths      = self.radtrans.get_wavelengths() * 1e4 # micron
-        self.planet_radius_cm = cfg["PLANET"]["radius_rjup"][0] * r_jup_mean
-        self.star_radius_cm   = cfg["STAR"]["radius_rsun"][0] * r_sun
+        self.planet_radius_cm = cfg["FIXED_PARAMETERS"]["planet_radius_rjup"] * r_jup_mean
+        self.star_radius_cm   = cfg["FIXED_PARAMETERS"]["star_radius_rsun"] * r_sun
         self.quench_id        = where(self.pressures_bar >= 5E-8)[0][0]
         self._cgravity        = g_const * m_jup / self.planet_radius_cm**2 
 
@@ -150,7 +161,7 @@ class IsothermalEqChem(BaseAtmosphere):
         cloudtop_pbar   = 10**atm_params[2] # bar
         cloud_fraction  = atm_params[3] 
 
-        temperatures = full_like(self.pressures_bar, atm_params[4]) 
+        temperatures = self.get_temperatures(self.pressures_bar, atm_params[4])
 
         # Assume equilibrium chemistry
         metallicities = full_like(self.pressures_bar, atm_params[5])
@@ -187,6 +198,14 @@ class IsothermalEqChem(BaseAtmosphere):
             return transit_depths
         return transit_depths, _add
 
+    @staticmethod
+    def get_temperatures(pbar: ndarray, temperature: float,) -> ndarray:
+        """
+        Isothermal temperature profile
+        """
+        temperatures = full_like(pbar, temperature)
+        return temperatures
+
 class IsothermalFastChem(BaseAtmosphere):
     def __init__(self, cfg):
         super().__init__(cfg) 
@@ -205,8 +224,8 @@ class IsothermalFastChem(BaseAtmosphere):
         )
 
         self.wavelengths      = self.radtrans.get_wavelengths() * 1e4 # micron
-        self.planet_radius_cm = cfg["PLANET"]["radius_rjup"][0] * r_jup_mean 
-        self.star_radius_cm   = cfg["STAR"]["radius_rsun"][0] * r_sun 
+        self.planet_radius_cm = cfg["FIXED_PARAMETERS"]["planet_radius_rjup"] * r_jup_mean 
+        self.star_radius_cm   = cfg["FIXED_PARAMETERS"]["star_radius_rsun"] * r_sun 
         self._cgravity        = g_const * m_jup / self.planet_radius_cm**2   
         
         logk_path = os.path.expanduser(cfg["FASTCHEM"]["logk"])
@@ -249,7 +268,8 @@ class IsothermalFastChem(BaseAtmosphere):
 
         _ = self.fastchem.calcDensities(self.fastchem_input, self.fastchem_output)
 
-        hillnotations = ['H2', 'He'] + [self.fastchem.convertToHillNotation(n) for n in cfg["ATMOSPHERE"]["chemical_species"]] 
+        hillnotations = ['H2', 'He', 'H', 'H1-', 'e-']
+        hillnotations += [self.fastchem.convertToHillNotation(n) for n in cfg["ATMOSPHERE"]["chemical_species"]]
         self.species_indices = [self.fastchem.getGasSpeciesIndex(n) for n in hillnotations]
         self.species_weights = array([self.fastchem.getGasSpeciesWeight(i) for i in self.species_indices])
  
@@ -264,7 +284,7 @@ class IsothermalFastChem(BaseAtmosphere):
         # self._gas_mole_frac   = zeros((n_layers, n_spec)) 
         self._gas_mass_frac   = zeros((n_layers, n_spec)) 
         self._mass_frac_dict  = { 
-            n: zeros_like(self.pressures_bar) for n in ['H2', 'He'] + self.radtrans._line_species
+            n: zeros_like(self.pressures_bar) for n in ['H2', 'He', 'H', 'H-', 'e-'] + self.radtrans._line_species
         }
 
     def __call__(self, pv: ndarray, return_contribution: bool = False):
@@ -395,24 +415,28 @@ class M09FreeChem(IsothermalFreeChem):
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
-        ref_pressure    = 10**atm_params[1] # bar
-        cloudtop_pbar   = 10**atm_params[2] # bar
+        ref_pressure    = 10.0**atm_params[1] # bar
+        cloudtop_pbar   = 10.0**atm_params[2] # bar
         cloud_fraction  = atm_params[3] 
-        haze_factor     = 10**atm_params[4]
+        haze_factor     = 10.0**atm_params[4]
 
         temperatures = self.get_temperatures(self.pressures_bar, *atm_params[5:10])
 
-        for i, sp in enumerate(self.radtrans._line_species):
-            self.mass_fractions[sp][:] = full_like(self.pressures_bar, 10**atm_params[10+i])
+        line_species = self.radtrans._line_species
+        mmrs = 10.0 ** atm_params[10:10+len(line_species)]
 
-        _msum = sum([self.mass_fractions[sp][0] for sp in self.radtrans._line_species])
-        if _msum < 1.0:
-            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.762 * (1 - _msum))
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.238 * (1 - _msum))
+        for sp, mmr in zip(line_species, mmrs):
+            self.mass_fractions[sp][:] = mmr
+
+        _msum = float(mmrs.sum())
+        if _msum <= 1.0:
+            h2_he = 1.0 - _msum
+            self.mass_fractions["H2"][:] = 0.762 * h2_he
+            self.mass_fractions["He"][:] = 0.238 * h2_he
         else:
-            self.mass_fractions["H2"][:] = full_like(self.pressures_bar, 0.0)
-            self.mass_fractions["He"][:] = full_like(self.pressures_bar, 0.0)
-            for sp in self.radtrans._line_species:
+            self.mass_fractions["H2"][:] = 0.0
+            self.mass_fractions["He"][:] = 0.0 
+            for sp in line_species:
                 self.mass_fractions[sp] /= _msum
 
         mmw = compute_mean_molar_masses(self.mass_fractions)

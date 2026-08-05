@@ -46,6 +46,7 @@ pip install -e .
 Basic usage:
 ```python
 from relic import Relic
+from multiprocessing import Pool
 
 relic = Relic('input_config.toml')
 
@@ -54,11 +55,12 @@ def loglikelihood(pv):
 def prior_transform(uv):
     return relic.prior_transform(uv)
 
-results = relic.run_dynesty(
-    loglikelihood   = loglikelihood,
-    prior_transform = prior_transform, 
-    nlivepoints     = 100, 
-) 
+with Pool(8) as pool:
+    sampler, results = relic.run_nautilus(
+        prior           = prior_transform,
+        loglikelihood   = loglikelihood,
+        pool            = pool,
+    )
 
 ```
 
@@ -72,7 +74,7 @@ See [ReLiC documentation](https://relic.readthedocs.io/en/latest/quickstart.html
 
 Our ReLiC paper is going to be submitted.
 
-The ReLiC code is primarily built upon [ExoIris](https://github.com/hpparvi/ExoIris), [PyTransit](https://github.com/hpparvi/PyTransit), and [LDTk](https://github.com/hpparvi/ldtk) developed by Hannu Parviainen. Thus, please also consider citing the following papers:
+The ReLiC code is primarily built upon [ExoIris](https://github.com/hpparvi/ExoIris), [PyTransit](https://github.com/hpparvi/PyTransit), and [LDTk](https://github.com/hpparvi/ldtk) developed by Hannu Parviainen. Thus, if you use ReLiC in your work, please also consider citing the following papers:
 
 ```latex
 

@@ -50,6 +50,10 @@ n_baselines       = [2, 2] # second-order polynomials
 rebin_resolutions = [100, 100] # set to 0 for native resolution. 
 noise_model        = "white_marginalized"
 
+[FIXED_PARAMETERS]
+planet_radius_rjup = 1.39  
+star_radius_rsun   = 1.19 
+
 [PRIORS.TRANSIT]
 rho         = ["NP", 1.04, 0.07, 0.7, 1.4, "stellar density", "cgs"]
 p           = ["NP", 3.52474859, 0.00000038, 0, inf, "transit period", "days"]

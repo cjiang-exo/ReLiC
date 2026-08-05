@@ -27,7 +27,6 @@ dependencies = [
     "pytransit",
     "exoiris",
     "petitRADTRANS",
-    "dynesty",
     "celerite2",
     "numba",
     "nautilus",
