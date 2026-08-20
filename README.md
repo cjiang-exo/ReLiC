@@ -30,11 +30,13 @@ It's recommended to create a new conda environment with Python=3.12.
 conda create --name relic python=3.12
 conda activate relic
 ```
-Install the package and all dependencies in development mode:
+First, you would need to install petitRADTRANS (V3). See [petitRADTRANS installation](https://petitradtrans.readthedocs.io/en/latest/content/installation.html) for details.
+
+Then, install ReLiC and other dependencies in the development mode:
 
 ```bash
 git clone https://github.com/cjiang-exo/ReLiC.git
-cd ReLiC
+cd ReLiC 
 conda install -c conda-forge openmpi
 pip install -e .
 ```
