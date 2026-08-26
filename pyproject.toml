@@ -29,7 +29,7 @@ dependencies = [
     "petitRADTRANS",
     "celerite2",
     "numba",
-    "nautilus",
+    "nautilus-sampler",
     "mpi4py",
     "pyfastchem",
 ]
