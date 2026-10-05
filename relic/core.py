@@ -22,7 +22,7 @@ from nautilus import Sampler as NautilusSampler
 
 from .atmosphere import BaseAtmosphere
 
-# --- optimization patch for ldtk.LDPSetCreator.init_filters ---
+# --- Optimization patch for ldtk.LDPSetCreator.init_filters ---
 from .ldtk_patch import apply_ldtk_patch
 apply_ldtk_patch()  
 # --------------------------------------------------------------
@@ -30,17 +30,24 @@ apply_ldtk_patch()
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
 
+# Noise-model identifiers (from ExoIris)
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
 NM_GP_FREE = 2
 NM_WHITE_PROFILED = 3
-
-""" pv should be scalar input, no more vectorization """
-
+ 
 class Relic: 
 
     def __init__(self, config: str, idle: bool = False):
+        """Initialization from a TOML config file.
 
+        Parameters
+        ----------
+        config: str
+            Path to the TOML configuration file.
+        idle: bool
+            If True, only validate/load the config and skip data/model setup, only for test purposes.
+        """
         self.idle = idle
         
         self.cfg = self._validate_config(config)
@@ -141,6 +148,7 @@ class Relic:
         )
         
     def _load_raw_data(self) -> list[h5py.File]:
+        """ Load the light-curve data. """
         filelist = self.cfg["PATH"]["lightcurve_files"]
         print("\nLoading data: ", flush=True)
         for f in filelist:
@@ -148,6 +156,10 @@ class Relic:
         return [h5py.File(f, 'r') for f in filelist]
     
     def _init_TSData(self) -> TSDataGroup:
+        """ 
+        Build a `TSDataGroup` from the raw files, applying wavelength crops,
+        transit masking, normalization, outlier masking, and optional rebinning. 
+        """
 
         def _get_data(data: dict, key_aliases: list[str]) -> np.ndarray:
             for k in key_aliases:
@@ -206,8 +218,8 @@ class Relic:
 
         return reduce(lambda x,y: x+y, dlist)
     
-    def _init_LDModel(self):
-        print('\nInitializing LDTk model... It takes 1 -- 30 minutes. Be patient!', flush=True)
+    def _init_LDModel(self): 
+        print('\nInitializing LDTk model... It may take several minutes. Be patient!', flush=True)
 
         _t = self.cfg['STAR']['teff']
         _g = self.cfg['STAR']['logg']
@@ -274,12 +286,39 @@ class Relic:
         self.exoiris.print_parameters()
 
     def update_covariates(self, additional_covariates: list[np.ndarray], ):
+        """ Generate baseline covariates, 
+        optionally appending external state vectors. """
         covariates = self.generate_covariates(additional_covariates)
         for i, cov in enumerate(covariates):
             self.exoiris.data[i].covs = cov.copy()
         self.exoiris._wa = NewWhiteLPF(self.exoiris._tsa, covariates=covariates)
 
+        
+    def generate_covariates(self, state_vectors: list=None) -> list[ndarray]:
+        """ Build per-dataset Chebyshev baseline covariates.
+        HST data folded on the 95.42-min orbital period; JWST data in time """
+        period_hst = 95.42 / 60.0 / 24.0 # in days
+        _standardize = lambda x: 2 * (x - x.min()) / (x.max() - x.min()) - 1 # to [-1, 1]
+
+        covariates = []
+        for i, d in enumerate(self.exoiris._tsa.data):
+            n = self.exoiris.data[i].n_baseline
+            if ("HST" in d.name) or ("STIS" in d.name) or ("WFC3" in d.name): 
+                phases = (d.time - d.time[0]) % period_hst # phase-folded 
+                phases[phases >= 0.75*period_hst] -= period_hst
+                x = _standardize(phases) 
+            else: # JWST
+                x = _standardize(d.time) 
+            _covs = array([Chebyshev.basis(deg)(x) for deg in range(n+1)]).T 
+            if (state_vectors is not None) and (state_vectors[i] is not None):
+                v = state_vectors[i].astype(np.float64)
+                _covs = hstack([_covs, _standardize(v)])
+            covariates.append(_covs)
+        return covariates
+
     def fit_white(self, pool:Optional[Pool]=None, lnpost:Optional[Callable]=None, npop=100):
+        """Optimize the white-light model to validate covariates and refine the
+        transit ephemeris, then re-mask the data using the fitted ephemeris."""
         print("Fitting white light curves to validate covariates...", flush=True)
 
         niter = self.cfg["SAMPLER"]["niter_white"] 
@@ -303,26 +342,6 @@ class Relic:
         self.exoiris.data.mask_transit(self.exoiris.zero_epoch, 
             self.exoiris.period, self.exoiris.transit_duration
         ) 
-        
-    def generate_covariates(self, state_vectors: list=None) -> list[ndarray]:
-        period_hst = 95.42 / 60.0 / 24.0 # in days
-        _standardize = lambda x: 2 * (x - x.min()) / (x.max() - x.min()) - 1 # to [-1, 1]
-
-        covariates = []
-        for i, d in enumerate(self.exoiris._tsa.data):
-            n = self.exoiris.data[i].n_baseline
-            if ("HST" in d.name) or ("STIS" in d.name) or ("WFC3" in d.name): 
-                phases = (d.time - d.time[0]) % period_hst # phase-folded 
-                phases[phases >= 0.75*period_hst] -= period_hst
-                x = _standardize(phases) 
-            else: # JWST
-                x = _standardize(d.time) 
-            _covs = array([Chebyshev.basis(deg)(x) for deg in range(n+1)]).T 
-            if (state_vectors is not None) and (state_vectors[i] is not None):
-                v = state_vectors[i].astype(np.float64)
-                _covs = hstack([_covs, _standardize(v)])
-            covariates.append(_covs)
-        return covariates
 
     def sample_from_prior(self, size: int) -> ndarray:
         return squeeze(self.exoiris.ps.sample_from_prior(size))
@@ -404,6 +423,7 @@ class Relic:
             leave=True, vectorize=False, save=False)
 
     def save_mcmc(self, overwrite: bool = False, config_file: str = None):
+        """Save ExoIris results (and optionally the config) into the output dir."""
         # Results from ExoIris
         self.exoiris.save(overwrite=overwrite)
         outname = os.path.join(self.cfg['PATH']['output_dir'], self.exoiris.name+'.fits')
@@ -414,7 +434,15 @@ class Relic:
             shutil.copy(config_file, outname)
             print(f"Configuration file copied to {outname}.")
 
-    def run_nautilus(self, prior: Callable, loglikelihood: Callable, pool: Optional[Pool] = None, n_networks: int = 8) -> tuple[NautilusSampler, dict]:   
+    def run_nautilus(self, prior: Callable, loglikelihood: Callable, pool: Optional[Pool] = None, n_networks: int = 8) -> tuple[NautilusSampler, dict]:
+        """ Run nested sampling with Nautilus.
+
+        Returns
+        -------
+        (sampler, results)
+            The Nautilus sampler and a dict with evidence, posterior samples,
+            log-weights/log-likelihoods, parameter names, and the best-fit model.
+        """
         start_time = datetime.now()
         print(f"Start time: {start_time}", flush=True)
 
@@ -467,6 +495,8 @@ class Relic:
         return sampler, results
 
     def run_test(self, nsamples:int=3, seed:int=None):
+        """ Sanity check.
+        Draw a few samples and evaluate their log-probability. """
         print("Running a quick sampling test...")
 
         ndim = len(self.exoiris._tsa.ps)
@@ -533,6 +563,11 @@ class RelicExoIris(ExoIris):
         self.white_gp_models: None | list[ndarray] = None
         
 class Priors:
+    """ Callable prior transform mapping a unit cube to parameter space.
+
+    Supported priors: uniform, unbounded-normal, and truncated-normal.
+    """
+
     def __init__(self, prior_list: list[GParameter]):
 
         # initialize lists for different prior types

@@ -7,6 +7,7 @@ from astropy.visualization import ZScaleInterval
 from relic.core import Relic
 from relic.utils import SpectrumDownsampler 
 
+# Noise-model identifiers 
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
 NM_GP_FREE = 2
@@ -22,6 +23,7 @@ class RelicVisualization:
         self.save = save
 
     def plot_white(self, figname="white_fit.png"):
+        """ Plot the white-light curve fitting """
         ncols = self.relic.exoiris.data.size
         fig = self.relic.exoiris.plot_white(figsize=(3 * ncols, 7.2))
         fig.tight_layout()
@@ -32,6 +34,7 @@ class RelicVisualization:
         return fig
 
     def plot_2dfluxes(self, figname="fluxes.png"):
+        """Plot the 2D (time & wavelength) fluxes for each dataset."""
         figs = []
         for i, d in enumerate(self.relic.exoiris.data):
             fig, ax = pl.subplots(2, 1, figsize=(4.8, 4.8))
@@ -71,6 +74,11 @@ class RelicVisualization:
         return figs
 
     def plot_residuals(self, maxlike_params: ndarray, figname: str = "residuals.png"):
+        """Plot best-fit 2D fluxes.
+        ax[0]: Observed fluxes.
+        ax[1]: Best-fit model fluxes.
+        ax[2]: Normalized residuals.
+        """
 
         tsa = self.relic.exoiris._tsa
 
@@ -137,6 +145,7 @@ class RelicVisualization:
         return figs
     
     def plot_corners(self, samples=None, weights=None, truths=None, figname="corners.pdf"):
+        """ Make a posterior corner plot. """
 
         if samples is None:
             samples = self.relic.exoiris._tsa.sampler.flatchain
@@ -180,6 +189,7 @@ class RelicVisualization:
         return fig
 
     def plot_mcmc_lnprob(self, figname: str = "lnprob.png"):
+        """ Plot the MCMC log-probability chains."""
 
         lnp: ndarray = self.relic.exoiris.sampler.get_log_prob()
         outputname = os.path.join(self.relic.cfg['PATH']['output_dir'], 'lnprob.txt')
@@ -200,9 +210,10 @@ class RelicVisualization:
 
     def plot_transmission_spectra(self, maxlike_param:ndarray, 
                                   figname:str="transmission_spectrum.png" ):
+        """ Plot the best-fit transmission spectrum. """
         
         wl_model = self.relic.atmos_model.wavelengths
-        ts_modelmaxlike = 100 * self.relic.atmos_model(maxlike_param)
+        ts_modelmaxlike = 100 * self.relic.atmos_model(maxlike_param)  # transit depth [%]
  
         wavelengths = [d.wavelength for d in self.relic.tsdata]
         binwidths = [d._wl_r_edges - d._wl_l_edges for d in self.relic.tsdata]

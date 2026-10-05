@@ -29,13 +29,15 @@ It's recommended to create a new conda environment with Python=3.12.
 ```bash
 conda create --name relic python=3.12
 conda activate relic
+conda install -c conda-forge openmpi
 ```
-Install the package and all dependencies in development mode:
+First, you would need to install petitRADTRANS (V3). See [petitRADTRANS installation](https://petitradtrans.readthedocs.io/en/latest/content/installation.html) for details.
+
+Then, install ReLiC and other dependencies in the development mode:
 
 ```bash
 git clone https://github.com/cjiang-exo/ReLiC.git
-cd ReLiC
-conda install -c conda-forge openmpi
+cd ReLiC 
 pip install -e .
 ```
 
@@ -45,6 +47,8 @@ pip install -e .
 
 Basic usage:
 ```python
+''' Please prepare the configuration file (input_config.toml) before running the script. '''
+
 from relic import Relic
 from multiprocessing import Pool
 
@@ -57,11 +61,10 @@ def prior_transform(uv):
 
 with Pool(8) as pool:
     sampler, results = relic.run_nautilus(
-        prior           = prior_transform,
-        loglikelihood   = loglikelihood,
-        pool            = pool,
+        prior         = prior_transform,
+        loglikelihood = loglikelihood,
+        pool          = pool,
     )
-
 ```
 
 An example retrieval script can be found: [`example_scripts/pipeline_ns.py`](example_scripts/pipeline_ns.py)
@@ -77,7 +80,6 @@ Our ReLiC paper is going to be submitted.
 The ReLiC code is primarily built upon [ExoIris](https://github.com/hpparvi/ExoIris), [PyTransit](https://github.com/hpparvi/PyTransit), and [LDTk](https://github.com/hpparvi/ldtk) developed by Hannu Parviainen. Thus, if you use ReLiC in your work, please also consider citing the following papers:
 
 ```latex
-
 @ARTICLE{2026AJ....171..237P,
        author = {{Parviainen}, Hannu},
         title = "{ExoIris: Fast Exoplanet Transmission Spectroscopy in Python}",
@@ -107,8 +109,6 @@ The ReLiC code is primarily built upon [ExoIris](https://github.com/hpparvi/ExoI
         pages = {3821-3826},
           doi = {10.1093/mnras/stv1857}, 
 }
-
-
 ```
 
 ---
