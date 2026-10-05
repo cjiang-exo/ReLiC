@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "relic"
 version = "0.1.0"
-description = "ReLic: atmospheric Retrievals using spectral Light Curves"
+description = "Atmospheric retrievals using spectral light curves"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
@@ -16,22 +16,23 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Astronomy",
 ]
+requires-python = ">= 3.10"
 
-dependencies = [
+dependencies = [ 
+    "exoiris==1.1.1",
+    "pytransit",
+    "numba",
     "numpy",
-    "scipy",
-    "astropy",
     "matplotlib",
     "h5py",
-    "corner",
-    "pytransit",
-    "exoiris",
+    "corner", 
     "petitRADTRANS",
-    "celerite2",
-    "numba",
     "nautilus-sampler",
     "mpi4py",
     "pyfastchem",
+    "astropy",
+    "scipy",
+    "celerite2",
 ]
 
 [project.urls]

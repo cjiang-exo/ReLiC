@@ -9,7 +9,7 @@ from petitRADTRANS.physical_constants import m_jup, r_jup_mean, r_sun, G as g_co
 from petitRADTRANS.radtrans import Radtrans
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
 from petitRADTRANS.chemistry.utils import compute_mean_molar_masses
-from petitRADTRANS.physics import temperature_profile_function_guillot 
+# from petitRADTRANS.physics import temperature_profile_function_guillot 
 from pytransit.orbits import as_from_rhop
 import pyfastchem as fc
 
@@ -18,6 +18,8 @@ from relic.physics import get_temperatures_g10, get_temperatures_m09
 KB = const.k_B.cgs.value
 
 class BaseAtmosphere:
+    """ Abstract base class for user-defined atmosphere models. """
+
     def __init__(self, config: dict):
         self.cfg                    = config
         self._sl_atm: slice         = None # slice for atmospheric parameters in the parameter vector
@@ -25,17 +27,20 @@ class BaseAtmosphere:
         self.wavelengths: ndarray   = None # wavelengths in micron 
 
     def __call__(self, pv: ndarray) -> ndarray:
-        """ Given a parameter vector, return a transmission or emission spectra."""
+        """ Given a parameter vector, return a transmission or emission spectra. """
         raise NotImplementedError()
 
     @staticmethod
     def get_temperatures(*args, **kwargs) -> ndarray:
-        """ Calculate a temperature-pressure profile."""
+        """ Calculate a temperature-pressure profile. """
         raise NotImplementedError()
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 class IsothermalFreeChem(BaseAtmosphere):
+    """ Isothermal T-P profile with free chemistry."""
+
     def __init__(self, cfg):
+        """ Initialize petitRADTRANS and some constants """
         super().__init__(cfg) 
 
         self.pressures_bar = logspace(
@@ -65,6 +70,8 @@ class IsothermalFreeChem(BaseAtmosphere):
         self._cgravity        = g_const * m_jup / self.planet_radius_cm**2 
 
     def __call__(self, pv: ndarray, return_contribution: bool = False) -> ndarray:
+        """ Input pv and return transit depths.
+        If return_contribution=True, additionally return transmission contribution."""
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
@@ -81,6 +88,7 @@ class IsothermalFreeChem(BaseAtmosphere):
         for sp, mmr in zip(line_species, mmrs):
             self.mass_fractions[sp][:] = mmr
 
+        # Normalize the mass fractions to ensure they sum to 1.
         _msum = float(mmrs.sum())
         if _msum <= 1.0:
             h2_he = 1.0 - _msum
@@ -122,7 +130,9 @@ class IsothermalFreeChem(BaseAtmosphere):
     
 
 class IsothermalEqChem(BaseAtmosphere):
-    def __init__(self, cfg):
+    """Isothermal T-P profile with pRT pre-calculated equilibrium chemistry."""
+
+    def __init__(self, cfg): 
         super().__init__(cfg) 
 
         self.pressures_bar = logspace(
@@ -154,6 +164,8 @@ class IsothermalEqChem(BaseAtmosphere):
         self._cgravity        = g_const * m_jup / self.planet_radius_cm**2 
 
     def __call__(self, pv: ndarray, return_contribution: bool = False) -> ndarray:
+        """ Input pv and return transit depths.
+        If return_contribution=True, additionally return transmission contribution."""
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
@@ -207,6 +219,8 @@ class IsothermalEqChem(BaseAtmosphere):
         return temperatures
 
 class IsothermalFastChem(BaseAtmosphere):
+    """Isothermal T-P profile with FastChem equilibrium chemistry."""
+
     def __init__(self, cfg):
         super().__init__(cfg) 
 
@@ -273,6 +287,7 @@ class IsothermalFastChem(BaseAtmosphere):
         self.species_indices = [self.fastchem.getGasSpeciesIndex(n) for n in hillnotations]
         self.species_weights = array([self.fastchem.getGasSpeciesWeight(i) for i in self.species_indices])
  
+        # Pre-allocated buffers.
         n_layers = len(self.pressures_bar)
         n_spec   = len(self.species_indices)
         self._p_over_kb       = self.pressures_bar * 1e6 / KB # ascending pressure
@@ -280,15 +295,17 @@ class IsothermalFastChem(BaseAtmosphere):
 
         self.mmw              = zeros_like(self.pressures_bar)
         self._tot_mass_density = zeros_like(self.pressures_bar) # total mass density  
-        self._gas_num_density = zeros((n_layers, n_spec)) 
-        # self._gas_mole_frac   = zeros((n_layers, n_spec)) 
+        self._gas_num_density = zeros((n_layers, n_spec))  
         self._gas_mass_frac   = zeros((n_layers, n_spec)) 
         self._mass_frac_dict  = { 
             n: zeros_like(self.pressures_bar) for n in ['H2', 'He', 'H', 'H-', 'e-'] + self.radtrans._line_species
         }
 
     def __call__(self, pv: ndarray, return_contribution: bool = False):
-        ''' pv: [mass_p, pres_ref, pres_cloud, frac_cloud, f_haze, temperature, metallicity, co_ratios] '''
+        ''' Input pv and return transit depths.
+        If return_contribution=True, additionally return transmission contribution.
+        pv: [mass_p, pres_ref, pres_cloud, frac_cloud, f_haze, temperature, metallicity, co_ratio] 
+        '''
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
@@ -300,9 +317,9 @@ class IsothermalFastChem(BaseAtmosphere):
         temperatures = self.get_temperatures(self.pressures_bar, atm_params[5]) # ascending 
  
         metallicity = 10**atm_params[6]
-        co_ratios = atm_params[7]
+        co_ratio = atm_params[7]
  
-        mass_fractions = self.get_mass_fractions(metallicity, co_ratios, temperatures)
+        mass_fractions = self.get_mass_fractions(metallicity, co_ratio, temperatures)
         if mass_fractions == -1:
             return zeros_like(self.wavelengths) # capture and return null values
  
@@ -324,12 +341,13 @@ class IsothermalFastChem(BaseAtmosphere):
             return transit_depths
         return transit_depths, _add 
 
-    def get_mass_fractions(self, metallicity: float, co_ratios: float, temperatures: ndarray) -> dict:
+    def get_mass_fractions(self, metallicity: float, co_ratio: float, temperatures: ndarray) -> dict:
+        """ Run FastChem to compute mass fractions. """
 
         self._new_abundances[:] = self.init_abundances
         self._new_abundances[self.index_M] *= metallicity
-        _c1 = self.sum_CO * metallicity / (1 + co_ratios)
-        self._new_abundances[self.index_C] = _c1 * co_ratios 
+        _c1 = self.sum_CO * metallicity / (1 + co_ratio)
+        self._new_abundances[self.index_C] = _c1 * co_ratio 
         self._new_abundances[self.index_O] = _c1 
         
         self.fastchem_input.temperature = temperatures[::-1] # descending
@@ -359,8 +377,10 @@ class IsothermalFastChem(BaseAtmosphere):
 
 
 class GuillotFastChem(IsothermalFastChem):
+    """Guillot (2010) T-P profile with FastChem equilibrium chemistry."""
+
     def __call__(self, pv: ndarray, return_contribution: bool = False):
-        ''' pv: [mass_p, pres_ref, pres_cloud, frac_cloud, f_haze, t0, lga1, lga2, lgp1, lgp2, metallicity, co_ratios] '''
+        ''' pv: [mass_p, pres_ref, pres_cloud, frac_cloud, f_haze, t0, lga1, lga2, lgp1, lgp2, metallicity, co_ratio] '''
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
@@ -381,9 +401,9 @@ class GuillotFastChem(IsothermalFastChem):
         ) 
  
         metallicity = 10**atm_params[8]
-        co_ratios = atm_params[9]
+        co_ratio = atm_params[9]
  
-        mass_fractions = self.get_mass_fractions(metallicity, co_ratios, temperatures)
+        mass_fractions = self.get_mass_fractions(metallicity, co_ratio, temperatures)
         if mass_fractions == -1:
             return zeros_like(self.wavelengths) # capture and return null values
  
@@ -407,11 +427,16 @@ class GuillotFastChem(IsothermalFastChem):
 
     @staticmethod
     def get_temperatures(pbar, lg_kir, lg_gamma, beta=0.25, t_int=300, t_star=6000, sma=8.0, gravity=1000.0):
+        """Guillot (2010) T-P profile, clipped to [100, 3400] K."""
         temperatures = get_temperatures_g10(pbar, lg_kir, lg_gamma, beta, t_int, t_star, sma, gravity)
         return temperatures.clip(100, 3400)
     
 class M09FreeChem(IsothermalFreeChem):
+    """Madhusudhan & Seager (2009) T-P profile with free chemistry."""
+
     def __call__(self, pv: ndarray, return_contribution: bool = False) -> ndarray:
+        """ Input pv and return transit depths.
+        If return_contribution=True, additionally return transmission contribution."""
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
@@ -469,9 +494,10 @@ class M09FreeChem(IsothermalFreeChem):
         return temperatures.clip(100, 3400)
     
 class M09FastChem(IsothermalFastChem):    
+    """Madhusudhan & Seager (2009) T-P profile with FastChem chemistry."""
 
     def __call__(self, pv: ndarray, return_contribution: bool = False):
-        ''' pv: [mass_p, pres_ref, pres_cloud, frac_cloud, f_haze, t0, lga1, lga2, lgp1, lgp2, metallicity, co_ratios] '''
+        ''' pv: [mass_p, pres_ref, pres_cloud, frac_cloud, f_haze, t0, lga1, lga2, lgp1, lgp2, metallicity, co_ratio] '''
 
         atm_params      = pv[self._sl_atm]
         ref_gravity     = atm_params[0] * self._cgravity # cgs
@@ -483,9 +509,9 @@ class M09FastChem(IsothermalFastChem):
         temperatures = self.get_temperatures(self.pressures_bar, *atm_params[5:10]) # ascending 
  
         metallicity = 10**atm_params[10]
-        co_ratios = atm_params[11] 
+        co_ratio = atm_params[11] 
  
-        mass_fractions = self.get_mass_fractions(metallicity, co_ratios, temperatures)
+        mass_fractions = self.get_mass_fractions(metallicity, co_ratio, temperatures)
         if mass_fractions == -1:
             return zeros_like(self.wavelengths) # capture and return null values
  
