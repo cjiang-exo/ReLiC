@@ -4,7 +4,7 @@ This is where users define their own atmospheric models.
 
 import os
 from astropy import constants as const
-from numpy import array, ones, full_like, logspace, ndarray, where, log, empty_like, convolve, pad, zeros_like, zeros, exp 
+from numpy import array, full_like, logspace, ndarray, where, zeros_like, zeros
 from petitRADTRANS.physical_constants import m_jup, r_jup_mean, r_sun, G as g_const
 from petitRADTRANS.radtrans import Radtrans
 from petitRADTRANS.chemistry.pre_calculated_chemistry import PreCalculatedEquilibriumChemistryTable
@@ -375,7 +375,75 @@ class IsothermalFastChem(BaseAtmosphere):
         temperatures = full_like(pbar, temperature)
         return temperatures
 
+class GuillotFreeChem(IsothermalFreeChem):
+    """Guillot (2010) T-P profile with free chemistry."""
 
+    def __call__(self, pv: ndarray, return_contribution: bool = False) -> ndarray:
+        """ Input pv and return transit depths.
+        If return_contribution=True, additionally return transmission contribution."""
+
+        atm_params      = pv[self._sl_atm]
+        ref_gravity     = atm_params[0] * self._cgravity # cgs
+        ref_pressure    = 10.0**atm_params[1] # bar
+        cloudtop_pbar   = 10.0**atm_params[2] # bar
+        cloud_fraction  = atm_params[3] 
+        haze_factor     = 10.0**atm_params[4]
+
+        sma = as_from_rhop(pv[0], pv[1])
+
+        temperatures = self.get_temperatures(
+            self.pressures_bar, 
+            *atm_params[5:8],
+            t_int = self.cfg["FIXED_PARAMETERS"]["atm_tint"],
+            t_star = pv[4],
+            sma = sma,
+            gravity = ref_gravity,
+        ) 
+
+        line_species = self.radtrans._line_species
+        mmrs = 10.0 ** atm_params[8:8+len(line_species)]
+
+        for sp, mmr in zip(line_species, mmrs):
+            self.mass_fractions[sp][:] = mmr
+
+        _msum = float(mmrs.sum())
+        if _msum <= 1.0:
+            h2_he = 1.0 - _msum
+            self.mass_fractions["H2"][:] = 0.762 * h2_he
+            self.mass_fractions["He"][:] = 0.238 * h2_he
+        else:
+            self.mass_fractions["H2"][:] = 0.0
+            self.mass_fractions["He"][:] = 0.0 
+            for sp in line_species:
+                self.mass_fractions[sp] /= _msum
+
+        mmw = compute_mean_molar_masses(self.mass_fractions)
+
+        _, transit_radius_cm, _add = self.radtrans.calculate_transit_radii(
+            temperatures                = temperatures,
+            mass_fractions              = self.mass_fractions,
+            mean_molar_masses           = mmw,
+            reference_gravity           = ref_gravity,
+            planet_radius               = self.planet_radius_cm,
+            reference_pressure          = ref_pressure,
+            opaque_cloud_top_pressure   = cloudtop_pbar,
+            haze_factor                 = haze_factor,
+            cloud_fraction              = cloud_fraction,
+            return_contribution         = return_contribution,
+        ) 
+        transit_depths = (transit_radius_cm / self.star_radius_cm)**2
+
+        if not return_contribution:
+            return transit_depths
+        return transit_depths, _add
+    
+    @staticmethod
+    def get_temperatures(pbar, lg_kir, lg_gamma, beta=0.25, t_int=300, t_star=6000, sma=8.0, gravity=1000.0):
+        """Guillot (2010) T-P profile, clipped to [100, 3400] K."""
+        temperatures = get_temperatures_g10(pbar, lg_kir, lg_gamma, beta, t_int, t_star, sma, gravity)
+        return temperatures.clip(100, 3400)
+
+    
 class GuillotFastChem(IsothermalFastChem):
     """Guillot (2010) T-P profile with FastChem equilibrium chemistry."""
 
@@ -411,6 +479,71 @@ class GuillotFastChem(IsothermalFastChem):
             temperatures                = temperatures,
             mass_fractions              = mass_fractions,
             mean_molar_masses           = self.mmw,
+            reference_gravity           = ref_gravity,
+            planet_radius               = self.planet_radius_cm,
+            reference_pressure          = ref_pressure,
+            opaque_cloud_top_pressure   = cloudtop_pbar,
+            haze_factor                 = haze_factor,
+            cloud_fraction              = cloud_fraction,
+            return_contribution         = return_contribution,
+        ) 
+        transit_depths = (transit_radius_cm / self.star_radius_cm)**2 
+
+        if not return_contribution:
+            return transit_depths
+        return transit_depths, _add
+
+    @staticmethod
+    def get_temperatures(pbar, lg_kir, lg_gamma, beta=0.25, t_int=300, t_star=6000, sma=8.0, gravity=1000.0):
+        """Guillot (2010) T-P profile, clipped to [100, 3400] K."""
+        temperatures = get_temperatures_g10(pbar, lg_kir, lg_gamma, beta, t_int, t_star, sma, gravity)
+        return temperatures.clip(100, 3400)
+
+class GuillotEqChem(IsothermalEqChem):
+    """Guillot (2010) T-P profile with pRT equilibrium chemistry."""
+
+    def __call__(self, pv: ndarray, return_contribution: bool = False):
+        ''' pv: [mass_p, pres_ref, pres_cloud, frac_cloud, f_haze, t0, lga1, lga2, lgp1, lgp2, metallicity, co_ratio] '''
+
+        atm_params      = pv[self._sl_atm]
+        ref_gravity     = atm_params[0] * self._cgravity # cgs
+        ref_pressure    = 10**atm_params[1] # bar
+        cloudtop_pbar   = 10**atm_params[2] # bar
+        cloud_fraction  = atm_params[3] 
+        haze_factor     = 10**atm_params[4] 
+
+        sma = as_from_rhop(pv[0], pv[1])
+ 
+        temperatures = self.get_temperatures(
+            self.pressures_bar, 
+            *atm_params[5:8],
+            t_int = self.cfg["FIXED_PARAMETERS"]["atm_tint"],
+            t_star = pv[4],
+            sma = sma,
+            gravity = ref_gravity,
+        ) 
+ 
+        # Assume equilibrium chemistry
+        metallicities = full_like(self.pressures_bar, atm_params[8])
+        co_ratios = full_like(self.pressures_bar, atm_params[9])
+        mass_fractions = self.chem.interpolate_mass_fractions(
+            co_ratios           = co_ratios,
+            log10_metallicities = metallicities,
+            temperatures        = temperatures,
+            pressures           = self.pressures_bar, 
+            full                = False,
+        ) 
+
+        # quenching the chemistry above 5e-8 bar
+        for sp in self.radtrans._line_species: 
+            mass_fractions[sp][:self.quench_id] = mass_fractions[sp][self.quench_id]
+
+        mmw = compute_mean_molar_masses(mass_fractions)
+ 
+        _, transit_radius_cm, _add = self.radtrans.calculate_transit_radii(
+            temperatures                = temperatures,
+            mass_fractions              = mass_fractions,
+            mean_molar_masses           = mmw,
             reference_gravity           = ref_gravity,
             planet_radius               = self.planet_radius_cm,
             reference_pressure          = ref_pressure,
@@ -542,6 +675,64 @@ class M09FastChem(IsothermalFastChem):
         temperatures = get_temperatures_m09(pbar, t0, lga1, lga2, lgp1, lgp2, lgp3)
         return temperatures.clip(100, 3400)
     
+class M09EqChem(IsothermalEqChem):    
+    """Madhusudhan & Seager (2009) T-P profile with FastChem chemistry."""
+
+    def __call__(self, pv: ndarray, return_contribution: bool = False):
+        ''' pv: [mass_p, pres_ref, pres_cloud, frac_cloud, f_haze, t0, lga1, lga2, lgp1, lgp2, metallicity, co_ratio] '''
+
+        atm_params      = pv[self._sl_atm]
+        ref_gravity     = atm_params[0] * self._cgravity # cgs
+        ref_pressure    = 10**atm_params[1] # bar
+        cloudtop_pbar   = 10**atm_params[2] # bar
+        cloud_fraction  = atm_params[3] 
+        haze_factor     = 10**atm_params[4] 
+
+        temperatures = self.get_temperatures(self.pressures_bar, *atm_params[5:10]) # ascending 
+ 
+        # Assume equilibrium chemistry
+        metallicities = full_like(self.pressures_bar, atm_params[10])
+        co_ratios = full_like(self.pressures_bar, atm_params[11])
+        mass_fractions = self.chem.interpolate_mass_fractions(
+            co_ratios           = co_ratios,
+            log10_metallicities = metallicities,
+            temperatures        = temperatures,
+            pressures           = self.pressures_bar, 
+            full                = False,
+        ) 
+
+        # quenching the chemistry above 5e-8 bar
+        for sp in self.radtrans._line_species: 
+            mass_fractions[sp][:self.quench_id] = mass_fractions[sp][self.quench_id]
+
+        mmw = compute_mean_molar_masses(mass_fractions)
+ 
+        _, transit_radius_cm, _add = self.radtrans.calculate_transit_radii(
+            temperatures                = temperatures,
+            mass_fractions              = mass_fractions,
+            mean_molar_masses           = mmw,
+            reference_gravity           = ref_gravity,
+            planet_radius               = self.planet_radius_cm,
+            reference_pressure          = ref_pressure,
+            opaque_cloud_top_pressure   = cloudtop_pbar,
+            haze_factor                 = haze_factor,
+            cloud_fraction              = cloud_fraction,
+            return_contribution         = return_contribution,
+        ) 
+        transit_depths = (transit_radius_cm / self.star_radius_cm)**2 
+
+        if not return_contribution:
+            return transit_depths
+        return transit_depths, _add
+
+    @staticmethod
+    def get_temperatures(pbar: ndarray, t0: float, lga1: float, lga2: float, 
+            lgp1: float, lgp2: float, lgp3: float=0) -> ndarray:
+        """
+        Parametric T-P profile from 2009ApJ...707...24M.
+        """
+        temperatures = get_temperatures_m09(pbar, t0, lga1, lga2, lgp1, lgp2, lgp3)
+        return temperatures.clip(100, 3400)
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
