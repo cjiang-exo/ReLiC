@@ -1,6 +1,6 @@
 # ReLiC Quick Start
 
-A step-by-step guide to running atmospheric retrievals of transiting exoplanets with ReLiC.
+A step-by-step guide to running atmospheric retrievals of transiting exoplanets with [ReLiC](https://github.com/cjiang-exo/ReLiC).
  
 
 ## 1. Prepare your data
@@ -17,19 +17,19 @@ Each observation's spectral light curves should be stored in an HDF5 file contai
 
 ## 2. Prepare your atmospheric model (optional)
 
-`relic.atmosphere` provides several built-in atmospheric models based on `petitRADTRANS`. The atmospheric models must inherit from `BaseAtmosphere` and implement `__call__(pv) -> ndarray` returning 1D transit depth array.
+`relic.atmosphere` provides several built-in atmospheric models based on [`petitRADTRANS`](https://petitradtrans.readthedocs.io/en/latest/). The atmospheric models must inherit from `BaseAtmosphere` and implement `__call__(pv) -> ndarray` returning 1D transit depth array.
 
 | Model Class | Temperature-pressure profile | Chemistry | 
 |---|---|---| 
 | `IsothermalFreeChem` | Isothermal | Free chemistry |
-| `IsothermalFastChem` | Isothermal | FastCHEM chemistry |
+| `IsothermalFastChem` | Isothermal | [FastCHEM](https://newstrangeworlds.github.io/FastChem/) chemistry |
 | `IsothermalEqChem` | Isothermal | Equilibrium (petitRADTRANS tables) |
-| `GuillotFreeChem` | Guillot (2010) | Free chemistry |
-| `GuillotFastChem` | Guillot (2010) | FastCHEM chemistry |
-| `GuillotEqChem` | Guillot (2010) | Equilibrium (petitRADTRANS tables) |
-| `M09FreeChem` | Madhusudhan et al. (2009) | Free chemistry |
-| `M09FastChem` | Madhusudhan et al. (2009) | FastCHEM chemistry |
-| `M09EqChem` | Madhusudhan et al. (2009) | Equilibrium (petitRADTRANS tables) |
+| `GuillotFreeChem` | [Guillot (2010)](https://ui.adsabs.harvard.edu/abs/2010A%26A...520A..27G/abstract) | Free chemistry |
+| `GuillotFastChem` | [Guillot (2010)](https://ui.adsabs.harvard.edu/abs/2010A%26A...520A..27G/abstract) | [FastCHEM](https://newstrangeworlds.github.io/FastChem/) chemistry |
+| `GuillotEqChem` | [Guillot (2010)](https://ui.adsabs.harvard.edu/abs/2010A%26A...520A..27G/abstract) | Equilibrium (petitRADTRANS tables) |
+| `M09FreeChem` | [Madhusudhan & Seager (2009)](https://ui.adsabs.harvard.edu/abs/2009ApJ...707...24M/abstract) | Free chemistry |
+| `M09FastChem` | [Madhusudhan & Seager (2009)](https://ui.adsabs.harvard.edu/abs/2009ApJ...707...24M/abstract) | [FastCHEM](https://newstrangeworlds.github.io/FastChem/) chemistry |
+| `M09EqChem` | [Madhusudhan & Seager (2009)](https://ui.adsabs.harvard.edu/abs/2009ApJ...707...24M/abstract) | Equilibrium (petitRADTRANS tables) |
 
 To implement a custom model, subclass BaseAtmosphere:
 
