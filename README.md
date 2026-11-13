@@ -75,7 +75,7 @@ See [ReLiC documentation](https://relic.readthedocs.io/en/latest/quickstart.html
 
 ## Citation
 
-Our ReLiC paper is going to be submitted.
+Our ReLiC paper is under review.
 
 The ReLiC code is primarily built upon [ExoIris](https://github.com/hpparvi/ExoIris), [PyTransit](https://github.com/hpparvi/PyTransit), and [LDTk](https://github.com/hpparvi/ldtk) developed by Hannu Parviainen. Thus, if you use ReLiC in your work, please also consider citing the following papers:
 

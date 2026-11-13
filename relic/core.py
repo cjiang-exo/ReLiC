@@ -11,9 +11,11 @@ import h5py
 import numpy as np
 from exoiris import ExoIris, TSData, TSDataGroup
 from exoiris.ldtkld import LDTkLD
+from ldtk import BoxcarFilter, TabulatedFilter
 from numpy import array, asarray, empty_like, floor, hstack, isfinite, ndarray, squeeze, unique
 from numpy.polynomial import Chebyshev
 from numpy.random import default_rng
+from pytransit import LDTkLD as PyTransitLDTkLD
 from pytransit.param import GParameter, NormalPrior as NP, UniformPrior as UP
 from scipy.stats import norm, truncnorm 
 from datetime import datetime
@@ -29,6 +31,7 @@ apply_ldtk_patch()
 
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
+from .plots import RelicVisualization
 
 # Noise-model identifiers (from ExoIris)
 NM_WHITE_MARGINALIZED = 0
@@ -39,7 +42,7 @@ NM_WHITE_PROFILED = 3
 class Relic: 
 
     def __init__(self, config: str, idle: bool = False):
-        """Initialization from a TOML config file.
+        """Initialize from a TOML config file and save diagnostic plots.
 
         Parameters
         ----------
@@ -79,7 +82,11 @@ class Relic:
             pass
         else:
             raise ValueError(f"Sampling method should be one of 'nautilus' or 'emcee', got: {self.cfg['SAMPLER']['method']}")
-        
+
+        self.visual = RelicVisualization(self, dpi=100, save=True)
+        self.visual.plot_2dfluxes(figname='fluxes.png')
+        self.visual.plot_ldprofiles(figname='ldprofiles.png')
+
         print("Initialization complete.", flush=True) 
         print("Time spent: ", datetime.now() - t_start, flush=True)
 
@@ -175,12 +182,36 @@ class Relic:
                 wl_edges = None
 
             time = _get_data(rd, ['bjd_tdb', 'bjd', 'time'])
-            wavelength = _get_data(rd, ['wavelength', 'wavelengths'])
-            fluxes = _get_data(rd, ['flux', 'fluxes'])
-            flux_errors = _get_data(rd, ['errors', 'flux_err', 'flux_error', 'flux_errors', 'ferrors']) 
-            if fluxes.shape[0] != len(wavelength):
-                fluxes = fluxes.T
-                flux_errors = flux_errors.T
+            fluxes = _get_data(rd, ['data', 'flux', 'fluxes'])
+            flux_errors = _get_data(rd, ['err', 'errors', 'flux_err', 'flux_error', 'flux_errors', 'ferrors', 'ferr'])
+            response = None
+            if fluxes.ndim == 1:
+                wavelength = _get_data(rd, ['wavelength', 'wavelengths'])
+                if wavelength.shape != (1,) or not np.isfinite(wavelength[0]):
+                    raise ValueError('Photometric wavelength must be a finite 1D array of length one.')
+                response_file = self.cfg['PATH']['spec_resolving_power_files'][i]
+                if not response_file:
+                    raise ValueError('Photometric datasets require a response function file.')
+                response = np.loadtxt(response_file, ndmin=2)
+                if (response.ndim != 2 or response.shape[1] != 2 or
+                    response.shape[0] < 4 or not np.all(np.isfinite(response)) or
+                    np.any(np.diff(response[:, 0]) <= 0) or
+                    np.any(response[:, 1] < 0) or not np.any(response[:, 1] > 0)):
+                    raise ValueError('Photometric response_function must contain at least four rows of increasing wavelengths and nonnegative, nonzero response.')
+                if flux_errors.shape != fluxes.shape or time.shape != fluxes.shape:
+                    raise ValueError('Photometric time, fluxes, and errors must have matching 1D shapes.')
+                if self.cfg['EXOIRIS']['rebin_resolutions'][i] > 0:
+                    raise ValueError('Photometric light curves cannot be rebinned in wavelength.')
+                if self.cfg['EXOIRIS']['wl_range_micron'][i] != []:
+                    raise ValueError('Wavelength cropping is not supported for photometric light curves.')
+                wl_edges = np.array([[response[0, 0]], [response[-1, 0]]])
+                fluxes = fluxes[np.newaxis, :]
+                flux_errors = flux_errors[np.newaxis, :]
+            else:
+                wavelength = _get_data(rd, ['wavelength', 'wavelengths'])
+                if fluxes.shape[0] != len(wavelength):
+                    fluxes = fluxes.T
+                    flux_errors = flux_errors.T
  
             dlist.append(TSData(
                 time        = np.asarray(time),
@@ -192,6 +223,8 @@ class Relic:
                 noise_group = self.cfg["EXOIRIS"]["noise_groups"][i], 
                 n_baseline  = self.cfg['EXOIRIS']['n_baselines'][i],
             ))
+            if response is not None:
+                dlist[-1].response_function = response
 
             _wlrange = self.cfg["EXOIRIS"]["wl_range_micron"][i] 
             if _wlrange != []:
@@ -202,7 +235,8 @@ class Relic:
                 t14 = self.cfg["PLANET"]["transit_duration_d"][0]
             ) 
             dlist[-1].normalize_to_poly()
-            dlist[-1].mask_outliers(sigma=10.0)
+            if response is None:
+                dlist[-1].mask_outliers(sigma=10.0)
 
             print("Loaded dataset #{0:d} with nwl={1:d}, nt={2:d}.".format(
                 i, *dlist[i].fluxes.shape
@@ -225,7 +259,9 @@ class Relic:
         _g = self.cfg['STAR']['logg']
         _m = self.cfg['STAR']['metal']
         
-        return LDTkLD(
+        datasets = [self.tsdata] if isinstance(self.tsdata, TSData) else self.tsdata
+        ld_class = ResponseLDTkLD if any(hasattr(d, 'response_function') for d in datasets) else LDTkLD
+        return ld_class(
             data    = self.tsdata, 
             teff    = (_t[0], max(_t[1], 50)),
             logg    = (_g[0], max(_g[1], 0.02)),
@@ -342,6 +378,7 @@ class Relic:
         self.exoiris.data.mask_transit(self.exoiris.zero_epoch, 
             self.exoiris.period, self.exoiris.transit_duration
         ) 
+        self.visual.plot_white()
 
     def sample_from_prior(self, size: int) -> ndarray:
         return squeeze(self.exoiris.ps.sample_from_prior(size))
@@ -489,6 +526,11 @@ class Relic:
             pickle.dump(results, f)
             print(f"Sampling results saved to {os.path.join(odir, 'ns_results.pkl')}")
 
+        self.visual.plot_corners(samples=samples, weights=np.exp(log_w),
+                     truths=maxlike_params, figname='corners.pdf')
+        self.visual.plot_residuals(maxlike_params, figname='residuals.png')
+        self.visual.plot_transmission_spectra(maxlike_params, figname='transmission_spectra.png')
+
         print('log Z = {:.2f} +/- {:.2f}'.format(sampler.log_z, 1 / np.sqrt(sampler.n_eff)))
         print('Number of effective samples: {}'.format(sampler.n_eff))
         print('Sampling complete.')
@@ -515,6 +557,27 @@ class Relic:
 
         print("Test complete.") 
         return prior_params, pp
+
+class ResponseLDTkLD(LDTkLD):
+    def __init__(self, data, teff, logg, metal, cache=None, dataset='vis-lowres'):
+        data = TSDataGroup([data]) if isinstance(data, TSData) else data
+        filters = []
+        self.wlslices = []
+        wavelengths = []
+        for dataset_data in data:
+            start = len(filters)
+            response = getattr(dataset_data, 'response_function', None)
+            if response is not None:
+                filters.append(TabulatedFilter(dataset_data.name, response[:, 0] * 1e3, response[:, 1]))
+            else:
+                for left, right in zip(dataset_data._wl_l_edges, dataset_data._wl_r_edges):
+                    filters.append(BoxcarFilter(f'{0.5 * (left + right):08.5f}', left * 1e3, right * 1e3))
+            self.wlslices.append(slice(start, len(filters)))
+            wavelengths.extend(dataset_data.wavelength)
+        PyTransitLDTkLD.__init__(self, filters, teff, logg, metal, cache, dataset)
+        self.wavelength = np.asarray(wavelengths)
+        self.dataset = dataset
+
 
 class RelicExoIris(ExoIris):
     def __init__(self, name: str, ldmodel, data: TSDataGroup | TSData,

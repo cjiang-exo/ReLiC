@@ -1,10 +1,38 @@
 import numba
+import numpy as np
 from astropy.stats import sigma_clip
 from numpy import (any, array, asarray, concatenate, exp, float64, hstack,
                    int64, interp, log, log2, ndarray, round, searchsorted,
                    sqrt, sum as np_sum, zeros, zeros_like, loadtxt)
 from numpy.polynomial import Chebyshev
 from petitRADTRANS.physics import rebin_spectrum_bin 
+
+class PhotometricDownsampler:
+    def __init__(self, wl_model: ndarray, response: ndarray):
+        wl_model = np.asarray(wl_model)
+        if (wl_model.ndim != 1 or wl_model.size < 2 or
+            not np.all(np.isfinite(wl_model)) or np.any(np.diff(wl_model) <= 0)):
+            raise ValueError('Atmosphere wavelengths must be finite and strictly increasing.')
+        response_wl, transmission = response.T
+        if wl_model[0] > response_wl[0] or wl_model[-1] < response_wl[-1]:
+            raise ValueError('Atmosphere wavelength grid must cover the entire photometric response function.')
+
+        grid = np.union1d(response_wl, wl_model[(wl_model > response_wl[0]) & (wl_model < response_wl[-1])])
+        transmission = np.interp(grid, response_wl, transmission)
+        widths = np.diff(grid)
+        grid_weights = np.zeros(grid.size)
+        grid_weights[:-1] += widths * (2 * transmission[:-1] + transmission[1:]) / 6
+        grid_weights[1:] += widths * (transmission[:-1] + 2 * transmission[1:]) / 6
+        indices = np.clip(np.searchsorted(wl_model, grid, side='right') - 1, 0, wl_model.size - 2)
+        fraction = (grid - wl_model[indices]) / (wl_model[indices + 1] - wl_model[indices])
+        self.weights = np.zeros(wl_model.size)
+        np.add.at(self.weights, indices, grid_weights * (1 - fraction))
+        np.add.at(self.weights, indices + 1, grid_weights * fraction)
+        self.weights /= self.weights.sum()
+
+    def convolve_and_rebin(self, model_flux: ndarray):
+        return np.array([np.dot(self.weights, model_flux)])
+
 
 class SpectrumDownsampler:
     def __init__(self, wl_model: ndarray, wl_data: ndarray, wl_binwidths: ndarray, spec_resolving_power_file: str | None = None, n_sigma=3):

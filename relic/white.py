@@ -3,9 +3,7 @@
 from matplotlib.figure import Figure
 from matplotlib.pyplot import subplots, setp 
 from numpy.linalg import lstsq, LinAlgError 
-from numpy import ( array, average, atleast_2d, diff, floor, isfinite, isscalar, inf, 
-    log10, nan, repeat, sqrt, squeeze, unique, where, ndarray, zeros_like, ones_like
-) 
+from numpy import ( array, average, atleast_2d, diff, floor, isfinite, isscalar, inf, log10, nan, repeat, sqrt, squeeze, unique, where, ndarray, zeros_like, ones_like,  nanquantile)
 from scipy.optimize import minimize
 from pytransit import BaseLPF
 from pytransit.orbits import as_from_rhop, i_from_ba, fold, i_from_baew, d_from_pkaiews, epoch
@@ -70,7 +68,8 @@ class NewWhiteLPF(BaseLPF):
     def _init_p_planet(self):
         """Planet parameter initialisation.
         """ 
-        pk2 = [PParameter(f'k2_{pb}', 'area_ratio', 'A_s', UP(0.001, 0.1), (0, inf)) for pb in self.passbands]
+        approx_k2 = nanquantile(self.fluxes[0], q=0.95) - nanquantile(self.fluxes[0], q=0.05)
+        pk2 = [PParameter(f'k2_{pb}', 'area_ratio', 'A_s', UP(0.3*approx_k2, 3*approx_k2), (0, inf)) for pb in self.passbands]
         self.ps.add_passband_block('k2', 1, self.npb, pk2)
         self._pid_k2 = repeat(self.ps.blocks[-1].start, self.npb)
         self._start_k2 = self.ps.blocks[-1].start

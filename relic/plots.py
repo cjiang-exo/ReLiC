@@ -2,10 +2,15 @@ import corner
 import numpy as np
 import matplotlib.pyplot as pl
 import os   
+from typing import TYPE_CHECKING
 from numpy import ndarray, savetxt, where, diff, median, sqrt
 from astropy.visualization import ZScaleInterval 
-from relic.core import Relic
+from exoiris import TSData
+from pytransit.orbits import fold
 from relic.utils import SpectrumDownsampler 
+
+if TYPE_CHECKING:
+    from .core import Relic
 
 # Noise-model identifiers 
 NM_WHITE_MARGINALIZED = 0
@@ -15,28 +20,72 @@ NM_WHITE_PROFILED = 3
 
 
 class RelicVisualization:
-    """A collection of plotting methods for ReLic results."""
+    """Plot ReLic results and return figures after closing them."""
 
-    def __init__(self, relic: Relic, dpi: int = 150, save: bool = True):
+    def __init__(self, relic: 'Relic', dpi: int = 150, save: bool = True):
         self.relic = relic
         self.dpi = dpi
         self.save = save
 
+    def _save_figure(self, fig, figname, message, suffix=''):
+        try:
+            if self.save:
+                stem, extension = os.path.splitext(figname)
+                outname = os.path.join(self.relic.cfg['PATH']['output_dir'], f'{stem}{suffix}{extension}')
+                fig.savefig(outname, dpi=self.dpi)
+                print(f'{message} {outname}.')
+        finally:
+            pl.close(fig)
+
     def plot_white(self, figname="white_fit.png"):
-        """ Plot the white-light curve fitting """
+        """Plot the white-light curve fit against folded time in days."""
+        white = self.relic.exoiris._wa
         ncols = self.relic.exoiris.data.size
-        fig = self.relic.exoiris.plot_white(figsize=(3 * ncols, 7.2))
+        fig, axs = pl.subplots(3, ncols, figsize=(3 * ncols, 7.2),
+                               sharey='row', sharex='col', squeeze=False)
+        pv = white.de.minimum_location
+        period = pv[0]
+        transit_centers = pv[white._sl_tc]
+        transit = np.asarray(white.transit_model(pv)).reshape(-1)
+        model = np.asarray(white.flux_model(pv)).reshape(-1)
+        residuals = white.ofluxa - model
+        detrended = transit + residuals
+        duration = white.transit_duration
+
+        for index, sl in enumerate(white.lcslices):
+            center = transit_centers[self.relic.exoiris.data.epoch_groups[index]]
+            time = fold(white.timea[sl], period, center)
+            time_diff = np.diff(time)
+            breaks = time_diff < 0
+            if time_diff.size:
+                breaks |= time_diff > 2 * np.median(time_diff)
+            segments = np.split(np.arange(time.size), np.where(breaks)[0] + 1)
+
+            axs[0, index].plot(time, white.ofluxa[sl], '.k', alpha=0.25)
+            axs[1, index].plot(time, detrended[sl], '.k', alpha=0.25)
+            axs[2, index].plot(time, residuals[sl], '.k', alpha=0.25)
+            for segment in segments:
+                axs[0, index].plot(time[segment], model[sl][segment], 'r', ms=1, zorder=9)
+                axs[1, index].plot(time[segment], transit[sl][segment], 'r', ms=1, zorder=9)
+            axs[2, index].axhline(0, ls='--', c='r', zorder=9)
+            for ax in axs[:, index]: 
+                for marker in (0, -0.5 * duration, 0.5 * duration):
+                    ax.axvline(marker, ls='--', c='0.5')
+            axs[2, index].set(xlabel='Time from mid-transit [d]', xlim=(-2*duration, 2*duration))
+
+        for ax in axs[:2, 0]:
+            ax.set_ylabel('Normalized flux')
+        axs[2, 0].set_ylabel('Residuals')
         fig.tight_layout()
-        outname = os.path.join(self.relic.cfg['PATH']['output_dir'], figname)
-        if self.save:
-            fig.savefig(outname, dpi=self.dpi)
-            print(f"A preview of white light curve fit saved as {outname}.")
+        self._save_figure(fig, figname, 'A preview of white light curve fit saved as')
         return fig
 
     def plot_2dfluxes(self, figname="fluxes.png"):
-        """Plot the 2D (time & wavelength) fluxes for each dataset."""
+        """Plot the 2D (time & wavelength) fluxes for spectroscopic datasets."""
         figs = []
         for i, d in enumerate(self.relic.exoiris.data):
+            if hasattr(d, 'response_function'):
+                continue
             fig, ax = pl.subplots(2, 1, figsize=(4.8, 4.8))
             _t = d.time
             _w = d.wavelength
@@ -66,11 +115,7 @@ class RelicVisualization:
 
             fig.tight_layout()
             figs.append(fig)
-            if self.save:
-                outname = figname.split('.')[0] + f'_d{i}.' + figname.split('.')[1]
-                outname = os.path.join(self.relic.cfg["PATH"]["output_dir"], outname)
-                fig.savefig(outname, dpi=self.dpi)
-                print(f"A preview of 2D fluxes is saved as {outname}.")
+            self._save_figure(fig, figname, 'A preview of 2D fluxes is saved as', suffix=f'_d{i}')
         return figs
 
     def plot_residuals(self, maxlike_params: ndarray, figname: str = "residuals.png"):
@@ -136,11 +181,7 @@ class RelicVisualization:
             fig.tight_layout()
             figs.append(fig)
 
-            if self.save:
-                outname = figname.split('.')[0] + f'_d{i}.' + figname.split('.')[1]
-                outname = os.path.join(self.relic.cfg["PATH"]["output_dir"], outname)
-                fig.savefig(outname, dpi=self.dpi)
-                print(f"A preview of residuals is saved as {outname}.")
+            self._save_figure(fig, figname, 'A preview of residuals is saved as', suffix=f'_d{i}')
 
         return figs
     
@@ -161,32 +202,53 @@ class RelicVisualization:
             levels=[0.3935, 0.8647, 0.9889],
             quantiles=[0.16, 0.5, 0.84])
 
-        if self.save:
-            outname = os.path.join(self.relic.cfg['PATH']['output_dir'], figname)
-            fig.savefig(outname, dpi=self.dpi)
-            print(f"A preview of posterior distributions is saved as {outname}.")
+        self._save_figure(fig, figname, 'A preview of posterior distributions is saved as')
         return fig
 
     def plot_ldprofiles(self, teff:float=None, logg:float=None,
-                        metal:float=None, figname:str="ldprofiles.png"):
+                        metal:float=None, figname:str="ldprofiles.pdf"):
         """
-        Plot limb darkening profiles for the given stellar parameters.
-        If any parameter is None, it will be taken from the configuration file.
+        Plot each spectroscopic dataset and all photometric profiles separately.
+        Parameters default to the configuration values. Return the figures as a
+        list, with the combined photometry figure last when present.
         """
 
         _t = teff if teff is not None else self.relic.cfg['STAR']['teff'][0]
         _g = logg if logg is not None else self.relic.cfg['STAR']['logg'][0]
         _m = metal if metal is not None else self.relic.cfg['STAR']['metal'][0]
         _title = r'$T_{{\rm eff}}$={:.0f} K, $\log g$={:.2f}, [Fe/H]={:.2f}'.format(_t, _g, _m)
-        outname = os.path.join(self.relic.cfg['PATH']['output_dir'], figname)
+        model = self.relic.ldmodel
+        profiles, _ = model(model.mu, np.array([_t, _g, _m]))
+        datasets = self.relic.tsdata
+        if isinstance(datasets, TSData):
+            datasets = [datasets]
 
-        fig = self.relic.ldmodel.plot_profiles(_t, _g, _m)
-        fig.axes[0].set_title(_title)
-        fig.tight_layout()
-        if self.save:
-            fig.savefig(outname, dpi=self.dpi)
-            print(f"A preview of limb-darkening profiles is saved as {outname}.")
-        return fig
+        figs = []
+        photometry = []
+        for index, (dataset, wlslice) in enumerate(zip(datasets, model.wlslices)):
+            dataset_profiles = profiles[0, wlslice, :]
+            if hasattr(dataset, 'response_function'):
+                photometry.append((dataset.name, dataset_profiles[0]))
+                continue
+
+            fig, ax = pl.subplots()
+            image = ax.pcolormesh(model.mu, model.wavelength[wlslice], dataset_profiles, shading='auto')
+            fig.colorbar(image, ax=ax, label='Surface brightness')
+            ax.set(xlabel=r'$\mu$', ylabel=r'Wavelength [$\mu$m]', title=f'{dataset.name}\n{_title}')
+            fig.tight_layout()
+            figs.append(fig)
+            self._save_figure(fig, figname, 'A preview of limb-darkening profiles is saved as', suffix=f'_d{index}')
+
+        if photometry:
+            fig, ax = pl.subplots()
+            for name, profile in photometry:
+                ax.plot(model.mu, profile, label=name)
+            ax.set(xlabel=r'$\mu$', ylabel='Surface brightness', title=_title)
+            ax.legend()
+            fig.tight_layout()
+            figs.append(fig)
+            self._save_figure(fig, figname, 'A preview of limb-darkening profiles is saved as', suffix='_photometry')
+        return figs
 
     def plot_mcmc_lnprob(self, figname: str = "lnprob.png"):
         """ Plot the MCMC log-probability chains."""
@@ -196,16 +258,12 @@ class RelicVisualization:
         savetxt(outputname, lnp)
         print(f"Evolution of posterior probabilities saved as {outputname}.")
 
-        outputname = os.path.join(self.relic.cfg['PATH']['output_dir'], figname)
-
         fig, ax = pl.subplots(1, 1, figsize=(6, 4))
         ax.plot(lnp, c='k', lw=0.5, alpha=0.5)
         ax.set_xlabel(f'Iterations ({lnp.shape[0]} walkers)')
         ax.set_ylabel('Posterior probability')
         fig.tight_layout()
-        if self.save:
-            fig.savefig(outputname, dpi=self.dpi)
-            print(f"Evolution of posterior probability saved as {outputname}.")
+        self._save_figure(fig, figname, 'Evolution of posterior probability saved as')
         return fig
 
     def plot_transmission_spectra(self, maxlike_param:ndarray, 
@@ -242,8 +300,5 @@ class RelicVisualization:
         if wl_model[-1] / wl_model[0] > 10:
             ax.set_xscale('log')
         fig.tight_layout()
-        if self.save:
-            outname = os.path.join(self.relic.cfg['PATH']['output_dir'], figname)
-            fig.savefig(outname, dpi=self.dpi)
-            print(f"A preview of transmission spectra is saved as {outname}.")
+        self._save_figure(fig, figname, 'A preview of transmission spectra is saved as')
         return fig
