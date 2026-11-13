@@ -15,6 +15,8 @@ Each observation's spectral light curves should be stored in an HDF5 file contai
 - `flux_err` — 2D error array (n_wavelength × n_time)
 - `wavelength_bins` (optional) — 2D array (n_wavelength × 2) of left and right bin edges. If omitted, bin edges are estimated from `numpy.diff(wavelength)`.
 
+`ReLiC` also supports retrievals that use photometric light curves together with spectral light curves. To enable this, the HDF5 files of photometric light curves should contain 1D `bjd_tdb`, `flux`, `flux_err` arrays, as well as a reference `wavelength` array of length one (e.g. [0.5,]) in microns. TESS light curves from different sectors can be concatenated into a single array after flux normalization. Set the corresponding `rebin_resolutions` to `-1` in the configuration file. Provide the instrumental response function in the corresponding `spec_resolving_power_files` entry as a two-column ASCII file containing wavelength [microns] and throughput. The atmospheric wavelength grid must cover the full response function. To accelerate atmospheric modeling, consider trimming the response function to remove regions with negligible throughput.
+
 ## 2. Prepare your atmospheric model (optional)
 
 `relic.atmosphere` provides several built-in atmospheric models based on [`petitRADTRANS`](https://petitradtrans.readthedocs.io/en/latest/). The atmospheric models must inherit from `BaseAtmosphere` and implement `__call__(pv) -> ndarray` returning 1D transit depth array.
@@ -92,7 +94,7 @@ circular_orbit          = true # if true, eccentricity is fixed to zero; if fals
 [ATMOSPHERE] # Keys depend on the chosen atmospheric model
 pressure_layers          = 101
 pressure_bounds_log10bar = [-8, 2]
-wavelength_bounds_micron = [2.0, 5.5]
+wavelength_bounds_micron = [2.0, 5.5] # Make sure this range is slightly broader than the wavelength coverage of your data (especially for photometric light curves, broaden the range to fully encompass the response function)
 chemical_species = [ 
   "H2O", "CO", "CO2", "CH4", 
 ]
@@ -108,10 +110,10 @@ wl_range_micron   = [ [], [] ] # crop useful wavelength range (optional)
 time_range_bjd    = [ [], [] ] # crop useful time range (optional)
 noise_groups      = [0, 1] # group datasets with the same instrument setup so they share the same jitter factors
 n_baselines       = [2, 2] # maximum degree of the polynomial baseline (must be ≥ 1)
-rebin_resolutions = [100, 200] # separate resolution for each instrument; set to 0 to use native pixel resolution
+rebin_resolutions = [100, 200] # separate resolution for each instrument; set to 0 to use native resolution; -1 for photometric data
 noise_model        = "white_marginalized" # select from ["white_marginalized", "white_profiled", "free_gp", "fixed_gp"]; see the ExoIris documentation for details
 
-[FIXED_PARAMETERS]
+[FIXED_PARAMETERS] # Depending on your atmospheric model, you may fix some parameters
 planet_radius_rjup  = 1.39
 star_radius_rsun    = 1.19
 atm_tint            = 100
@@ -129,7 +131,7 @@ teff        = ["NP", 6091, 50, 5000, 7000, "stellar effective temperature", "K"]
 logg        = ["NP", 4.45, 0.02, 4, 5, "stellar gravity", "log10 cgs"]
 metal       = ["NP", 0.01, 0.05, -1, 1, "stellar metallicity", ""]
 
-[PRIORS.NOISE] # priors on noise parameters
+[PRIORS.NOISE] # priors on noise parameters corresponding to each noise group defined in [EXOIRIS]
 sigma_m_00  = ["UP", 0.2, 5, -inf, inf, "noise factor 00", ""]
 sigma_m_01  = ["UP", 0.2, 5, -inf, inf, "noise factor 01", ""]
 
@@ -169,6 +171,8 @@ os.environ["NUMBA_NUM_THREADS"] = "1"
 os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'
 
 from multiprocessing import Pool
+import numpy as np
+from relic import Relic
 ```
 
 ### 4.1 Initialization
@@ -180,16 +184,16 @@ config_file = "your-configurations.toml"
 relic = Relic(config_file)
 ```
 
-The parsed configuration is accessible as `relic.cfg`.
+The parsed configuration is accessible as `relic.cfg`. Initialization also creates 2D spectral flux images (`fluxes.png`) and limb-darkening images (`ldprofiles.png`) in `output_dir`.
 
 ### 4.2 Fitting white light curves
 
 Fitting the white light curve is not a required step. However, we recommend doing so as a quick sanity check to verify that your noise model is appropriate for the data.
 
-By default, `ExoIris` constructs polynomial covariates in time up to the degree specified by `n_baseline`. For some datasets (e.g., ground-based or HST light curves), you may want to supply additional state vectors to model more complex systematics. To do this, define the state vectors for each dataset in a list:
+Call `update_covariates` to build Chebyshev baseline covariates up to the degree specified by `n_baselines` and optionally add state vectors. The baseline uses HST orbital phase for datasets named HST, STIS, or WFC3, and time for other datasets. For example:
 
 ```python
-state_vectors_dataset1 = np.asarray([
+state_vectors_dataset1 = np.column_stack([
     trace_xposition, 
     trace_yposition,
     fwhm,
@@ -215,11 +219,6 @@ relic.update_covariates(state_vectors_alldata)
 
 To fit the white light curves, run
 ```python
-relic.fit_white()  # global optimization via differential evolution
-```
-
-Or with multiprocessing:
-```python
 def lnpost_white(pv):
     return relic.exoiris._wa.lnposterior(pv)
 
@@ -228,12 +227,8 @@ with Pool(relic.cfg["SAMPLER"]["npools"]) as pool:
 ```
 The log-posterior function must be defined at the module level for pickling
 
-To display the best-fit white light curves:
-
-```python
-visual = RelicVisualization(relic, dpi=100, save=True)
-visual.plot_white()
-```
+After fitting, `fit_white()` updates the transit ephemeris and mask and saves
+`white_fit.png` in `output_dir`.
 
 Note: this white-light fit is a thin wrapper around `exoiris.wlpf.WhiteLPF` with minor modifications — no atmospheric or stellar model is involved.
 
@@ -242,7 +237,7 @@ Note: this white-light fit is a thin wrapper around `exoiris.wlpf.WhiteLPF` with
 Before launching a full retrieval, evaluate the likelihood on a few random prior samples to catch errors in configuration early:
 
 ```python
-relic.run_test(3)
+random_params, log_likelihoods = relic.run_test(3)
 ```
 
 ### 4.4 Run the sampler
@@ -263,7 +258,7 @@ with Pool(relic.cfg["SAMPLER"]["npools"], maxtasksperchild=100) as pool:
     )
 ```
 
-The output `results` is a dictionary containing posterior samples, log weights, and other summary statistics.
+The output `results` is a dictionary containing posterior samples, log weights, and other summary statistics. The method saves the dictionary as `ns_results.pkl`, then generates `corners.pdf`, `residuals.png`, and `transmission_spectra.png` in `output_dir`.
 
 As a reference: with two JWST NIRCam datasets (2.5–5.0 μm), a retrieval with `n_live_points=240`, `npools=60`, and 10 chemical species takes roughly 10 hours.
 
@@ -271,22 +266,15 @@ As a reference: with two JWST NIRCam datasets (2.5–5.0 μm), a retrieval with 
 
 ### 4.5 Visualize results
 
+The plots above are generated automatically. You can manually call the plotting functions if needed. Use the `relic.visual` instance:
+
 ```python
-# Before the retrieval: inspect 2D spectral light curves and limb-darkening profiles
-visual.plot_2dfluxes(figname='fluxes.png')
-visual.plot_ldprofiles(figname='ldprofiles.png')
-
-# After the retrieval
-samples = results['posterior_samples']
-maxlike_params = results['maxlike_params']
-weights = np.exp(results['log_weights'])
-
-""" Plot posterior corner plots """
-visual.plot_corners(samples=samples, weights=weights, truths=maxlike_params, figname='corners.pdf') 
-
-""" Plot best-fit residuals """ 
-visual.plot_residuals(maxlike_params, figname='residuals.png')
-
-""" Plot transmission spectra """
-visual.plot_transmission_spectra(maxlike_params, figname='transmission_spectra.png')
+relic.visual.plot_ldprofiles(figname='custom_profiles.png')
+relic.visual.plot_corners(
+    samples=results['posterior_samples'],
+    weights=np.exp(results['log_weights']),
+    truths=results['maxlike_params'],
+    figname='custom_corners.pdf',
+)
 ```
+

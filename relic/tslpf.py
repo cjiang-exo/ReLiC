@@ -13,7 +13,7 @@ from pytransit.orbits import as_from_rhop, i_from_ba
 from pytransit.param import GParameter, NormalPrior as NP, ParameterSet, UniformPrior as UP
 
 from .atmosphere import BaseAtmosphere
-from .utils import SpectrumDownsampler
+from .utils import PhotometricDownsampler, SpectrumDownsampler
  
 NM_WHITE_MARGINALIZED = 0
 NM_GP_FIXED = 1
@@ -35,9 +35,16 @@ class NewTSLPF(TSLPF):
         self.atmos_model  = atmos_model
         self.wl_model     = atmos_model.wavelengths
         self.bin_widths   = self._get_binwidths(data)  
+        if spec_resolving_power_files is None:
+            spec_resolving_power_files = [None] * len(data)
+        if len(spec_resolving_power_files) != len(data):
+            raise ValueError('Provide one resolving power file entry per dataset.')
         self.downsamplers = [
-            SpectrumDownsampler(self.wl_model, wl, bw, rpf) \
-                for wl, bw, rpf in zip(
+            PhotometricDownsampler(self.wl_model, dataset.response_function)
+            if hasattr(dataset, 'response_function') else
+            SpectrumDownsampler(self.wl_model, wl, bw, rpf)
+                for dataset, wl, bw, rpf in zip(
+                    data,
                     self.wavelengths, 
                     self.bin_widths, 
                     spec_resolving_power_files
