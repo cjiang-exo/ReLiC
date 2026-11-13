@@ -2,8 +2,7 @@ API Reference
 =============
 
 This reference covers the public classes, functions, and methods defined in
-each ReLiC module. Frequently used objects are also available directly from
-``relic``. The package's ``__all__`` lists these top-level exports. 
+each ReLiC module. 
 
 Core
 ----
