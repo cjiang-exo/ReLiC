@@ -22,10 +22,10 @@ NM_WHITE_PROFILED = 3
 class RelicVisualization:
     """Plot ReLic results and return figures after closing them."""
 
-    def __init__(self, relic: 'Relic', dpi: int = 150, save: bool = True):
+    def __init__(self, relic: 'Relic', dpi: int = 150, savefig: bool = True):
         self.relic = relic
         self.dpi = dpi
-        self.save = save
+        self.save = savefig
 
     def _save_figure(self, fig, figname, message, suffix=''):
         try:

@@ -8,7 +8,7 @@ import os
 import sys
 
 # -- Path setup --------------------------------------------------------------
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # -- Project information -----------------------------------------------------
 project = "ReLiC"
@@ -28,6 +28,14 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
 ]
+
+autoclass_content = "both"
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
+    "special-members": "__call__",
+}
 
 # MyST configuration
 myst_enable_extensions = [
@@ -55,7 +63,6 @@ language = "en"
 # -- Options for HTML output -------------------------------------------------
 html_theme = "furo"
 html_title = "ReLiC Documentation"
-html_static_path = ["_static"]
 
 # Furo theme options
 html_theme_options = {
