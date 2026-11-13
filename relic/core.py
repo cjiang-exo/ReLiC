@@ -41,17 +41,19 @@ NM_WHITE_PROFILED = 3
  
 class Relic: 
 
-    def __init__(self, config: str, idle: bool = False):
+    def __init__(self, config: str, dpi=100, debug_mode: bool = False):
         """Initialize from a TOML config file and save diagnostic plots.
 
         Parameters
         ----------
         config: str
             Path to the TOML configuration file.
-        idle: bool
-            If True, only validate/load the config and skip data/model setup, only for test purposes.
+        dpi: int
+            DPI for the generated plots.
+        debug_mode: bool
+            If True, enable debug mode for additional logging.
         """
-        self.idle = idle
+        self.debug_mode = debug_mode
         
         self.cfg = self._validate_config(config)
         self.atmos_model = self._resolve_atmosphere_class(
@@ -62,9 +64,8 @@ class Relic:
         if self.atmos_model.wavelengths is None: 
             raise ValueError("The atmosphere model must have initialized wavelength grid.") 
 
-        if self.idle: 
-            print("Idle mode.")
-            return
+        if self.debug_mode: 
+            print("Debug mode enabled.")
         
         t_start = datetime.now()
         self.raw_data    = self._load_raw_data()
@@ -83,7 +84,7 @@ class Relic:
         else:
             raise ValueError(f"Sampling method should be one of 'nautilus' or 'emcee', got: {self.cfg['SAMPLER']['method']}")
 
-        self.visual = RelicVisualization(self, dpi=100, save=True)
+        self.visual = RelicVisualization(self, dpi=dpi, savefig=True)
         self.visual.plot_2dfluxes(figname='fluxes.png')
         self.visual.plot_ldprofiles(figname='ldprofiles.png')
 
@@ -93,7 +94,8 @@ class Relic:
     def _validate_config(self, configuration_file: str):
 
         cfg = tomllib.load(open(configuration_file, 'rb'))
-        if self.idle:
+        if self.debug_mode: 
+            print("Debug mode: Loaded configuration file.")
             return cfg
         
         # Verify that the configuration file contains all required sections and keys

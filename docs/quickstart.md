@@ -225,7 +225,7 @@ def lnpost_white(pv):
 with Pool(relic.cfg["SAMPLER"]["npools"]) as pool:
     relic.fit_white(pool=pool, lnpost=lnpost_white)
 ```
-The log-posterior function must be defined at the module level for pickling
+The log-posterior function must be defined at the module level for pickling.
 
 After fitting, `fit_white()` updates the transit ephemeris and mask and saves
 `white_fit.png` in `output_dir`.
@@ -266,7 +266,7 @@ As a reference: with two JWST NIRCam datasets (2.5–5.0 μm), a retrieval with 
 
 ### 4.5 Visualize results
 
-The plots above are generated automatically. You can manually call the plotting functions if needed. Use the `relic.visual` instance:
+The plots during initialization, white-light curve fitting, and retrieval are generated automatically. You can manually call the plotting functions if needed. Use the `relic.visual` instance:
 
 ```python
 relic.visual.plot_ldprofiles(figname='custom_profiles.png')
