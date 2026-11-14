@@ -7,7 +7,7 @@ from numpy import ndarray, savetxt, where, diff, median, sqrt
 from astropy.visualization import ZScaleInterval 
 from exoiris import TSData
 from pytransit.orbits import fold
-from relic.utils import SpectrumDownsampler 
+from relic.utils import PhotometricDownsampler, SpectrumDownsampler 
 
 if TYPE_CHECKING:
     from .core import Relic
@@ -119,11 +119,7 @@ class RelicVisualization:
         return figs
 
     def plot_residuals(self, maxlike_params: ndarray, figname: str = "residuals.png"):
-        """Plot best-fit 2D fluxes.
-        ax[0]: Observed fluxes.
-        ax[1]: Best-fit model fluxes.
-        ax[2]: Normalized residuals.
-        """
+        """Plot best-fit spectroscopic fluxes and photometric light curves."""
 
         tsa = self.relic.exoiris._tsa
 
@@ -144,9 +140,47 @@ class RelicVisualization:
                         tsa.set_gp_hyperparameters(*gp_pv[n * 3:(n + 1) * 3], idata=n)
                 fresidual = tsa._gp_flux[i] - fmod[i][tsa.data[i].mask]
                 gp_trend = tsa._gp[i].predict(fresidual, tsa._gp_time[i])
-                fresidual = (fresidual - gp_trend).reshape(fmod[i].shape)
+                gp_residual = fresidual - gp_trend
+                fresidual = np.full(fmod[i].shape, np.nan)
+                fresidual[tsa.data[i].mask] = gp_residual
                 # fdetrend = fresidual + fmod[i]
-                zres = fresidual / sqrt(tsa._gp[i]._diag.reshape(fmod[i].shape))
+                zres = np.full(fmod[i].shape, np.nan)
+                zres[tsa.data[i].mask] = gp_residual / sqrt(tsa._gp[i]._diag)
+
+            if hasattr(d, 'response_function'):
+                # Plot photometric light curves
+                period = maxlike_params[tsa._sl_orbit][0]
+                center = maxlike_params[tsa._sl_tcs][tsa.data.epoch_groups[i]]
+                time = fold(d.time, period, center)
+                duration = self.relic.cfg["PLANET"]["transit_duration_d"][0]
+                transit = fmod[i][0]
+                residual = fresidual[0]
+                model = d.fluxes[0] - residual
+                time_diff = np.diff(time)
+                breaks = time_diff < 0
+                if time_diff.size:
+                    breaks |= time_diff > 2 * np.median(time_diff)
+                segments = np.split(np.arange(time.size), np.where(breaks)[0] + 1)
+
+                fig, ax = pl.subplots(3, 1, figsize=(4.8, 7.2), sharex=True)
+                ax[0].plot(time, d.fluxes[0], '.k', alpha=0.25)
+                ax[1].plot(time, transit + residual, '.k', alpha=0.25)
+                ax[2].plot(time, residual, '.k', alpha=0.25)
+                for segment in segments:
+                    ax[0].plot(time[segment], model[segment], 'r', ms=1, zorder=9)
+                    ax[1].plot(time[segment], transit[segment], 'r', ms=1, zorder=9)
+                ax[2].axhline(0, ls='--', c='r', zorder=9)
+                for axis in ax:
+                    for marker in (0, -0.5 * duration, 0.5 * duration):
+                        axis.axvline(marker, ls='--', c='0.5')
+                ax[0].set_ylabel('Normalized flux')
+                ax[1].set_ylabel('Normalized flux')
+                ax[2].set(ylabel='Residuals', xlabel='Time from mid-transit [d]',
+                          xlim=(-2 * duration, 2 * duration))
+                fig.tight_layout()
+                figs.append(fig)
+                self._save_figure(fig, figname, 'A preview of residuals is saved as', suffix=f'_d{i}')
+                continue
 
             fig, ax = pl.subplots(3, 1, figsize=(4.8, 7.2))
 
@@ -275,30 +309,35 @@ class RelicVisualization:
  
         wavelengths = [d.wavelength for d in self.relic.tsdata]
         binwidths = [d._wl_r_edges - d._wl_l_edges for d in self.relic.tsdata]
-        rpfiles = self.relic.cfg["PATH"]["spec_resolving_power_files"] 
+        rpfiles = self.relic.cfg["PATH"]["spec_resolving_power_files"]
+        if len(rpfiles) != len(wavelengths):
+            raise ValueError('Provide one resolving power file entry per dataset.')
         downsamplers = [
-            SpectrumDownsampler(self.relic.atmos_model.wavelengths, wl, bw, rpf) \
-                for wl, bw, rpf in zip(
+            PhotometricDownsampler(wl_model, dataset.response_function)
+            if hasattr(dataset, 'response_function') else
+            SpectrumDownsampler(wl_model, wl, bw, rpf)
+                for dataset, wl, bw, rpf in zip(
+                    self.relic.tsdata,
                     wavelengths, 
                     binwidths, 
                     rpfiles
                 )
         ]
 
-        wl_lowres = [ds.wl_data for ds in downsamplers]
         ts_lowres = [ds.convolve_and_rebin(ts_modelmaxlike).copy() for ds in downsamplers] 
 
         fig, ax = pl.subplots(1, 1, figsize=(6, 4))
 
         _a_highres, = ax.plot(wl_model, ts_modelmaxlike, c='C1', lw=0.5, alpha=0.5, label=f'original model')
-        for wl, ts in zip(wl_lowres, ts_lowres): 
-            _a_lowres, = ax.plot(wl, ts, lw=1, label='data-resolution', color='#5e3c99')
+        for dataset, wl, ts in zip(self.relic.tsdata, wavelengths, ts_lowres):
+            marker = 'o' if hasattr(dataset, 'response_function') else None
+            _a_lowres, = ax.plot(wl, ts, lw=1, marker=marker, label='data-resolution', color='#5e3c99')
 
         ax.set_xlabel('Wavelength [micron]')
         ax.set_ylabel('Transit depth (%)')
         ax.legend([_a_highres, _a_lowres], ['original model', 'data-resolution'], loc='best', fontsize=8)
-        if wl_model[-1] / wl_model[0] > 10:
-            ax.set_xscale('log')
+        # if wl_model[-1] / wl_model[0] > 10:
+        #     ax.set_xscale('log')
         fig.tight_layout()
         self._save_figure(fig, figname, 'A preview of transmission spectra is saved as')
         return fig
