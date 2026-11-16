@@ -528,6 +528,10 @@ class Relic:
             pickle.dump(results, f)
             print(f"Sampling results saved to {os.path.join(odir, 'ns_results.pkl')}")
 
+        print('log Z = {:.2f} +/- {:.2f}'.format(sampler.log_z, 1 / np.sqrt(sampler.n_eff)))
+        print('Number of effective samples: {}'.format(sampler.n_eff))
+        print('Sampling complete.')
+        
         self.visual.plot_corners(samples=samples, weights=np.exp(log_w),
                      truths=maxlike_params, figname='corners.pdf')
         self.visual.plot_residuals(maxlike_params, figname='residuals.png')
