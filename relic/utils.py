@@ -1,11 +1,18 @@
 import numba
 import numpy as np
+from astropy.io import fits
 from astropy.stats import sigma_clip
 from numpy import (any, array, asarray, concatenate, exp, float64, hstack,
                    int64, interp, log, log2, ndarray, round, searchsorted,
                    sqrt, sum as np_sum, zeros, zeros_like, loadtxt)
 from numpy.polynomial import Chebyshev
 from petitRADTRANS.physics import rebin_spectrum_bin 
+
+from itertools import product
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+from urllib.request import urlretrieve
+
 
 class PhotometricDownsampler:
     def __init__(self, wl_model: ndarray, response: ndarray):
@@ -251,3 +258,116 @@ def optimize_parallelization(nlivepoints:int, npools:int, allow_memoryleak: floa
     print(f"Suggested n_live_points: {suggested_nlivepoints} (rounded from {nlivepoints})")
     print(f"Suggested maxtasksperchild: {maxtasks}")
     return suggested_nlivepoints, maxtasks
+
+
+_PHOENIX_AXES = (
+    np.concatenate((np.arange(2300, 7001, 100), np.arange(7200, 12001, 200))),
+    np.arange(0, 6.1, 0.5),
+    np.array([-4, -3, -2, -1.5, -1, -0.5, 0, 0.5, 1]),
+)
+
+
+def get_phoenix_grid(star_priors):
+    """Return the temperature grid and nearest logg and metallicity grid points."""
+    def prior_bounds(name):
+        prior = star_priors[name]
+        if prior[0] == 'UP':
+            lower, upper = prior[1:3]
+        elif prior[0] == 'NP':
+            lower, upper = prior[3:5]
+        else:
+            raise ValueError(f'Unsupported prior for {name}: {prior[0]}')
+        if not np.isfinite(lower) or not np.isfinite(upper) or lower > upper:
+            raise ValueError(f'{name} must have finite, ordered prior bounds.')
+        return lower, upper
+
+    temperature_bounds = [prior_bounds(name) for name in ('teff', 'tspot', 'tfacu')]
+    lower = min(pair[0] for pair in temperature_bounds)
+    upper = max(pair[1] for pair in temperature_bounds)
+    grid = _PHOENIX_AXES[0]
+    if lower < grid[0] or upper > grid[-1]:
+        raise ValueError('temperature prior bounds exceed the native PHOENIX grid.')
+    start = max(np.searchsorted(grid, lower, side='right') - 1, 0)
+    stop = min(np.searchsorted(grid, upper, side='left') + 1, grid.size)
+    axes = [grid[start:stop]]
+    for name, grid in zip(('logg', 'metal'), _PHOENIX_AXES[1:]):
+        value = star_priors[name][1]
+        if not np.isfinite(value):
+            raise ValueError(f'{name} prior value must be finite.')
+        index = np.abs(grid - value).argmin()
+        axes.append(grid[index:index + 1])
+    print(f'PHOENIX grid: teff = [{axes[0][0]:g}, {axes[0][-1]:g}] K, '
+          f'logg = [{axes[1][0]:g}, {axes[1][-1]:g}], '
+          f'metal = [{axes[2][0]:g}, {axes[2][-1]:g}]; '
+          f'models = {np.prod([len(axis) for axis in axes])}', flush=True)
+    return tuple(axes)
+
+
+def get_phoenix_spectra(teffs, loggs, metals, data_wavelength=None, cache_dir=None):
+    """Load the PHOENIX HiRes spectral grid.
+
+    Parameters are one-dimensional sequences of native PHOENIX grid points:
+    effective temperature in K, log10 surface gravity in cgs, and [Fe/H].
+    The cache defaults to ``~/.cache/relic/phoenix/HiResFITS`` and mirrors
+    the directory structure of the PHOENIX server.
+
+    The returned fluxes are interpolated onto ``data_wavelength [microns]`` if it is provided. 
+    """
+    axes = []
+    for name, values, grid in zip(('teffs', 'loggs', 'metals'), (teffs, loggs, metals), _PHOENIX_AXES):
+        values = np.asarray(values, dtype=float)
+        if values.ndim != 1 or not values.size or not np.all(np.isfinite(values)):
+            raise ValueError(f'{name} must be a non-empty 1D array of finite grid points.')
+        nearest = np.abs(values[:, None] - grid).argmin(axis=1)
+        if not np.all(np.isclose(values, grid[nearest], rtol=0, atol=1e-8)):
+            raise ValueError(f'{name} contains values outside the native PHOENIX grid.')
+        axes.append(grid[nearest])
+
+    if data_wavelength is not None:
+        data_wavelength = np.asarray(data_wavelength, dtype=float)
+        if data_wavelength.ndim != 1 or not data_wavelength.size or not np.all(np.isfinite(data_wavelength)):
+            raise ValueError('data_wavelength must be a non-empty 1D array of finite wavelengths in microns.')
+
+    root = Path(cache_dir).expanduser() if cache_dir is not None else Path.home() / '.cache/relic/phoenix/HiResFITS'
+    base_url = 'https://ftp.gwdg.de/pub/misc/phoenix/HiResFITS'
+    model_name = 'PHOENIX-ACES-AGSS-COND-2011'
+
+    def read_fits(relative_path):
+        path = root / relative_path
+        if not path.is_file():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with NamedTemporaryFile(dir=path.parent, suffix='.fits', delete=False) as temporary:
+                temporary_path = Path(temporary.name)
+            try:
+                print(f'Downloading PHOENIX file: {relative_path.name}', flush=True)
+                urlretrieve(f'{base_url}/{relative_path.as_posix()}', temporary_path)
+                data = fits.getdata(temporary_path, memmap=False)
+                if data is None or data.ndim != 1 or data.size == 0:
+                    raise ValueError(f'Invalid PHOENIX FITS data: {relative_path}')
+                temporary_path.replace(path)
+            finally:
+                temporary_path.unlink(missing_ok=True)
+        else:
+            data = fits.getdata(path, memmap=False)
+        if data is None or data.ndim != 1 or data.size == 0:
+            raise ValueError(f'Invalid PHOENIX FITS data: {path}')
+        return data
+
+    wavelength = read_fits(Path(f'WAVE_{model_name}.fits')) / 1e4
+    if data_wavelength is not None:
+        if wavelength.size < 2 or not np.all(np.isfinite(wavelength)) or np.any(np.diff(wavelength) <= 0):
+            raise ValueError('PHOENIX wavelengths must be finite and strictly increasing for interpolation.')
+        if np.any(data_wavelength < wavelength[0]) or np.any(data_wavelength > wavelength[-1]):
+            raise ValueError('data_wavelength must lie within the PHOENIX wavelength range.')
+    output_wavelength = wavelength if data_wavelength is None else data_wavelength
+    spectra = np.empty(tuple(len(axis) for axis in axes) + (len(output_wavelength),), dtype=np.float64)
+    for indices in product(*(range(len(axis)) for axis in axes)):
+        teff, logg, metal = (axis[index] for axis, index in zip(axes, indices))
+        metal_label = '-0.0' if metal == 0 else f'{metal:+.1f}'
+        filename = f'lte{int(teff):05d}-{logg:.2f}{metal_label}.{model_name}-HiRes.fits'
+        relative_path = Path(model_name) / f'Z{metal_label}' / filename
+        flux = read_fits(relative_path)
+        if flux.shape != wavelength.shape:
+            raise ValueError(f'PHOENIX spectrum {relative_path} does not match the wavelength grid.')
+        spectra[indices] = flux if data_wavelength is None else np.interp(data_wavelength, wavelength, flux)
+    return output_wavelength, spectra
