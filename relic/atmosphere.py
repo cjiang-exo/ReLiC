@@ -318,10 +318,8 @@ class IsothermalFastChem(BaseAtmosphere):
  
         metallicity = 10**atm_params[6]
         co_ratio = atm_params[7]
- 
+
         mass_fractions = self.get_mass_fractions(metallicity, co_ratio, temperatures)
-        if mass_fractions == -1:
-            return zeros_like(self.wavelengths) # capture and return null values
  
         _, transit_radius_cm, _add = self.radtrans.calculate_transit_radii(
             temperatures                = temperatures,
@@ -354,7 +352,7 @@ class IsothermalFastChem(BaseAtmosphere):
         self.fastchem.setElementAbundances(self._new_abundances)
         _flag = self.fastchem.calcDensities(self.fastchem_input, self.fastchem_output) 
         if _flag != 0:
-            return -1 # capture and reject
+            raise ValueError("FastChem failed to converge.")
 
         self._gas_num_density[:] = array(self.fastchem_output.number_densities)[::-1, self.species_indices] # ascending
         self.mmw[:] = array(self.fastchem_output.mean_molecular_weight)[::-1] # ascending
@@ -470,10 +468,8 @@ class GuillotFastChem(IsothermalFastChem):
  
         metallicity = 10**atm_params[8]
         co_ratio = atm_params[9]
- 
+
         mass_fractions = self.get_mass_fractions(metallicity, co_ratio, temperatures)
-        if mass_fractions == -1:
-            return zeros_like(self.wavelengths) # capture and return null values
  
         _, transit_radius_cm, _add = self.radtrans.calculate_transit_radii(
             temperatures                = temperatures,
@@ -643,10 +639,8 @@ class M09FastChem(IsothermalFastChem):
  
         metallicity = 10**atm_params[10]
         co_ratio = atm_params[11] 
- 
+
         mass_fractions = self.get_mass_fractions(metallicity, co_ratio, temperatures)
-        if mass_fractions == -1:
-            return zeros_like(self.wavelengths) # capture and return null values
  
         _, transit_radius_cm, _add = self.radtrans.calculate_transit_radii(
             temperatures                = temperatures,

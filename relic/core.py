@@ -306,6 +306,27 @@ class Relic:
         self.exoiris._tsa._sl_atm = self.exoiris.ps.blocks[-1].slice
         self.atmos_model._sl_atm = self.exoiris._tsa._sl_atm
 
+        stellar_parameters = getattr(self.atmos_model, 'stellar_parameters', ())
+        extra_stellar = [name for name in stellar_parameters if name not in ('teff', 'logg', 'metal')]
+        if extra_stellar:
+            star_priors = self.cfg['PRIORS']['STAR']
+            stellar_ps = [GParameter(name, star_priors[name][5], star_priors[name][6],
+                                    pmap[star_priors[name][0]](*star_priors[name][1:3]),
+                                    star_priors[name][3:5]) for name in extra_stellar]
+            self.exoiris.ps.add_global_block('stellar_contamination', stellar_ps)
+            for name in ('teff', 'logg', 'metal'):
+                parameter = self.exoiris.ps[self.exoiris.ps.find_pid(name)]
+                lower, upper = star_priors[name][3:5]
+                parameter.bounds = (max(parameter.bounds[0], lower), min(parameter.bounds[1], upper))
+                if parameter.bounds[0] >= parameter.bounds[1]:
+                    raise ValueError(f'No overlap between LDTk and configured bounds for {name}.')
+
+            self.exoiris.ps.freeze()
+            self.exoiris.ps.thaw()
+            if extra_stellar:
+                self.atmos_model._stellar_parameter_indices = [
+                self.exoiris.ps.find_pid(name) for name in stellar_parameters]
+
         """ Update all prior functions"""
         all_priors = self.cfg["PRIORS"]["TRANSIT"].copy()
         all_priors.update(self.cfg["PRIORS"]["STAR"])

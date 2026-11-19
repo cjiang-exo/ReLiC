@@ -22,7 +22,6 @@ venv/
 output*/
 plots/
 tests/
-!/tests/
 /tests/* 
 results/
 data/
@@ -36,3 +35,4 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
+tests/test_phoenix_spectra.py

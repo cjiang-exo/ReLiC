@@ -70,8 +70,8 @@ Spectral downsampling, covariates, and retrieval utilities.
 	a wavelength-dependent resolving-power file and rebins it onto data bins.
 	Without a resolving-power file, ``convolve_and_rebin`` only rebins.
 * :class:`relic.utils.PhotometricDownsampler` integrates a model over a
-	two-column wavelength and throughput response. The model grid must cover
-	the response wavelength range.
+	two-column wavelength and throughput response. The model grid
+	must cover this window.
 * :func:`relic.utils.generate_covariates` creates Chebyshev baseline vectors.
 * :func:`relic.utils.get_maxlike_estimates` selects the highest log-posterior
 	MCMC sample. 

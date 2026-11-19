@@ -171,8 +171,6 @@ class NewTSLPF(TSLPF):
 
     def flux_model(self, pv: ndarray, include_baseline: bool = True):   
         transit_model = self.transit_model(pv)
-        if not transit_model:
-            return [] # capture and reject
         
         if self.spot_model is not None:
             self.spot_model.apply_spots(pv, transit_model)
@@ -197,8 +195,6 @@ class NewTSLPF(TSLPF):
         2D fluxes for each dataset: list[ndarray]
         """  
         transpec = self.atmos_model(pv)
-        if not all(transpec>0):
-            return [] # capture and reject
         
         k = [ds.convolve_and_rebin(transpec)**0.5 for ds in self.downsamplers]
 
@@ -239,12 +235,12 @@ class NewTSLPF(TSLPF):
 
     def lnposterior(self, pv: ndarray) -> float:
         lnp = self.lnprior(pv)
-        return -inf if not isfinite(lnp) else lnp + self.lnlikelihood(pv) 
+        return -1e99 if not isfinite(lnp) else lnp + self.lnlikelihood(pv) 
     
     def lnprior(self, pv) -> float:
         """ 1D input only, no vectorization. """ 
         if any(pv <= self.ps.lbounds) | any(pv >= self.ps.ubounds):
-            return -inf
+            return -1e99
         
         lnp = sum([p.lnprior(pv[i]) for i, p in enumerate(self.ps)])
         return lnp + self.additional_priors(pv)
@@ -258,35 +254,38 @@ class NewTSLPF(TSLPF):
         lnl = 0
         if self._nm == NM_WHITE_MARGINALIZED:
             wn_multipliers = pv[self._sl_wnm]
-            fmod = self.flux_model(pv, include_baseline=False) 
-            if not fmod:
-                return -inf # capture and reject
+            try:
+                fmod = self.flux_model(pv, include_baseline=False)
+            except ValueError:
+                return -1e99
             try:
                 for i, d in enumerate(self.data):
                     lnl += marginalized_loglike_mbl2d(d.fluxes, fmod[i], d.errors*wn_multipliers[d.noise_group], d.covs, d.mask)
             except LinAlgError:
-                lnl = -inf
+                lnl = -1e99
         elif self._nm == NM_WHITE_PROFILED:
             wn_multipliers = pv[self._sl_wnm]
-            fmod = self.flux_model(pv, include_baseline=True)
-            if not fmod:
-                return -inf # capture and reject
+            try:
+                fmod = self.flux_model(pv, include_baseline=True)
+            except ValueError:
+                return -1e99
             for i, d in enumerate(self.data):
                 lnl += lnlike_normal(d.fluxes, fmod[i], d.errors, wn_multipliers[d.noise_group], d.mask)
         else: # GP
-            fmod = self.flux_model(pv, include_baseline=False) 
-            if not fmod:
-                return -inf # capture and reject
+            try:
+                fmod = self.flux_model(pv, include_baseline=False)
+            except ValueError:
+                return -1e99
             if self._nm == NM_GP_FREE: 
                 gp_pv = 10**pv[self._sl_gp]
                 for n in self.data.noise_groups: 
                     self.set_gp_hyperparameters(*gp_pv[n*3:(n+1)*3], idata=n)
             for i in range(self.data.size):
                 lnl += self._gp[i].log_likelihood(self._gp_flux[i] - fmod[i][self.data[i].mask])
-        return lnl if isfinite(lnl) else -inf
+        return lnl if isfinite(lnl) else -1e99
 
     def lnlikelihood_ns(self, pv: ndarray) -> float:
-        if any(pv <= self.ps.lbounds) | any(pv >= self.ps.ubounds):
+        if any(pv < self.ps.lbounds) | any(pv > self.ps.ubounds):
             return -1e99
         lnp = self.additional_priors(pv)
         return -1e99 if not isfinite(lnp) else self.lnlikelihood(pv) 
