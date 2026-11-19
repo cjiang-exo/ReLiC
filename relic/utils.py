@@ -21,10 +21,26 @@ class PhotometricDownsampler:
             not np.all(np.isfinite(wl_model)) or np.any(np.diff(wl_model) <= 0)):
             raise ValueError('Atmosphere wavelengths must be finite and strictly increasing.')
         response_wl, transmission = response.T
-        if wl_model[0] > response_wl[0] or wl_model[-1] < response_wl[-1]:
-            raise ValueError('Atmosphere wavelength grid must cover the entire photometric response function.')
+        active = np.flatnonzero(transmission > 0.01)
+        if not active.size:
+            raise ValueError('Photometric response must have transmission greater than 0.01.')
+        first, last = active[0], active[-1]
+        lower = response_wl[first]
+        upper = response_wl[last]
+        if first > 0:
+            lower = np.interp(0.01, transmission[first - 1:first + 1], response_wl[first - 1:first + 1])
+        if last < len(response_wl) - 1:
+            upper = np.interp(0.01, transmission[last:last + 2][::-1], response_wl[last:last + 2][::-1])
+        if wl_model[0] > lower or wl_model[-1] < upper:
+            raise ValueError('Atmosphere wavelength grid must cover the photometric response window.')
 
-        grid = np.union1d(response_wl, wl_model[(wl_model > response_wl[0]) & (wl_model < response_wl[-1])])
+        start = max(np.searchsorted(wl_model, lower, side='right') - 1, 0)
+        end = min(np.searchsorted(wl_model, upper, side='left') + 1, wl_model.size)
+        self.sl_wl = slice(start, end)
+        wl_model = wl_model[self.sl_wl]
+        response_grid = response_wl[(response_wl > lower) & (response_wl < upper)]
+        model_grid = wl_model[(wl_model > lower) & (wl_model < upper)]
+        grid = np.union1d(np.concatenate(([lower], response_grid, [upper])), model_grid)
         transmission = np.interp(grid, response_wl, transmission)
         widths = np.diff(grid)
         grid_weights = np.zeros(grid.size)
@@ -36,9 +52,11 @@ class PhotometricDownsampler:
         np.add.at(self.weights, indices, grid_weights * (1 - fraction))
         np.add.at(self.weights, indices + 1, grid_weights * fraction)
         self.weights /= self.weights.sum()
+        self.wl_data = asarray([np.dot(self.weights, wl_model)])
+        self.wl_binwidths = asarray([grid_weights.sum() / np.max(transmission)])
 
     def convolve_and_rebin(self, model_flux: ndarray):
-        return np.array([np.dot(self.weights, model_flux)])
+        return np.array([np.dot(self.weights, model_flux[self.sl_wl])])
 
 
 class SpectrumDownsampler:
