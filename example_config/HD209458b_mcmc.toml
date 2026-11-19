@@ -1,13 +1,13 @@
 [PATH]
 lightcurve_files = [
-  "~/work/relic/data/HD209458b/JWST/NIRCAM_F322W2.h5",
-  "~/work/relic/data/HD209458b/JWST/NIRCAM_F444W.h5",
+  "data/HD209458b/JWST/NIRCAM_F322W2.h5",
+  "data/HD209458b/JWST/NIRCAM_F444W.h5",
 ]
 spec_resolving_power_files = [  
-  "~/work/relic/data/resolving_power/NIRCam.dat", 
-  "~/work/relic/data/resolving_power/NIRCam.dat",
+  "data/resolving_power/NIRCam.dat", 
+  "data/resolving_power/NIRCam.dat",
 ] # contains two columns: wavelength (micron) and resolving power 
-output_dir = "./results/HD209458b/"
+output_dir = "results/HD209458b/"
 
 [STAR] 
 name        = "HD209458" 
@@ -80,15 +80,15 @@ m2h         = ["UP", -3, 3, -inf, inf, "atmospheric metallicity", "log10"]
 c2o         = ["UP", 0.1, 2, -inf, inf, "C/O ratio", " "]
 
 [SAMPLER]
-method      = "nautilus" 
+method      = "emcee" 
 npools      = 8 
 niter_white = 2000  
-n_live_points = 1000 
-n_effective = 10000  
-resume       = false 
+niter_de    = 200
+nwalkers    = 100
+niter_mcmc  = 2000
 
 [FASTCHEM]
-element_abundances = "~/work/relic/data/fastchem/lodders_2025.dat"
-logk = "~/work/relic/data/fastchem/logK.dat"
-logk_condensates = "~/work/relic/data/fastchem/logK_condensates.dat"
+element_abundances = "data/fastchem/lodders_2025.dat"
+logk = "data/fastchem/logK.dat"
+logk_condensates = "data/fastchem/logK_condensates.dat"
 condensation_mode = "no_condensation"

@@ -32,6 +32,7 @@ apply_ldtk_patch()
 from .tslpf import NewTSLPF
 from .white import NewWhiteLPF
 from .plots import RelicVisualization
+from .utils import get_maxlike_estimates
 
 # Noise-model identifiers (from ExoIris)
 NM_WHITE_MARGINALIZED = 0
@@ -454,7 +455,7 @@ class Relic:
         thin: int = 1, repeats: int = 1, pool: Optional[Pool] = None, 
         lnpost: Optional[Callable] = None, use_tqdm: bool = True) -> None:
         """ 
-        Run MCMC sampling to obtain the posterior distribution of parameters.
+        Run MCMC sampling, save the results, and generate diagnostic plots.
 
         Parameters
         ----------
@@ -481,6 +482,12 @@ class Relic:
         self.exoiris._tsa.sample_mcmc(niter=niter, population=population, 
             thin=thin, repeats=repeats, pool=pool, lnpost=lnpost, use_tqdm=use_tqdm,
             leave=True, vectorize=False, save=False)
+
+        self.save_mcmc(overwrite=True)
+        self.visual.plot_mcmc_lnprob(figname='lnprob.png')
+        maxlike_params = get_maxlike_estimates(self)
+        self.visual.plot_corners(truths=maxlike_params, figname='corners.pdf')
+        self.visual.plot_residuals(maxlike_params, figname='residuals.png')
 
     def save_mcmc(self, overwrite: bool = False, config_file: str = None):
         """Save ExoIris results (and optionally the config) into the output dir."""
