@@ -299,7 +299,8 @@ def get_phoenix_grid(star_priors):
             raise ValueError(f'{name} must have finite, ordered prior bounds.')
         return lower, upper
 
-    temperature_bounds = [prior_bounds(name) for name in ('teff', 'tspot', 'tfacu')]
+    temperature_bounds = [prior_bounds('teff')]
+    temperature_bounds.extend(prior_bounds(name) for name in ('tspot', 'tfacu') if name in star_priors)
     lower = min(pair[0] for pair in temperature_bounds)
     upper = max(pair[1] for pair in temperature_bounds)
     grid = _PHOENIX_AXES[0]
