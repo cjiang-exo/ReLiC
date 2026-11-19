@@ -9,13 +9,12 @@ os.environ["NUMBA_NUM_THREADS"] =      "1"
 os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'   
 from multiprocessing import Pool   
 
-import argparse 
+import argparse
+from pathlib import Path
 
 from relic.core import Relic  
-from relic.plots import RelicVisualization 
-from relic.utils import get_maxlike_estimates 
 
-DEFAULT_CFG = '/work/relic/source/config/HD209458b-jwst-pix-tp6fastchem.toml'
+DEFAULT_CFG = 'example_config/HD209458b_mcmc.toml'
 
 if 'get_ipython' in globals(): 
     config = DEFAULT_CFG # use DEFAULT_CFG if running in Jupyter Notebook
@@ -29,7 +28,6 @@ else: # for command line execution
 #%% Initialization #############################################################
 
 relic = Relic(config)
-visual  = RelicVisualization(relic)
 
 #%% fit white light curves to validate the covariates ##########################
  
@@ -52,8 +50,6 @@ npools = relic.cfg["SAMPLER"]["npools"]
 with Pool(npools) as pool:
     relic.fit_white(pool=pool, lnpost=lnpost_white)
  
-visual.plot_white()
-
 #%% test likelihood evaluation #################################################
 
 relic.run_test(3)
@@ -81,27 +77,6 @@ with Pool(npools) as pool:
         lnpost  = lnpostf, 
         pool    = pool, 
     )
-
-
-#%% Post analysis and plotting #################################################
-
-relic.save_mcmc(overwrite=True, config_file=config)
-
-""" Plot likelihood evolutions """
-visual.plot_mcmc_lnprob(figname='lnprob.png')
-
-""" Plot 2D fluxes and errors """
-visual.plot_2dfluxes(figname='fluxes.png')
-
-""" Plot limb darkening profiles """
-visual.plot_ldprofiles(figname='ldprofiles.png')
-
-""" Plot posterior distributions """
-maxlike_params = get_maxlike_estimates(relic)
-visual.plot_corners(truths=maxlike_params, figname='corners.pdf')
-
-""" Plot best-fit residuals """
-visual.plot_residuals(maxlike_params, figname='residuals.png')
 
 print("Done!")
 # %%

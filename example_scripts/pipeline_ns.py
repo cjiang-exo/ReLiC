@@ -9,12 +9,12 @@ os.environ["NUMBA_NUM_THREADS"] =      "1"
 os.environ['NUMBA_THREADING_LAYER'] = 'workqueue'   
 
 import argparse  
-import numpy as np
 from multiprocessing import Pool
-from relic import Relic, RelicVisualization 
+from pathlib import Path
+from relic import Relic
 from relic.atmosphere import *
 
-DEFAULT_CFG = '/home/ubuntu/work/relic/source/example_config/HD209458b-example.toml'
+DEFAULT_CFG = 'example_config/HD209458b_ns.toml'
 
 if 'get_ipython' in globals(): 
     config = DEFAULT_CFG # use DEFAULT_CFG if running in Jupyter Notebook
@@ -28,7 +28,6 @@ else: # for command line execution
 #%% Initialization #############################################################
  
 relic = Relic(config)
-visual = RelicVisualization(relic, dpi=100, save=True)
  
 #%% fit white light curves to validate the covariates ##########################
  
@@ -48,14 +47,6 @@ npools = relic.cfg["SAMPLER"]["npools"]
 with Pool(npools) as pool:
     relic.fit_white(pool=pool, lnpost=lnpost_white)
  
-visual.plot_white()
-
-""" Plot 2D fluxes and errors """
-visual.plot_2dfluxes(figname='fluxes.png')
-
-""" Plot limb darkening profiles """
-visual.plot_ldprofiles(figname='ldprofiles.png')
-
 #%% test likelihood evaluation #################################################
 
 relic.run_test(3)
@@ -73,20 +64,6 @@ with Pool(relic.cfg["SAMPLER"]["npools"], maxtasksperchild=200) as pool:
         loglikelihood   = loglikelihood, 
         pool            = pool,   
     )
-
-#%% Post analysis and plotting #################################################
-
-""" Plot posterior distributions """   
-samples = results['posterior_samples']
-maxlike_params = results['maxlike_params']
-weights = np.exp(results['log_weights'])
-visual.plot_corners(samples=samples, weights=weights, truths=maxlike_params, figname='corners.pdf') 
-
-""" Plot best-fit residuals """ 
-visual.plot_residuals(maxlike_params, figname='residuals.png')
-
-""" Plot transmission spectra """
-visual.plot_transmission_spectra(maxlike_params, figname='transmission_spectra.png')
 
 print("Done!")
 
