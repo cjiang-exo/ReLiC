@@ -202,7 +202,7 @@ class RelicVisualization:
                 ax[2].axvspan(_t[_c], _t[_c + 1], facecolor='white', lw=0, alpha=1, zorder=1)
 
             [a.set_xlabel('Time [BJD]') for a in ax]
-            [a.set_ylabel('Wavelength [$\mu$m]') for a in ax]
+            [a.set_ylabel('Wavelength [μm]') for a in ax]
 
             transit_limits = d.ephemeris.transit_limits(d.time.mean())
             [ax[0].axvline(tl, ls='--', color='k', alpha=0.8) for tl in transit_limits]
@@ -268,7 +268,7 @@ class RelicVisualization:
             fig, ax = pl.subplots()
             image = ax.pcolormesh(model.mu, model.wavelength[wlslice], dataset_profiles, shading='auto')
             fig.colorbar(image, ax=ax, label='Surface brightness')
-            ax.set(xlabel=r'$\mu$', ylabel=r'Wavelength [$\mu$m]', title=f'{dataset.name}\n{_title}')
+            ax.set(xlabel='μ', ylabel=r'Wavelength [μm]', title=f'{dataset.name}\n{_title}')
             fig.tight_layout()
             figs.append(fig)
             self._save_figure(fig, figname, 'A preview of limb-darkening profiles is saved as', suffix=f'_d{index}')
@@ -277,7 +277,7 @@ class RelicVisualization:
             fig, ax = pl.subplots()
             for name, profile in photometry:
                 ax.plot(model.mu, profile, label=name)
-            ax.set(xlabel=r'$\mu$', ylabel='Surface brightness', title=_title)
+            ax.set(xlabel='μ', ylabel='Surface brightness', title=_title)
             ax.legend()
             fig.tight_layout()
             figs.append(fig)
