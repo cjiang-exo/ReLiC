@@ -64,6 +64,10 @@ class RelicVisualization:
             axs[0, index].plot(time, white.ofluxa[sl], '.k', alpha=0.25)
             axs[1, index].plot(time, detrended[sl], '.k', alpha=0.25)
             axs[2, index].plot(time, residuals[sl], '.k', alpha=0.25)
+            axs[0, index].set_title(self.relic.exoiris.data[index].name, fontsize='small')
+            rmse_ppm = np.sqrt(np.mean(residuals[sl] ** 2)) * 1e6
+            axs[2, index].text(0.05, 0.95, f'RMSE: {rmse_ppm:.1f} ppm',
+                               transform=axs[2, index].transAxes, va='top')
             for segment in segments:
                 axs[0, index].plot(time[segment], model[sl][segment], 'r', ms=1, zorder=9)
                 axs[1, index].plot(time[segment], transit[sl][segment], 'r', ms=1, zorder=9)
